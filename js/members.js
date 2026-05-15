@@ -18,31 +18,25 @@ import {
 /* =========================
    ELEMENTS
 ========================= */
-const memberForm = document.getElementById("memberForm");
-const membersTable = document.getElementById("membersTable");
+const modal = document.getElementById("memberModal");
+const openBtn = document.getElementById("openModalBtn");
+const closeBtn = document.getElementById("closeModalBtn");
 
-const searchInput = document.getElementById("searchMember");
-const searchResults = document.getElementById("searchResults");
-const selectedMember = document.getElementById("selectedMember");
-
+const form = document.getElementById("memberForm");
 const photoInput = document.getElementById("photo");
 const photoPreview = document.getElementById("photoPreview");
 
-const modal = document.getElementById("memberModal");
-
-const openModalBtn = document.getElementById("openModalBtn");
-const closeModalBtn = document.getElementById("closeModalBtn");
+const table = document.getElementById("membersTable");
 
 /* =========================
-   CHECK IMPORTANT ELEMENTS
+   🔥 FIX: MAKE SURE ELEMENTS EXIST
 ========================= */
+console.log("Open Button:", openBtn);
 console.log("Modal:", modal);
-console.log("Open button:", openModalBtn);
 
 /* =========================
-   MODAL OPEN/CLOSE
+   MODAL OPEN / CLOSE (FIXED)
 ========================= */
-
 function openModal() {
   modal.style.display = "flex";
 }
@@ -51,307 +45,121 @@ function closeModal() {
   modal.style.display = "none";
 }
 
-/* BUTTON EVENTS */
-if (openModalBtn) {
-  openModalBtn.addEventListener("click", openModal);
+/* IMPORTANT: attach events safely */
+if (openBtn) {
+  openBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+    openModal();
+  });
 }
 
-if (closeModalBtn) {
-  closeModalBtn.addEventListener("click", closeModal);
+if (closeBtn) {
+  closeBtn.addEventListener("click", closeModal);
 }
 
-/* CLOSE OUTSIDE */
+/* close when clicking outside modal */
 window.addEventListener("click", (e) => {
-  if (e.target === modal) {
-    closeModal();
-  }
+  if (e.target === modal) closeModal();
 });
 
 /* =========================
    PHOTO PREVIEW
 ========================= */
 if (photoInput) {
-
   photoInput.addEventListener("change", (e) => {
-
     const file = e.target.files[0];
-
     if (!file) return;
 
     const reader = new FileReader();
-
-    reader.onload = (event) => {
-      photoPreview.src = event.target.result;
+    reader.onload = (ev) => {
+      photoPreview.src = ev.target.result;
     };
-
     reader.readAsDataURL(file);
-
   });
-
 }
 
 /* =========================
    SAVE MEMBER
 ========================= */
-if (memberForm) {
-
-  memberForm.addEventListener("submit", async (e) => {
-
+if (form) {
+  form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
     try {
+      const name = document.getElementById("name").value.trim();
+      const phone = document.getElementById("phone").value.trim();
+      const nid = document.getElementById("nid").value.trim();
+      const photo = photoInput.files[0];
 
-      const name =
-        document.getElementById("name").value.trim();
+      if (!photo) return alert("Select photo");
 
-      const phone =
-        document.getElementById("phone").value.trim();
+      if (phone.length !== 9) return alert("Phone must be 9 digits");
+      if (nid.length !== 16) return alert("NID must be 16 digits");
 
-      const nid =
-        document.getElementById("nid").value.trim();
+      /* UPLOAD PHOTO */
+      const fileName = Date.now() + "_" + photo.name;
+      const storageRef = ref(storage, "members/" + fileName);
 
-      const photo =
-        photoInput.files[0];
-
-      if (!photo) {
-        alert("Please select photo");
-        return;
-      }
-
-      if (phone.length !== 9) {
-        alert("Phone must be 9 digits");
-        return;
-      }
-
-      if (nid.length !== 16) {
-        alert("NID must be 16 digits");
-        return;
-      }
-
-      /* DUPLICATE PHONE */
-      const phoneSnap = await getDocs(
-        query(
-          collection(db, "members"),
-          where("phone", "==", phone)
-        )
-      );
-
-      if (!phoneSnap.empty) {
-        alert("Phone already exists");
-        return;
-      }
-
-      /* DUPLICATE NID */
-      const nidSnap = await getDocs(
-        query(
-          collection(db, "members"),
-          where("nid", "==", nid)
-        )
-      );
-
-      if (!nidSnap.empty) {
-        alert("NID already exists");
-        return;
-      }
-
-      /* STORAGE */
-      const fileName =
-        Date.now() + "_" + photo.name;
-
-      const storageRef =
-        ref(storage, "members/" + fileName);
-
-      /* UPLOAD */
       await uploadBytes(storageRef, photo);
-
-      /* URL */
-      const photoUrl =
-        await getDownloadURL(storageRef);
-
-      /* CURRENT USER */
-      const user = auth.currentUser;
+      const photoUrl = await getDownloadURL(storageRef);
 
       /* SAVE FIRESTORE */
       await addDoc(collection(db, "members"), {
-
         name,
         phone,
         nid,
         photoUrl,
-
         savings: 0,
         loanTotal: 0,
         loanRemaining: 0,
-
         status: "active",
-
         createdAt: serverTimestamp(),
-
-        createdBy:
-          user ? user.email : "admin"
-
+        createdBy: auth.currentUser?.email || "admin"
       });
 
-      alert("✅ Member saved successfully");
+      alert("Member saved");
 
-      memberForm.reset();
-
-      photoPreview.src =
-        "https://dummyimage.com/120x120/cccccc/000000&text=Photo";
+      form.reset();
+      photoPreview.src = "https://dummyimage.com/120x120";
 
       closeModal();
-
       loadMembers();
 
-    } catch (error) {
-
-      console.error(error);
-
-      alert(
-        "❌ Error: " + error.message
-      );
-
+    } catch (err) {
+      console.error(err);
+      alert(err.message);
     }
-
   });
-
 }
 
 /* =========================
    LOAD MEMBERS
 ========================= */
 async function loadMembers() {
+  if (!table) return;
 
-  if (!membersTable) return;
+  table.innerHTML = "";
 
-  membersTable.innerHTML = "";
+  const snap = await getDocs(collection(db, "members"));
 
-  try {
+  snap.forEach((doc) => {
+    const m = doc.data();
 
-    const snapshot =
-      await getDocs(collection(db, "members"));
-
-    snapshot.forEach((doc) => {
-
-      const m = doc.data();
-
-      membersTable.innerHTML += `
-
-        <tr>
-
-          <td>
-            <img
-              src="${m.photoUrl}"
-              class="member-photo"
-            >
-          </td>
-
-          <td>${m.name}</td>
-
-          <td>${m.phone}</td>
-
-          <td>${m.nid}</td>
-
-          <td>${m.savings}</td>
-
-          <td>${m.loanTotal}</td>
-
-          <td>${m.loanRemaining}</td>
-
-          <td>${m.status}</td>
-
-          <td>
-            ${
-              m.createdAt
-              ? new Date(
-                  m.createdAt.seconds * 1000
-                ).toLocaleDateString()
-              : "-"
-            }
-          </td>
-
-          <td>${m.createdBy}</td>
-
-        </tr>
-
-      `;
-
-    });
-
-  } catch (error) {
-
-    console.error(error);
-
-  }
-
+    table.innerHTML += `
+      <tr>
+        <td><img src="${m.photoUrl}" class="member-photo"></td>
+        <td>${m.name}</td>
+        <td>${m.phone}</td>
+        <td>${m.nid}</td>
+        <td>${m.savings}</td>
+        <td>${m.loanTotal}</td>
+        <td>${m.loanRemaining}</td>
+        <td>${m.status}</td>
+        <td>-</td>
+        <td>${m.createdBy}</td>
+      </tr>
+    `;
+  });
 }
 
 loadMembers();
-
-/* =========================
-   SEARCH
-========================= */
-if (searchInput) {
-
-  searchInput.addEventListener("input", async () => {
-
-    const val =
-      searchInput.value.toLowerCase();
-
-    searchResults.innerHTML = "";
-
-    if (!val) return;
-
-    const snapshot =
-      await getDocs(collection(db, "members"));
-
-    snapshot.forEach((doc) => {
-
-      const m = doc.data();
-
-      if (
-
-        m.name.toLowerCase().includes(val)
-
-        ||
-
-        m.phone.includes(val)
-
-        ||
-
-        m.nid.includes(val)
-
-      ) {
-
-        const div =
-          document.createElement("div");
-
-        div.className = "search-item";
-
-        div.innerHTML = `
-          <strong>${m.name}</strong>
-          <small>${m.phone}</small>
-        `;
-
-        div.onclick = () => {
-
-          selectedMember.innerHTML = `
-            👤 ${m.name}<br>
-            📱 ${m.phone}<br>
-            🆔 ${m.nid}<br>
-            💰 Savings: ${m.savings}
-          `;
-
-          searchResults.innerHTML = "";
-
-        };
-
-        searchResults.appendChild(div);
-
-      }
-
-    });
-
-  });
-
-}

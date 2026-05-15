@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Members</title>
+
+  <link rel="stylesheet" href="css/style.css">
+
+  <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+</head>
+
+<body>
+
+<!-- =========================
+     SIDEBAR
+========================= -->
+<aside class="sidebar" id="sidebar">
+
+  <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+
+  <h2 class="logo">🏦 SACCO</h2>
+
+  <nav class="nav">
+
+    <a href="dashboard.html" class="nav-item">
+      <span class="icon">📊</span><span class="text">Dashboard</span>
+    </a>
+
+    <a href="members.html" class="nav-item active">
+      <span class="icon">👥</span><span class="text">Members</span>
+    </a>
+
+    <a href="savings.html" class="nav-item">
+      <span class="icon">💰</span><span class="text">Savings</span>
+    </a>
+
+    <a href="loans.html" class="nav-item">
+      <span class="icon">🏦</span><span class="text">Loans</span>
+    </a>
+
+    <a href="repayments.html" class="nav-item">
+      <span class="icon">💳</span><span class="text">Repayments</span>
+    </a>
+
+    <a href="withdrawals.html" class="nav-item">
+      <span class="icon">📤</span><span class="text">Withdrawals</span>
+    </a>
+
+    <a href="users.html" class="nav-item">
+      <span class="icon">👨‍💼</span><span class="text">Users</span>
+    </a>
+
+    <a href="settings.html" class="nav-item">
+      <span class="icon">⚙️</span><span class="text">Settings</span>
+    </a>
+
+    <a href="#" class="nav-item logout" id="logoutBtn">
+      <span class="icon">🚪</span><span class="text">Logout</span>
+    </a>
+
+  </nav>
+
+</aside>
+
+<!-- =========================
+     MAIN
+========================= -->
+<main class="main">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+
+    <h2>👥 Members Management</h2>
+
+    <button class="add-btn" id="openModalBtn">
+      <i class="fa fa-plus"></i> Add Member
+    </button>
+
+  </div>
+
+  <!-- SEARCH -->
+  <div class="search-container">
+
+    <input type="text" id="searchMember" class="search-input"
+      placeholder="Search by name, phone or NID...">
+
+    <div id="searchResults" class="search-dropdown"></div>
+
+  </div>
+
+  <!-- SELECTED -->
+  <div id="selectedMember" class="selected-box">
+    👤 Select a member
+  </div>
+
+  <!-- TABLE -->
+  <div class="table-card">
+
+    <table class="table-modern">
+
+      <thead>
+        <tr>
+          <th>Photo</th>
+          <th>Name</th>
+          <th>Phone</th>
+          <th>NID</th>
+          <th>Savings</th>
+          <th>Loan Total</th>
+          <th>Remaining Loan</th>
+          <th>Status</th>
+          <th>Created Date</th>
+          <th>Created By</th>
+        </tr>
+      </thead>
+
+      <tbody id="membersTable"></tbody>
+
+    </table>
+
+  </div>
+
+</main>
+
+<!-- =========================
+     MODAL
+========================= -->
+<div class="modal" id="memberModal">
+
+  <div class="modal-box">
+
+    <h3>Add New Member</h3>
+
+    <form id="memberForm">
+
+      <input type="text" id="name" placeholder="Full Name" required>
+
+      <input type="text" id="phone" placeholder="9 Digit Phone" maxlength="9" required>
+
+      <input type="text" id="nid" placeholder="16 Digit National ID" maxlength="16" required>
+
+      <!-- PHOTO -->
+      <input type="file" id="photo" accept="image/*" required>
+
+      <!-- PHOTO PREVIEW (FIXED) -->
+      <img
+        id="photoPreview"
+        src="https://dummyimage.com/120x120/cccccc/000000&text=Photo"
+        style="width:120px;height:120px;border-radius:10px;object-fit:cover;margin-top:10px;"
+      />
+
+      <button type="submit" class="save-btn">Save Member</button>
+
+      <button type="button" class="close-btn" id="closeModalBtn">
+        Cancel
+      </button>
+
+    </form>
+
+  </div>
+
+</div>
+
+<!-- =========================
+     SCRIPTS
+========================= -->
+<script type="module" src="js/layout.js"></script>
+<script type="module" src="js/members.js"></script>
+
+</body>
+</html>

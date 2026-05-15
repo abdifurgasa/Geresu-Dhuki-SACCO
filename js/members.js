@@ -29,13 +29,7 @@ const photoPreview = document.getElementById("photoPreview");
 const table = document.getElementById("membersTable");
 
 /* =========================
-   🔥 FIX: MAKE SURE ELEMENTS EXIST
-========================= */
-console.log("Open Button:", openBtn);
-console.log("Modal:", modal);
-
-/* =========================
-   MODAL OPEN / CLOSE (FIXED)
+   MODAL FIX (IMPORTANT)
 ========================= */
 function openModal() {
   modal.style.display = "flex";
@@ -45,19 +39,10 @@ function closeModal() {
   modal.style.display = "none";
 }
 
-/* IMPORTANT: attach events safely */
-if (openBtn) {
-  openBtn.addEventListener("click", (e) => {
-    e.preventDefault();
-    openModal();
-  });
-}
+/* GLOBAL FIX (CLICKABLE BUTTON) */
+openBtn.addEventListener("click", openModal);
+closeBtn.addEventListener("click", closeModal);
 
-if (closeBtn) {
-  closeBtn.addEventListener("click", closeModal);
-}
-
-/* close when clicking outside modal */
 window.addEventListener("click", (e) => {
   if (e.target === modal) closeModal();
 });
@@ -65,79 +50,56 @@ window.addEventListener("click", (e) => {
 /* =========================
    PHOTO PREVIEW
 ========================= */
-if (photoInput) {
-  photoInput.addEventListener("change", (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+photoInput.addEventListener("change", (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      photoPreview.src = ev.target.result;
-    };
-    reader.readAsDataURL(file);
-  });
-}
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    photoPreview.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+});
 
 /* =========================
    SAVE MEMBER
 ========================= */
-if (form) {
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
 
-    try {
-      const name = document.getElementById("name").value.trim();
-      const phone = document.getElementById("phone").value.trim();
-      const nid = document.getElementById("nid").value.trim();
-      const photo = photoInput.files[0];
+  const name = document.getElementById("name").value;
+  const phone = document.getElementById("phone").value;
+  const nid = document.getElementById("nid").value;
+  const photo = photoInput.files[0];
 
-      if (!photo) return alert("Select photo");
+  if (!photo) return alert("Select photo");
 
-      if (phone.length !== 9) return alert("Phone must be 9 digits");
-      if (nid.length !== 16) return alert("NID must be 16 digits");
+  const storageRef = ref(storage, "members/" + Date.now());
+  await uploadBytes(storageRef, photo);
+  const photoUrl = await getDownloadURL(storageRef);
 
-      /* UPLOAD PHOTO */
-      const fileName = Date.now() + "_" + photo.name;
-      const storageRef = ref(storage, "members/" + fileName);
-
-      await uploadBytes(storageRef, photo);
-      const photoUrl = await getDownloadURL(storageRef);
-
-      /* SAVE FIRESTORE */
-      await addDoc(collection(db, "members"), {
-        name,
-        phone,
-        nid,
-        photoUrl,
-        savings: 0,
-        loanTotal: 0,
-        loanRemaining: 0,
-        status: "active",
-        createdAt: serverTimestamp(),
-        createdBy: auth.currentUser?.email || "admin"
-      });
-
-      alert("Member saved");
-
-      form.reset();
-      photoPreview.src = "https://dummyimage.com/120x120";
-
-      closeModal();
-      loadMembers();
-
-    } catch (err) {
-      console.error(err);
-      alert(err.message);
-    }
+  await addDoc(collection(db, "members"), {
+    name,
+    phone,
+    nid,
+    photoUrl,
+    status: "active",
+    createdAt: serverTimestamp()
   });
-}
+
+  alert("Member saved");
+
+  form.reset();
+  photoPreview.src = "https://dummyimage.com/120x120";
+
+  closeModal();
+  loadMembers();
+});
 
 /* =========================
    LOAD MEMBERS
 ========================= */
 async function loadMembers() {
-  if (!table) return;
-
   table.innerHTML = "";
 
   const snap = await getDocs(collection(db, "members"));
@@ -147,16 +109,11 @@ async function loadMembers() {
 
     table.innerHTML += `
       <tr>
-        <td><img src="${m.photoUrl}" class="member-photo"></td>
+        <td><img src="${m.photoUrl}" width="40" height="40" style="border-radius:50%"></td>
         <td>${m.name}</td>
         <td>${m.phone}</td>
         <td>${m.nid}</td>
-        <td>${m.savings}</td>
-        <td>${m.loanTotal}</td>
-        <td>${m.loanRemaining}</td>
         <td>${m.status}</td>
-        <td>-</td>
-        <td>${m.createdBy}</td>
       </tr>
     `;
   });

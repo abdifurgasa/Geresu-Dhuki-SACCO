@@ -630,3 +630,12 @@ body{
   border-radius:10px;
   width:400px;
 }
+.add-btn {
+  position: relative;
+  z-index: 9999;
+  cursor: pointer;
+}
+
+.modal {
+  z-index: 9999;
+}

@@ -2,252 +2,79 @@
 <html lang="en">
 
 <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title data-i18n="savings_title">Savings</title>
 
-  <meta charset="UTF-8">
-
-  <meta name="viewport"
-        content="width=device-width, initial-scale=1.0">
-
-  <title data-i18n="savings_title">
-    Savings Management
-  </title>
-
-  <link rel="stylesheet"
-        href="css/style.css">
-
+  <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
 </head>
 
 <body>
 
-<!-- =========================
-     SIDEBAR
-========================= -->
-<aside class="sidebar"
-       id="sidebar">
+<!-- ================= SIDEBAR ================= -->
+<aside class="sidebar">
 
-  <button class="toggle-btn"
-          onclick="toggleSidebar()">
-
-    ☰
-
-  </button>
-
-  <h2 class="logo">
-
-    🏦 SACCO
-
-  </h2>
+  <h2 class="logo">🏦 SACCO</h2>
 
   <nav class="nav">
 
-    <a href="dashboard.html"
-       class="nav-item">
-
-      <span class="icon">📊</span>
-
-      <span class="text"
-            data-i18n="dashboard">
-
-        Dashboard
-
-      </span>
-
+    <a href="dashboard.html" class="nav-item">
+      📊 <span data-i18n="dashboard">Dashboard</span>
     </a>
 
-    <a href="members.html"
-       class="nav-item">
-
-      <span class="icon">👥</span>
-
-      <span class="text"
-            data-i18n="members">
-
-        Members
-
-      </span>
-
+    <a href="members.html" class="nav-item">
+      👥 <span data-i18n="members">Members</span>
     </a>
 
-    <a href="savings.html"
-       class="nav-item active">
-
-      <span class="icon">💰</span>
-
-      <span class="text"
-            data-i18n="savings">
-
-        Savings
-
-      </span>
-
+    <a href="savings.html" class="nav-item active">
+      💰 <span data-i18n="savings">Savings</span>
     </a>
 
-    <a href="loans.html"
-       class="nav-item">
-
-      <span class="icon">🏦</span>
-
-      <span class="text"
-            data-i18n="loans">
-
-        Loans
-
-      </span>
-
+    <a href="loans.html" class="nav-item">
+      🏦 <span data-i18n="loans">Loans</span>
     </a>
 
-    <a href="repayments.html"
-       class="nav-item">
-
-      <span class="icon">💳</span>
-
-      <span class="text"
-            data-i18n="repayments">
-
-        Repayments
-
-      </span>
-
-    </a>
-
-    <a href="withdrawals.html"
-       class="nav-item">
-
-      <span class="icon">📤</span>
-
-      <span class="text"
-            data-i18n="withdrawals">
-
-        Withdrawals
-
-      </span>
-
-    </a>
-
-    <a href="users.html"
-       class="nav-item">
-
-      <span class="icon">👨‍💼</span>
-
-      <span class="text"
-            data-i18n="users">
-
-        Users
-
-      </span>
-
-    </a>
-
-    <a href="settings.html"
-       class="nav-item">
-
-      <span class="icon">⚙️</span>
-
-      <span class="text"
-            data-i18n="settings">
-
-        Settings
-
-      </span>
-
-    </a>
-
-    <a href="#"
-       class="nav-item logout"
-       id="logoutBtn">
-
-      <span class="icon">🚪</span>
-
-      <span class="text"
-            data-i18n="logout">
-
-        Logout
-
-      </span>
-
+    <a href="settings.html" class="nav-item">
+      ⚙️ <span data-i18n="settings">Settings</span>
     </a>
 
   </nav>
 
 </aside>
 
-<!-- =========================
-     MAIN
-========================= -->
+<!-- ================= MAIN ================= -->
 <main class="main">
 
-  <!-- TOPBAR -->
   <div class="topbar">
+    <h2 data-i18n="savings_management">💰 Savings Management</h2>
 
-    <h2 data-i18n="savings_management">
+    <select id="langSelect">
+      <option value="en">EN</option>
+      <option value="om">OM</option>
+      <option value="am">AM</option>
+    </select>
 
-      💰 Savings Management
-
-    </h2>
-
-    <div class="topbar-actions">
-
-      <!-- LANGUAGE -->
-      <select id="langSelect"
-              class="lang-select">
-
-        <option value="en">
-          English
-        </option>
-
-        <option value="om">
-          Afaan Oromo
-        </option>
-
-        <option value="am">
-          አማርኛ
-        </option>
-
-      </select>
-
-      <!-- BUTTON -->
-      <button class="add-btn"
-              id="openModalBtn">
-
-        <i class="fa fa-plus"></i>
-
-        <span data-i18n="add_savings">
-
-          Add Savings
-
-        </span>
-
-      </button>
-
-    </div>
-
+    <button class="add-btn" id="openModalBtn">
+      <i class="fa fa-plus"></i>
+      <span data-i18n="add_savings">Add Savings</span>
+    </button>
   </div>
 
-  <!-- SEARCH -->
+  <!-- SEARCH MEMBER -->
   <div class="search-container">
-
-    <input type="text"
-           id="searchMember"
+    <input id="searchMember"
            class="search-input"
            data-i18n-placeholder="search_member"
-           placeholder="Search member by name, phone or NID...">
+           placeholder="Search member">
 
-    <div id="searchResults"
-         class="search-dropdown">
-
-    </div>
-
+    <div id="searchResults" class="search-dropdown"></div>
   </div>
 
-  <!-- SELECTED -->
-  <div id="selectedMember"
-       class="selected-box">
-
+  <!-- SELECTED MEMBER -->
+  <div id="selectedMember" class="selected-box">
     👤 Select a member
-
   </div>
 
   <!-- TABLE -->
@@ -256,31 +83,15 @@
     <table class="table-modern">
 
       <thead>
-
         <tr>
-
-          <th data-i18n="member_name">
-            Member Name
-          </th>
-
-          <th data-i18n="phone">
-            Phone
-          </th>
-
-          <th data-i18n="amount">
-            Amount
-          </th>
-
-          <th data-i18n="date">
-            Date
-          </th>
-
-          <th data-i18n="created_by">
-            Created By
-          </th>
-
+          <th data-i18n="member_name">Name</th>
+          <th data-i18n="phone">Phone</th>
+          <th>Amount</th>
+          <th>Previous Saving</th>
+          <th>Total Saving</th>
+          <th>Date</th>
+          <th>By</th>
         </tr>
-
       </thead>
 
       <tbody id="savingsTable"></tbody>
@@ -291,49 +102,27 @@
 
 </main>
 
-<!-- =========================
-     MODAL
-========================= -->
-<div class="modal"
-     id="savingsModal">
+<!-- ================= MODAL ================= -->
+<div class="modal" id="savingsModal">
 
   <div class="modal-box">
 
-    <h3 data-i18n="add_savings">
-
-      💰 Add Savings
-
-    </h3>
+    <h3 data-i18n="add_savings">Add Savings</h3>
 
     <form id="savingsForm">
 
       <input type="number"
              id="amount"
              data-i18n-placeholder="enter_amount"
-             placeholder="Enter Amount"
+             placeholder="Enter amount"
              required>
 
-      <button type="submit"
-              class="save-btn">
-
-        <span data-i18n="save_savings">
-
-          Save Savings
-
-        </span>
-
+      <button type="submit" class="save-btn">
+        <span data-i18n="save">Save</span>
       </button>
 
-      <button type="button"
-              class="close-btn"
-              id="closeModalBtn">
-
-        <span data-i18n="cancel">
-
-          Cancel
-
-        </span>
-
+      <button type="button" class="close-btn" id="closeModalBtn">
+        <span data-i18n="cancel">Cancel</span>
       </button>
 
     </form>
@@ -342,25 +131,10 @@
 
 </div>
 
-<!-- =========================
-     SCRIPTS
-========================= -->
-
-<script type="module">
-
-import {
-  initLanguage
-} from "./js/i18n.js";
-
-initLanguage();
-
-</script>
-
-<script type="module"
-        src="js/layout.js"></script>
-
-<script type="module"
-        src="js/savings.js"></script>
+<!-- ================= SCRIPTS ================= -->
+<script type="module" src="js/i18n.js"></script>
+<script type="module" src="js/layout.js"></script>
+<script type="module" src="js/savings.js"></script>
 
 </body>
 </html>

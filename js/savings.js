@@ -4,33 +4,25 @@ import {
   collection,
   addDoc,
   getDocs,
+  doc,
+  updateDoc,
   query,
   orderBy,
   onSnapshot,
-  serverTimestamp,
-  updateDoc,
-  doc,
-  increment
+  serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 import {
-  onAuthStateChanged,
-  signOut
+  onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 
-// ===============================
-// COLLECTIONS
-// ===============================
-
+// ================= FIRESTORE =================
 const membersRef = collection(db, "members");
 const savingsRef = collection(db, "savings");
 
 
-// ===============================
-// ELEMENTS
-// ===============================
-
+// ================= ELEMENTS =================
 const savingsForm = document.getElementById("savingsForm");
 const savingsTable = document.getElementById("savingsTable");
 
@@ -41,26 +33,19 @@ const selectedMember = document.getElementById("selectedMember");
 
 const openModalBtn = document.getElementById("openModalBtn");
 const closeModalBtn = document.getElementById("closeModalBtn");
-
 const savingsModal = document.getElementById("savingsModal");
-
-const logoutBtn = document.getElementById("logoutBtn");
 
 const amountInput = document.getElementById("amount");
 
+const langSelect = document.getElementById("langSelect");
 
-// ===============================
-// GLOBAL STATE
-// ===============================
 
+// ================= STATE =================
 let members = [];
 let selectedMemberData = null;
 
 
-// ===============================
-// AUTH CHECK
-// ===============================
-
+// ================= AUTH CHECK =================
 onAuthStateChanged(auth, (user) => {
   if (!user) {
     window.location.href = "index.html";
@@ -68,56 +53,37 @@ onAuthStateChanged(auth, (user) => {
 });
 
 
-// ===============================
-// LOGOUT
-// ===============================
-
-logoutBtn?.addEventListener("click", async () => {
-  await signOut(auth);
-  window.location.href = "index.html";
-});
-
-
-// ===============================
-// MODAL CONTROL
-// ===============================
-
-openModalBtn?.addEventListener("click", () => {
+// ================= MODAL =================
+openModalBtn.onclick = () => {
   savingsModal.style.display = "flex";
-});
+};
 
-closeModalBtn?.addEventListener("click", () => {
+closeModalBtn.onclick = () => {
   savingsModal.style.display = "none";
-});
+};
 
-window.addEventListener("click", (e) => {
+window.onclick = (e) => {
   if (e.target === savingsModal) {
     savingsModal.style.display = "none";
   }
-});
+};
 
 
-// ===============================
-// LOAD MEMBERS
-// ===============================
-
+// ================= LOAD MEMBERS =================
 async function loadMembers() {
-  const snapshot = await getDocs(membersRef);
+  const snap = await getDocs(membersRef);
 
-  members = snapshot.docs.map(doc => ({
-    id: doc.id,
-    ...doc.data()
+  members = snap.docs.map(d => ({
+    id: d.id,
+    ...d.data()
   }));
 }
 
 loadMembers();
 
 
-// ===============================
-// SEARCH MEMBERS
-// ===============================
-
-searchMember?.addEventListener("input", () => {
+// ================= SEARCH MEMBERS =================
+searchMember.addEventListener("input", () => {
 
   const value = searchMember.value.toLowerCase();
 
@@ -134,43 +100,39 @@ searchMember?.addEventListener("input", () => {
     m.nid?.includes(value)
   );
 
-  filtered.slice(0, 5).forEach(member => {
+  filtered.slice(0, 5).forEach(m => {
 
     const div = document.createElement("div");
 
     div.className = "search-item";
 
     div.innerHTML = `
-      <strong>${member.name}</strong><br>
-      📞 ${member.phone}
+      <strong>${m.name}</strong><br>
+      📞 ${m.phone}
     `;
 
     div.onclick = () => {
 
-      selectedMemberData = member;
+      selectedMemberData = m;
 
       selectedMember.innerHTML = `
-        👤 <strong>${member.name}</strong><br>
-        📞 ${member.phone}<br>
-        🪪 ${member.nid}<br>
-        💰 Savings: ${member.savings || 0} ETB
+        👤 <b>${m.name}</b><br>
+        📞 ${m.phone}<br>
+        💰 Previous: ${m.previousSaving || 0} ETB<br>
+        💰 Total: ${m.savings || 0} ETB
       `;
 
-      searchMember.value = member.name;
+      searchMember.value = m.name;
       searchResults.style.display = "none";
     };
 
+    searchResults.style.display = "block";
     searchResults.appendChild(div);
   });
-
-  searchResults.style.display = "block";
 });
 
 
-// ===============================
-// CLOSE SEARCH
-// ===============================
-
+// ================= CLOSE SEARCH =================
 document.addEventListener("click", (e) => {
   if (!searchMember.contains(e.target) && !searchResults.contains(e.target)) {
     searchResults.style.display = "none";
@@ -178,20 +140,14 @@ document.addEventListener("click", (e) => {
 });
 
 
-// ===============================
-// ONLY NUMBER INPUT
-// ===============================
-
-amountInput?.addEventListener("input", (e) => {
+// ================= ONLY NUMBERS =================
+amountInput.addEventListener("input", (e) => {
   e.target.value = e.target.value.replace(/\D/g, "");
 });
 
 
-// ===============================
-// SAVE SAVINGS
-// ===============================
-
-savingsForm?.addEventListener("submit", async (e) => {
+// ================= SAVE SAVINGS =================
+savingsForm.addEventListener("submit", async (e) => {
   e.preventDefault();
 
   if (!selectedMemberData) {
@@ -206,26 +162,33 @@ savingsForm?.addEventListener("submit", async (e) => {
     return;
   }
 
+  const previousSaving = selectedMemberData.savings || 0;
+  const totalSaving = previousSaving + amount;
+
+  const user = auth.currentUser;
+
   try {
 
-    const user = auth.currentUser;
-
+    // SAVE TRANSACTION
     await addDoc(savingsRef, {
       memberId: selectedMemberData.id,
       memberName: selectedMemberData.name,
       phone: selectedMemberData.phone,
       amount,
+      previousSaving,
+      totalSaving,
       createdBy: user?.email || "Admin",
       createdDate: new Date().toLocaleDateString(),
       timestamp: serverTimestamp()
     });
 
-    const memberDoc = doc(db, "members", selectedMemberData.id);
-
-    await updateDoc(memberDoc, {
-      savings: increment(amount)
+    // UPDATE MEMBER
+    await updateDoc(doc(db, "members", selectedMemberData.id), {
+      previousSaving,
+      savings: totalSaving
     });
 
+    // RESET UI
     savingsForm.reset();
     selectedMemberData = null;
     selectedMember.innerHTML = "👤 Select a member";
@@ -240,10 +203,7 @@ savingsForm?.addEventListener("submit", async (e) => {
 });
 
 
-// ===============================
-// REALTIME SAVINGS TABLE
-// ===============================
-
+// ================= REALTIME TABLE =================
 const q = query(savingsRef, orderBy("timestamp", "desc"));
 
 onSnapshot(q, (snap) => {
@@ -260,6 +220,8 @@ onSnapshot(q, (snap) => {
       <td>${d.memberName}</td>
       <td>${d.phone}</td>
       <td>${d.amount} ETB</td>
+      <td>${d.previousSaving} ETB</td>
+      <td>${d.totalSaving} ETB</td>
       <td>${d.createdDate}</td>
       <td>${d.createdBy}</td>
     `;

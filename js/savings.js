@@ -1,232 +1,204 @@
 import { db, auth } from "./firebase.js";
-
 import {
   collection,
   addDoc,
   getDocs,
-  doc,
-  updateDoc,
   query,
-  orderBy,
-  onSnapshot,
+  where,
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-import {
-  onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+/* =========================
+   ELEMENTS
+========================= */
 
-
-// ================= FIRESTORE =================
-const membersRef = collection(db, "members");
-const savingsRef = collection(db, "savings");
-
-
-// ================= ELEMENTS =================
-const savingsForm = document.getElementById("savingsForm");
 const savingsTable = document.getElementById("savingsTable");
-
-const searchMember = document.getElementById("searchMember");
-const searchResults = document.getElementById("searchResults");
-
-const selectedMember = document.getElementById("selectedMember");
+const savingsForm = document.getElementById("savingsForm");
+const amountInput = document.getElementById("amount");
 
 const openModalBtn = document.getElementById("openModalBtn");
 const closeModalBtn = document.getElementById("closeModalBtn");
-const savingsModal = document.getElementById("savingsModal");
+const modal = document.getElementById("savingsModal");
 
-const amountInput = document.getElementById("amount");
+const searchInput = document.getElementById("searchMember");
+const searchResults = document.getElementById("searchResults");
+const selectedMember = document.getElementById("selectedMember");
 
-const langSelect = document.getElementById("langSelect");
+/* =========================
+   MODAL
+========================= */
 
-
-// ================= STATE =================
-let members = [];
-let selectedMemberData = null;
-
-
-// ================= AUTH CHECK =================
-onAuthStateChanged(auth, (user) => {
-  if (!user) {
-    window.location.href = "index.html";
-  }
+openModalBtn?.addEventListener("click", () => {
+  modal.style.display = "flex";
 });
 
+closeModalBtn?.addEventListener("click", () => {
+  modal.style.display = "none";
+});
 
-// ================= MODAL =================
-openModalBtn.onclick = () => {
-  savingsModal.style.display = "flex";
-};
+/* =========================
+   GLOBAL SELECTED MEMBER
+========================= */
 
-closeModalBtn.onclick = () => {
-  savingsModal.style.display = "none";
-};
+let selected = null;
 
-window.onclick = (e) => {
-  if (e.target === savingsModal) {
-    savingsModal.style.display = "none";
-  }
-};
+/* =========================
+   SEARCH MEMBER
+========================= */
 
+searchInput?.addEventListener("input", async () => {
 
-// ================= LOAD MEMBERS =================
-async function loadMembers() {
-  const snap = await getDocs(membersRef);
-
-  members = snap.docs.map(d => ({
-    id: d.id,
-    ...d.data()
-  }));
-}
-
-loadMembers();
-
-
-// ================= SEARCH MEMBERS =================
-searchMember.addEventListener("input", () => {
-
-  const value = searchMember.value.toLowerCase();
+  const val = searchInput.value.toLowerCase();
 
   searchResults.innerHTML = "";
 
-  if (!value) {
-    searchResults.style.display = "none";
-    return;
-  }
+  if (!val) return;
 
-  const filtered = members.filter(m =>
-    m.name?.toLowerCase().includes(value) ||
-    m.phone?.includes(value) ||
-    m.nid?.includes(value)
-  );
+  const snap = await getDocs(collection(db, "members"));
 
-  filtered.slice(0, 5).forEach(m => {
+  snap.forEach(doc => {
 
-    const div = document.createElement("div");
+    const m = doc.data();
 
-    div.className = "search-item";
+    if (
+      m.name.toLowerCase().includes(val) ||
+      m.phone.includes(val)
+    ) {
 
-    div.innerHTML = `
-      <strong>${m.name}</strong><br>
-      📞 ${m.phone}
-    `;
+      const div = document.createElement("div");
+      div.className = "search-item";
 
-    div.onclick = () => {
-
-      selectedMemberData = m;
-
-      selectedMember.innerHTML = `
-        👤 <b>${m.name}</b><br>
-        📞 ${m.phone}<br>
-        💰 Previous: ${m.previousSaving || 0} ETB<br>
-        💰 Total: ${m.savings || 0} ETB
+      div.innerHTML = `
+        <strong>${m.name}</strong><br>
+        <small>${m.phone}</small>
       `;
 
-      searchMember.value = m.name;
-      searchResults.style.display = "none";
-    };
+      div.onclick = () => {
 
-    searchResults.style.display = "block";
-    searchResults.appendChild(div);
+        selected = {
+          id: doc.id,
+          ...m
+        };
+
+        selectedMember.innerHTML = `
+          👤 ${m.name}<br>
+          📱 ${m.phone}
+        `;
+
+        searchResults.innerHTML = "";
+
+      };
+
+      searchResults.appendChild(div);
+
+    }
+
   });
+
 });
 
+/* =========================
+   SAVE SAVINGS
+========================= */
 
-// ================= CLOSE SEARCH =================
-document.addEventListener("click", (e) => {
-  if (!searchMember.contains(e.target) && !searchResults.contains(e.target)) {
-    searchResults.style.display = "none";
-  }
-});
+savingsForm?.addEventListener("submit", async (e) => {
 
-
-// ================= ONLY NUMBERS =================
-amountInput.addEventListener("input", (e) => {
-  e.target.value = e.target.value.replace(/\D/g, "");
-});
-
-
-// ================= SAVE SAVINGS =================
-savingsForm.addEventListener("submit", async (e) => {
   e.preventDefault();
-
-  if (!selectedMemberData) {
-    alert("Select a member first");
-    return;
-  }
-
-  const amount = Number(amountInput.value);
-
-  if (amount <= 0) {
-    alert("Invalid amount");
-    return;
-  }
-
-  const previousSaving = selectedMemberData.savings || 0;
-  const totalSaving = previousSaving + amount;
-
-  const user = auth.currentUser;
 
   try {
 
-    // SAVE TRANSACTION
-    await addDoc(savingsRef, {
-      memberId: selectedMemberData.id,
-      memberName: selectedMemberData.name,
-      phone: selectedMemberData.phone,
+    if (!selected) {
+      alert("Select a member first");
+      return;
+    }
+
+    const amount = Number(amountInput.value);
+
+    if (!amount || amount <= 0) {
+      alert("Enter valid amount");
+      return;
+    }
+
+    /* GET PREVIOUS SAVINGS */
+    const q = query(
+      collection(db, "savings"),
+      where("memberId", "==", selected.id)
+    );
+
+    const snap = await getDocs(q);
+
+    let previousSaving = 0;
+
+    snap.forEach(doc => {
+      previousSaving += Number(doc.data().amount || 0);
+    });
+
+    const totalSaving = previousSaving + amount;
+
+    /* SAVE */
+    await addDoc(collection(db, "savings"), {
+
+      memberId: selected.id,
+      memberName: selected.name,
+      memberPhone: selected.phone,
+
       amount,
+
       previousSaving,
       totalSaving,
-      createdBy: user?.email || "Admin",
-      createdDate: new Date().toLocaleDateString(),
-      timestamp: serverTimestamp()
+
+      createdAt: serverTimestamp(),
+      createdBy: auth.currentUser?.email || "admin"
+
     });
 
-    // UPDATE MEMBER
-    await updateDoc(doc(db, "members", selectedMemberData.id), {
-      previousSaving,
-      savings: totalSaving
-    });
+    alert("Saved successfully");
 
-    // RESET UI
-    savingsForm.reset();
-    selectedMemberData = null;
-    selectedMember.innerHTML = "👤 Select a member";
-    savingsModal.style.display = "none";
+    amountInput.value = "";
 
-    alert("Savings saved successfully");
+    modal.style.display = "none";
+
+    loadSavings();
 
   } catch (err) {
+
     console.error(err);
     alert(err.message);
+
   }
+
 });
 
+/* =========================
+   LOAD SAVINGS TABLE
+========================= */
 
-// ================= REALTIME TABLE =================
-const q = query(savingsRef, orderBy("timestamp", "desc"));
-
-onSnapshot(q, (snap) => {
+async function loadSavings() {
 
   savingsTable.innerHTML = "";
 
-  snap.forEach(docSnap => {
+  const snap = await getDocs(collection(db, "savings"));
 
-    const d = docSnap.data();
+  snap.forEach(doc => {
 
-    const tr = document.createElement("tr");
+    const d = doc.data();
 
-    tr.innerHTML = `
-      <td>${d.memberName}</td>
-      <td>${d.phone}</td>
-      <td>${d.amount} ETB</td>
-      <td>${d.previousSaving} ETB</td>
-      <td>${d.totalSaving} ETB</td>
-      <td>${d.createdDate}</td>
-      <td>${d.createdBy}</td>
+    const row = `
+      <tr>
+        <td>${d.memberName}</td>
+        <td>${d.memberPhone}</td>
+        <td>${d.amount} ETB</td>
+        <td>${d.previousSaving} ETB</td>
+        <td>${d.totalSaving} ETB</td>
+        <td>${d.createdAt ? new Date(d.createdAt.seconds * 1000).toLocaleDateString() : "-"}</td>
+        <td>${d.createdBy}</td>
+      </tr>
     `;
 
-    savingsTable.appendChild(tr);
+    savingsTable.innerHTML += row;
+
   });
 
-});
+}
+
+loadSavings();

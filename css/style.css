@@ -545,6 +545,54 @@ h1{
   font-weight:800;
 }
 /* =========================================================
+   PROFILE MODAL SCROLLABLE HISTORY
+========================================================= */
+
+.history-container{
+  max-height: 500px;
+  overflow-y: auto;
+  overflow-x: auto;
+  border-radius: 12px;
+}
+
+/* CUSTOM SCROLLBAR */
+
+.history-container::-webkit-scrollbar{
+  width: 10px;
+  height: 10px;
+}
+
+.history-container::-webkit-scrollbar-track{
+  background: #e5e7eb;
+  border-radius: 10px;
+}
+
+.history-container::-webkit-scrollbar-thumb{
+  background: #2563eb;
+  border-radius: 10px;
+}
+
+.history-container::-webkit-scrollbar-thumb:hover{
+  background: #1d4ed8;
+}
+
+/* STICKY HEADER */
+
+.history-container thead th{
+  position: sticky;
+  top: 0;
+  background: #2563eb;
+  color: white;
+  z-index: 5;
+}
+
+/* HOVER EFFECT */
+
+#historyTable tr:hover{
+  background: rgba(37,99,235,0.08);
+  transition: 0.3s;
+}
+/* =========================================================
    📊 COUNTER (BANK STYLE)
 ========================================================= */
 

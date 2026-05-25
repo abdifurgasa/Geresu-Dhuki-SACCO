@@ -1,79 +1,125 @@
 import { auth } from "./firebase.js";
-import { signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+import {
+  signOut,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 /* =========================================================
    SIDEBAR TOGGLE
 ========================================================= */
 
 window.toggleSidebar = function () {
+
   const sidebar = document.getElementById("sidebar");
+
   if (sidebar) {
     sidebar.classList.toggle("collapsed");
   }
+
 };
 
 /* =========================================================
-   LOGOUT SYSTEM (FIXED)
+   AUTH CHECK
 ========================================================= */
 
-document.addEventListener("DOMContentLoaded", () => {
-  const logoutBtn = document.getElementById("logoutBtn");
+onAuthStateChanged(auth, (user) => {
 
-  if (logoutBtn) {
-    logoutBtn.addEventListener("click", async (e) => {
-      e.preventDefault();
+  // if not logged in
+  if (!user) {
 
-      const confirmLogout = confirm("Are you sure you want to logout?");
-      if (!confirmLogout) return;
+    window.location.href = "./index.html";
+    return;
 
-      try {
-        if (auth.currentUser) {
-          await signOut(auth);
-        }
-
-        localStorage.clear();
-
-        // ✅ FIXED PATH (NO 404)
-        window.location.href = "./index.html";
-
-      } catch (error) {
-        console.error("Logout error:", error);
-        alert("Logout failed");
-      }
-    });
   }
+
 });
 
 /* =========================================================
-   SESSION TIMEOUT (5 MINUTES)
+   LOGOUT SYSTEM
+========================================================= */
+
+document.addEventListener("DOMContentLoaded", () => {
+
+  const logoutBtn = document.getElementById("logoutBtn");
+
+  if (logoutBtn) {
+
+    logoutBtn.addEventListener("click", async (e) => {
+
+      e.preventDefault();
+
+      const confirmLogout = confirm(
+        "Are you sure you want to logout?"
+      );
+
+      if (!confirmLogout) return;
+
+      try {
+
+        // firebase logout
+        await signOut(auth);
+
+        // clear storage
+        localStorage.clear();
+        sessionStorage.clear();
+
+        // redirect to login
+        window.location.href = "./index.html";
+
+      } catch (error) {
+
+        console.error("Logout error:", error);
+
+        alert("Logout failed");
+
+      }
+
+    });
+
+  }
+
+});
+
+/* =========================================================
+   SESSION TIMEOUT
 ========================================================= */
 
 let timeout;
-const TIME_LIMIT = 5 * 60 * 1000;
+
+const TIME_LIMIT = 5 * 60 * 1000; // 5 minutes
 
 function resetTimer() {
+
   clearTimeout(timeout);
 
   timeout = setTimeout(async () => {
-    alert("Session expired. You will be logged out.");
+
+    alert("Session expired. Logging out.");
 
     try {
-      if (auth.currentUser) {
-        await signOut(auth);
-      }
-    } catch (e) {
-      console.error(e);
+
+      await signOut(auth);
+
+    } catch (error) {
+
+      console.error(error);
+
     }
 
     localStorage.clear();
+    sessionStorage.clear();
 
-    // ✅ FIXED PATH (NO 404)
     window.location.href = "./index.html";
 
   }, TIME_LIMIT);
+
 }
 
-/* activity tracking */
+/* =========================================================
+   USER ACTIVITY TRACKING
+========================================================= */
+
 window.addEventListener("mousemove", resetTimer);
 window.addEventListener("keydown", resetTimer);
 window.addEventListener("click", resetTimer);

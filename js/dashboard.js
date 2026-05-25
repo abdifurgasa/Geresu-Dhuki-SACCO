@@ -1,250 +1,437 @@
 import { db, auth } from "./firebase.js";
 
 import {
-  doc,
-  getDoc,
   collection,
-  onSnapshot,
+  addDoc,
+  getDocs,
   query,
-  where
+  where,
+  serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-import {
-  onAuthStateChanged,
-  signOut
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+/* =========================================================
+   ELEMENTS
+========================================================= */
 
-/* =========================
-   STATE
-========================= */
+const memberForm =
+  document.getElementById("memberForm");
 
-let role = null;
-let chartsInitialized = false;
+const membersTable =
+  document.getElementById("membersTable");
 
-/* =========================
-   GLOBAL STATS
-========================= */
+const searchInput =
+  document.getElementById("searchMember");
 
-let stats = {
-  members: 0,
-  savings: 0,
-  loans: 0,
-  repayments: 0,
-  withdrawals: 0,
-  outstanding: 0
-};
+const searchResults =
+  document.getElementById("searchResults");
 
-/* =========================
-   AUTH
-========================= */
+const selectedMember =
+  document.getElementById("selectedMember");
 
-onAuthStateChanged(auth, async (user) => {
+const modal =
+  document.getElementById("memberModal");
 
-  if (!user) {
-    window.location.href = "index.html";
-    return;
+const openModalBtn =
+  document.getElementById("openModalBtn");
+
+const closeModalBtn =
+  document.getElementById("closeModalBtn");
+
+/* =========================================================
+   MODAL SYSTEM
+========================================================= */
+
+function openModal() {
+
+  modal.style.display = "flex";
+
+}
+
+function closeModal() {
+
+  modal.style.display = "none";
+
+}
+
+/* OPEN BUTTON */
+if (openModalBtn) {
+
+  openModalBtn.addEventListener(
+    "click",
+    openModal
+  );
+
+}
+
+/* CLOSE BUTTON */
+if (closeModalBtn) {
+
+  closeModalBtn.addEventListener(
+    "click",
+    closeModal
+  );
+
+}
+
+/* CLOSE OUTSIDE */
+window.addEventListener("click", (e) => {
+
+  if (e.target === modal) {
+
+    closeModal();
+
   }
 
-  const userRef = doc(db, "users", user.uid);
-  const snap = await getDoc(userRef);
-
-  role = snap.data().role;
-
-  document.getElementById("roleBox").innerText =
-    role === "admin" ? "👑 Admin" : "👤 Member";
-
-  if (role === "admin") {
-    loadAdminDashboard();
-  } else {
-    loadMemberDashboard(user.uid);
-
-    document.querySelectorAll(".admin-only")
-      .forEach(el => el.style.display = "none");
-  }
 });
 
-/* =========================
-   ADMIN DASHBOARD
-========================= */
+/* =========================================================
+   SAVE MEMBER
+========================================================= */
 
-function loadAdminDashboard() {
+if (memberForm) {
 
-  /* MEMBERS */
-  onSnapshot(collection(db, "members"), snap => {
-    stats.members = snap.size;
-    document.getElementById("members").innerText = stats.members;
-  });
+  memberForm.addEventListener(
+    "submit",
+    async (e) => {
 
-  /* SAVINGS */
-  onSnapshot(collection(db, "savings"), snap => {
+      e.preventDefault();
 
-    stats.savings = 0;
+      try {
 
-    snap.forEach(d => {
-      stats.savings += Number(d.data().amount || 0);
-    });
+        /* VALUES */
+        const name =
+          document
+            .getElementById("name")
+            .value
+            .trim();
 
-    document.getElementById("savings").innerText =
-      stats.savings.toLocaleString() + " ETB";
+        const phone =
+          document
+            .getElementById("phone")
+            .value
+            .trim();
 
-    updateDashboard();
-  });
+        const nid =
+          document
+            .getElementById("nid")
+            .value
+            .trim();
 
-  /* LOANS */
-  onSnapshot(collection(db, "loans"), snap => {
+        /* VALIDATION */
+        if (phone.length !== 9) {
 
-    stats.loans = 0;
-    stats.outstanding = 0;
+          alert(
+            "Phone must be 9 digits"
+          );
 
-    snap.forEach(d => {
-      const l = d.data();
-      stats.loans += Number(l.totalAmount || 0);
-      stats.outstanding += Number(l.remaining || 0);
-    });
+          return;
 
-    document.getElementById("loans").innerText =
-      stats.loans.toLocaleString() + " ETB";
+        }
 
-    updateDashboard();
-  });
+        if (nid.length !== 16) {
 
-  /* REPAYMENTS */
-  onSnapshot(collection(db, "repayments"), snap => {
+          alert(
+            "NID must be 16 digits"
+          );
 
-    stats.repayments = 0;
+          return;
 
-    snap.forEach(d => {
-      stats.repayments += Number(d.data().amount || 0);
-    });
+        }
 
-    updateDashboard();
-  });
+        /* DUPLICATE PHONE */
+        const phoneSnap =
+          await getDocs(
 
-  /* 💸 WITHDRAWALS (NEW FIX) */
-  onSnapshot(collection(db, "withdrawals"), snap => {
+            query(
 
-    stats.withdrawals = 0;
+              collection(db, "members"),
 
-    snap.forEach(d => {
-      stats.withdrawals += Number(d.data().amount || 0);
-    });
+              where(
+                "phone",
+                "==",
+                phone
+              )
 
-    document.getElementById("withdrawals").innerText =
-      stats.withdrawals.toLocaleString() + " ETB";
+            )
 
-    updateDashboard();
-  });
-}
+          );
 
-/* =========================
-   MEMBER DASHBOARD
-========================= */
+        if (!phoneSnap.empty) {
 
-function loadMemberDashboard(uid) {
+          alert(
+            "Phone already exists"
+          );
 
-  onSnapshot(
-    query(collection(db, "savings"), where("memberId", "==", uid)),
-    snap => {
-      let total = 0;
-      snap.forEach(d => total += Number(d.data().amount || 0));
+          return;
 
-      document.getElementById("savings").innerText =
-        total.toLocaleString() + " ETB";
+        }
+
+        /* DUPLICATE NID */
+        const nidSnap =
+          await getDocs(
+
+            query(
+
+              collection(db, "members"),
+
+              where(
+                "nid",
+                "==",
+                nid
+              )
+
+            )
+
+          );
+
+        if (!nidSnap.empty) {
+
+          alert(
+            "NID already exists"
+          );
+
+          return;
+
+        }
+
+        /* CURRENT USER */
+        const user =
+          auth.currentUser;
+
+        /* SAVE TO FIRESTORE */
+        await addDoc(
+
+          collection(db, "members"),
+
+          {
+
+            name,
+            phone,
+            nid,
+
+            savings: 0,
+
+            loanTotal: 0,
+
+            loanRemaining: 0,
+
+            status: "active",
+
+            createdAt:
+              serverTimestamp(),
+
+            createdBy:
+              user
+                ? user.email
+                : "admin"
+
+          }
+
+        );
+
+        alert(
+          "✅ Member saved successfully"
+        );
+
+        /* RESET */
+        memberForm.reset();
+
+        /* CLOSE MODAL */
+        closeModal();
+
+        /* RELOAD MEMBERS */
+        loadMembers();
+
+      } catch (error) {
+
+        console.error(error);
+
+        alert(
+          "❌ Error: " +
+          error.message
+        );
+
+      }
+
     }
+
   );
+
 }
 
-/* =========================
-   PROFIT CALCULATION (FIXED)
-========================= */
+/* =========================================================
+   LOAD MEMBERS
+========================================================= */
 
-function calculateProfit() {
+async function loadMembers() {
 
-  return stats.savings
-    - stats.loans
-    - stats.withdrawals;
-}
+  if (!membersTable) return;
 
-/* =========================
-   UPDATE DASHBOARD
-========================= */
+  membersTable.innerHTML = "";
 
-function updateDashboard() {
+  try {
 
-  const profit = calculateProfit();
+    const snapshot =
+      await getDocs(
+        collection(db, "members")
+      );
 
-  document.getElementById("profit").innerText =
-    profit.toLocaleString() + " ETB";
+    snapshot.forEach((doc) => {
 
-  updateCharts();
-}
+      const m = doc.data();
 
-/* =========================
-   CHARTS
-========================= */
+      membersTable.innerHTML += `
 
-let financeChart;
-let repaymentChart;
+        <tr>
 
-function updateCharts() {
+          <td>👤</td>
 
-  if (!chartsInitialized) {
-    initCharts();
-    chartsInitialized = true;
+          <td>${m.name}</td>
+
+          <td>${m.phone}</td>
+
+          <td>${m.nid}</td>
+
+          <td>${m.savings}</td>
+
+          <td>${m.loanTotal}</td>
+
+          <td>${m.loanRemaining}</td>
+
+          <td>
+
+            <span class="badge active">
+
+              ${m.status}
+
+            </span>
+
+          </td>
+
+          <td>
+
+            ${
+              m.createdAt
+              ? new Date(
+                  m.createdAt.seconds
+                  * 1000
+                ).toLocaleDateString()
+              : "-"
+            }
+
+          </td>
+
+          <td>${m.createdBy}</td>
+
+        </tr>
+
+      `;
+
+    });
+
+  } catch (error) {
+
+    console.error(error);
+
   }
 
-  financeChart.data.datasets[0].data = [
-    stats.savings,
-    stats.loans,
-    stats.repayments
-  ];
-
-  financeChart.update();
-
-  repaymentChart.data.datasets[0].data = [
-    stats.loans,
-    stats.repayments,
-    stats.outstanding
-  ];
-
-  repaymentChart.update();
 }
 
-/* =========================
-   INIT CHARTS
-========================= */
+loadMembers();
 
-function initCharts() {
+/* =========================================================
+   SEARCH MEMBER
+========================================================= */
 
-  financeChart = new Chart(
-    document.getElementById("dashboardChart"),
-    {
-      type: "bar",
-      data: {
-        labels: ["Savings", "Loans", "Repayments"],
-        datasets: [{ data: [0, 0, 0] }]
-      }
+if (searchInput) {
+
+  searchInput.addEventListener(
+    "input",
+    async () => {
+
+      const value =
+        searchInput.value
+          .toLowerCase();
+
+      searchResults.innerHTML = "";
+
+      if (!value) return;
+
+      const snapshot =
+        await getDocs(
+          collection(db, "members")
+        );
+
+      snapshot.forEach((doc) => {
+
+        const m = doc.data();
+
+        if (
+
+          m.name
+            .toLowerCase()
+            .includes(value)
+
+          ||
+
+          m.phone
+            .includes(value)
+
+          ||
+
+          m.nid
+            .includes(value)
+
+        ) {
+
+          const div =
+            document.createElement("div");
+
+          div.className =
+            "search-item";
+
+          div.innerHTML = `
+
+            <strong>
+              ${m.name}
+            </strong>
+
+            <small>
+              ${m.phone}
+            </small>
+
+          `;
+
+          div.onclick = () => {
+
+            selectedMember.innerHTML = `
+
+              👤 ${m.name}
+              <br>
+
+              📱 ${m.phone}
+              <br>
+
+              🆔 ${m.nid}
+              <br>
+
+              💰 Savings:
+              ${m.savings}
+
+            `;
+
+            searchResults.innerHTML = "";
+
+          };
+
+          searchResults.appendChild(div);
+
+        }
+
+      });
+
     }
+
   );
 
-  repaymentChart = new Chart(
-    document.getElementById("repaymentChart"),
-    {
-      type: "doughnut",
-      data: {
-        labels: ["Loans", "Repayments", "Outstanding"],
-        datasets: [{ data: [0, 0, 0] }]
-      }
-    }
-  );
 }
-
-/* =========================
-   LOGOUT
-========================= */
-
-window.logoutUser = async function () {
-  await signOut(auth);
-  localStorage.clear();
-  window.location.href = "index.html";
-};

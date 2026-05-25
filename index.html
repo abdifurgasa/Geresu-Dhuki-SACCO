@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8">
-  <title data-i18n="dashboard">SACCO Login</title>
+  <title data-i18n="dashboard"> Geresu Dhuki SACCO Login</title>
 
   <style>
     /* =========================
@@ -19,26 +19,22 @@
       /* Background image less zoom */
       background: url("assets/images/background.jpg") no-repeat center center;
       background-size: contain;
-
-      display: flex;
       justify-content: center;
       align-items: center;
-
       position: relative;
       overflow: hidden;
     }
 
-    /* Dark overlay */
     body::before {
       content: "";
       position: absolute;
       width: 100%;
       height: 100%;
-      background: rgba(0, 0, 0, 0.55);
+      background: rgba(0,0,0,0.6);
     }
 
     /* =========================
-       LANGUAGE SELECT
+       LANGUAGE SELECT (ONE PLACE)
     ========================= */
     .lang-select {
       position: absolute;
@@ -48,13 +44,10 @@
     }
 
     .lang-select select {
-      padding: 8px 12px;
-      border-radius: 8px;
+      padding: 6px 10px;
+      border-radius: 6px;
       border: none;
       outline: none;
-
-      font-family: "Times New Roman", Times, serif;
-      font-size: 15px;
     }
 
     /* =========================
@@ -63,114 +56,64 @@
     .login-box {
       position: relative;
       z-index: 2;
-
       width: 360px;
-      padding: 35px;
-      border-radius: 18px;
+      padding: 30px;
+      border-radius: 14px;
 
-      background: rgba(255, 255, 255, 0.12);
-      backdrop-filter: blur(10px);
-
-      border: 1px solid rgba(255, 255, 255, 0.25);
+      background: rgba(255,255,255,0.1);
+      backdrop-filter: blur(15px);
+      border: 1px solid rgba(255,255,255,0.2);
 
       text-align: center;
-
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
-
       animation: fadeIn 0.8s ease;
     }
 
     @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(25px);
-      }
-
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
-    h2 {
+    h2, p {
       color: white;
-      margin-bottom: 10px;
-      font-size: 34px;
-      letter-spacing: 1px;
-    }
-
-    p {
-      color: #f1f1f1;
-      margin-bottom: 20px;
-      font-size: 18px;
     }
 
     input {
       width: 100%;
-      padding: 13px;
-      margin: 10px 0;
-
+      padding: 12px;
+      margin: 8px 0;
       border: none;
-      border-radius: 10px;
+      border-radius: 8px;
       outline: none;
-
-      font-size: 16px;
-      font-family: "Times New Roman", Times, serif;
-
-      background: rgba(255, 255, 255, 0.92);
-      box-sizing: border-box;
     }
 
-    input::placeholder {
-      color: #555;
-    }
-
-    /* LOGIN BUTTON */
+    /* 🔵 LOGIN BUTTON */
     button {
       width: 100%;
-      padding: 13px;
-      margin-top: 12px;
+      padding: 12px;
+      margin-top: 10px;
 
-      background: #1d4ed8;
+      background: #2563eb;
       color: white;
 
       border: none;
-      border-radius: 10px;
-
+      border-radius: 8px;
       cursor: pointer;
 
-      font-size: 18px;
       font-weight: bold;
-
-      font-family: "Times New Roman", Times, serif;
-
       transition: 0.3s;
     }
 
     button:hover {
-      background: #163fb3;
+      background: #1d4ed8;
       transform: translateY(-2px);
-
-      box-shadow: 0 8px 20px rgba(29, 78, 216, 0.45);
-    }
-
-    /* Responsive */
-    @media (max-width: 500px) {
-      .login-box {
-        width: 85%;
-        padding: 25px;
-      }
-
-      h2 {
-        font-size: 28px;
-      }
+      box-shadow: 0 8px 20px rgba(37, 99, 235, 0.4);
     }
   </style>
 </head>
 
 <body>
 
-  <!-- LANGUAGE SELECTOR -->
+  <!-- 🌍 LANGUAGE SELECTOR (ONLY ONE PLACE) -->
   <div class="lang-select">
     <select id="langSelect" onchange="changeLang(this.value)">
       <option value="EN">English</option>
@@ -182,9 +125,9 @@
   <!-- LOGIN BOX -->
   <div class="login-box">
 
-    <h2 data-i18n="dashboard">SACCO LOGIN</h2>
+    <h2 data-i18n="dashboard"> Geresu Dhuki SACCO LOGIN</h2>
 
-    <p data-i18n="welcome">Welcome Back</p>
+    <p data-i18n="welcome">Welcome back</p>
 
     <input type="email" placeholder="Email">
     <input type="password" placeholder="Password">
@@ -193,35 +136,30 @@
 
   </div>
 
-  <!-- FIREBASE LOGIN -->
+  <!-- =========================
+       FIREBASE LOGIN
+  ========================== -->
   <script type="module">
     import { auth } from "./js/firebase.js";
-
     import {
       signInWithEmailAndPassword
     } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
     window.login = function () {
-
-      const email =
-        document.querySelector("input[type='email']").value;
-
-      const password =
-        document.querySelector("input[type='password']").value;
+      const email = document.querySelector("input[type='email']").value;
+      const password = document.querySelector("input[type='password']").value;
 
       signInWithEmailAndPassword(auth, email, password)
-
         .then(() => {
           window.location.href = "dashboard.html";
         })
-
         .catch(err => alert(err.message));
     };
   </script>
 
-  <!-- i18n -->
-  <script src="js/i18n.js"></script>
-
+  <!-- =========================
+       GLOBAL i18n.js (USED HERE)
+  ========================== -->
+<script src="js/i18n.js"></script>
 </body>
-
 </html>

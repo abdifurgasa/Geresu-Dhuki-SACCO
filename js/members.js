@@ -24,15 +24,12 @@ const openModalBtn = document.getElementById("openModalBtn");
 const closeModalBtn = document.getElementById("closeModalBtn");
 
 /* PROFILE MODAL */
-
 const profileModal = document.getElementById("profileModal");
-
 const closeProfileBtn = document.getElementById("closeProfileBtn");
-
 const historyTable = document.getElementById("historyTable");
 
 /* =========================================================
-   OPEN/CLOSE MODAL
+   OPEN / CLOSE MODAL
 ========================================================= */
 
 openModalBtn?.addEventListener("click", () => {
@@ -68,7 +65,6 @@ memberForm?.addEventListener("submit", async (e) => {
       nid,
 
       status: "Active",
-
       createdAt: serverTimestamp(),
 
       createdBy:
@@ -81,17 +77,12 @@ memberForm?.addEventListener("submit", async (e) => {
     alert("Member Added Successfully");
 
     memberForm.reset();
-
     modal.style.display = "none";
 
     loadMembers();
 
   } catch (err) {
-
-    console.error(err);
-
     alert(err.message);
-
   }
 
 });
@@ -104,166 +95,74 @@ async function loadMembers() {
 
   membersTable.innerHTML = "";
 
-  const membersSnap = await getDocs(collection(db, "members"));
+  const snap = await getDocs(collection(db, "members"));
 
   const members = [];
 
-  for (const docSnap of membersSnap.docs) {
+  for (const docSnap of snap.docs) {
 
-    const member = docSnap.data();
+    const m = docSnap.data();
+    const id = docSnap.id;
 
-    const memberId = docSnap.id;
-
-    /* =========================
-       TOTAL SAVINGS
-    ========================= */
-
-    const savingsSnap = await getDocs(
-      query(
-        collection(db, "savings"),
-        where("memberId", "==", memberId)
-      )
-    );
-
+    /* SAVINGS */
+    const sSnap = await getDocs(query(collection(db, "savings"), where("memberId", "==", id)));
     let totalSavings = 0;
+    sSnap.forEach(d => totalSavings += Number(d.data().amount || 0));
 
-    savingsSnap.forEach(doc => {
-      totalSavings += Number(doc.data().amount || 0);
-    });
-
-    /* =========================
-       TOTAL LOANS
-    ========================= */
-
-    const loansSnap = await getDocs(
-      query(
-        collection(db, "loans"),
-        where("memberId", "==", memberId)
-      )
-    );
-
+    /* LOANS */
+    const lSnap = await getDocs(query(collection(db, "loans"), where("memberId", "==", id)));
     let totalLoans = 0;
+    lSnap.forEach(d => totalLoans += Number(d.data().amount || 0));
 
-    loansSnap.forEach(doc => {
-      totalLoans += Number(doc.data().amount || 0);
-    });
-
-    /* =========================
-       TOTAL REPAYMENTS
-    ========================= */
-
-    const repaymentSnap = await getDocs(
-      query(
-        collection(db, "repayments"),
-        where("memberId", "==", memberId)
-      )
-    );
-
-    let totalRepayment = 0;
-
-    repaymentSnap.forEach(doc => {
-      totalRepayment += Number(doc.data().amount || 0);
-    });
-
-    /* =========================
-       REMAINING LOAN
-    ========================= */
-
-    const remainingLoan = totalLoans - totalRepayment;
+    /* REPAYMENTS */
+    const rSnap = await getDocs(query(collection(db, "repayments"), where("memberId", "==", id)));
+    let totalRepayments = 0;
+    rSnap.forEach(d => totalRepayments += Number(d.data().amount || 0));
 
     members.push({
-
-      id: memberId,
-
-      ...member,
-
+      id,
+      ...m,
       totalSavings,
       totalLoans,
-      remainingLoan
-
+      remainingLoan: totalLoans - totalRepayments
     });
-
   }
 
-  /* =========================================================
-     SORT LATEST FIRST
-  ========================================================= */
-
-  members.sort((a, b) => {
-
-    const aTime = a.createdAt?.seconds || 0;
-    const bTime = b.createdAt?.seconds || 0;
-
-    return bTime - aTime;
-
-  });
-
-  /* =========================================================
-     DISPLAY MEMBERS
-  ========================================================= */
+  /* SORT LATEST */
+  members.sort((a, b) =>
+    (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)
+  );
 
   members.forEach(member => {
 
     const row = document.createElement("tr");
 
     row.innerHTML = `
-
-      <td>
-        <strong>${member.name}</strong>
-      </td>
-
+      <td><strong>${member.name}</strong></td>
       <td>${member.phone}</td>
-
       <td>${member.nid}</td>
-
-      <td>
-        ${member.totalSavings.toLocaleString()} ETB
-      </td>
-
-      <td>
-        ${member.totalLoans.toLocaleString()} ETB
-      </td>
-
-      <td>
-        ${member.remainingLoan.toLocaleString()} ETB
-      </td>
-
-      <td>
-        <span class="status active">
-          ${member.status}
-        </span>
-      </td>
-
-      <td>
-        ${
-          member.createdAt
-            ? new Date(
-                member.createdAt.seconds * 1000
-              ).toLocaleString()
-            : "-"
-        }
-      </td>
-
-      <td>
-        ${member.createdBy || member.name}
-      </td>
-
+      <td>${member.totalSavings} ETB</td>
+      <td>${member.totalLoans} ETB</td>
+      <td>${member.remainingLoan} ETB</td>
+      <td>${member.status}</td>
+      <td>${
+        member.createdAt
+          ? new Date(member.createdAt.seconds * 1000).toLocaleString()
+          : "-"
+      }</td>
+      <td>${member.createdBy || member.name}</td>
     `;
 
     row.style.cursor = "pointer";
 
-    row.addEventListener("click", () => {
-      openMemberProfile(member);
-    });
+    row.onclick = () => openMemberProfile(member);
 
     membersTable.appendChild(row);
-
   });
-
 }
 
 /* =========================================================
-   MEMBER PROFILE
+   PROFILE VIEW (FIXED - WORKING VERSION)
 ========================================================= */
 
 async function openMemberProfile(member) {
@@ -275,263 +174,130 @@ async function openMemberProfile(member) {
 
   historyTable.innerHTML = "";
 
-  /* =========================================================
-     TOTALS
-  ========================================================= */
-
   let totalSavings = 0;
   let totalLoans = 0;
   let totalRepayments = 0;
   let totalWithdrawals = 0;
 
-  const allTransactions = [];
+  const all = [];
 
-  /* =========================================================
-     SAVINGS
-  ========================================================= */
+  /* ================= SAVINGS ================= */
+  const sSnap = await getDocs(query(collection(db, "savings"), where("memberId", "==", member.id)));
+  sSnap.forEach(d => {
+    const x = d.data();
+    totalSavings += Number(x.amount || 0);
 
-  const savingsSnap = await getDocs(
-    query(
-      collection(db, "savings"),
-      where("memberId", "==", member.id)
-    )
-  );
-
-  savingsSnap.forEach(docSnap => {
-
-    const d = docSnap.data();
-
-    totalSavings += Number(d.amount || 0);
-
-    allTransactions.push({
-
+    all.push({
       type: "Savings",
-
-      amount: d.amount || 0,
-
-      description: "Saving Deposit",
-
-      createdAt: d.createdAt || null,
-
-      createdBy:
-        d.createdBy ||
-        member.name,
-
-      action: "Deposit"
-
+      amount: x.amount || 0,
+      action: "Deposit",
+      desc: "Saving Deposit",
+      time: x.createdAt,
+      by: x.createdBy || member.name
     });
-
   });
 
-  /* =========================================================
-     LOANS
-  ========================================================= */
+  /* ================= LOANS ================= */
+  const lSnap = await getDocs(query(collection(db, "loans"), where("memberId", "==", member.id)));
+  lSnap.forEach(d => {
+    const x = d.data();
+    totalLoans += Number(x.amount || 0);
 
-  const loansSnap = await getDocs(
-    query(
-      collection(db, "loans"),
-      where("memberId", "==", member.id)
-    )
-  );
-
-  loansSnap.forEach(docSnap => {
-
-    const d = docSnap.data();
-
-    totalLoans += Number(d.amount || 0);
-
-    allTransactions.push({
-
+    all.push({
       type: "Loan",
-
-      amount: d.amount || 0,
-
-      description: "Loan Created",
-
-      createdAt: d.createdAt || null,
-
-      createdBy:
-        d.createdBy ||
-        member.name,
-
-      action: "Loan"
-
+      amount: x.amount || 0,
+      action: "Loan",
+      desc: "Loan Created",
+      time: x.createdAt,
+      by: x.createdBy || member.name
     });
-
   });
 
-  /* =========================================================
-     REPAYMENTS
-  ========================================================= */
+  /* ================= REPAYMENTS ================= */
+  const rSnap = await getDocs(query(collection(db, "repayments"), where("memberId", "==", member.id)));
+  rSnap.forEach(d => {
+    const x = d.data();
+    totalRepayments += Number(x.amount || 0);
 
-  const repaymentSnap = await getDocs(
-    query(
-      collection(db, "repayments"),
-      where("memberId", "==", member.id)
-    )
-  );
-
-  repaymentSnap.forEach(docSnap => {
-
-    const d = docSnap.data();
-
-    totalRepayments += Number(d.amount || 0);
-
-    allTransactions.push({
-
+    all.push({
       type: "Repayment",
-
-      amount: d.amount || 0,
-
-      description: "Loan Repayment",
-
-      createdAt: d.createdAt || null,
-
-      createdBy:
-        d.createdBy ||
-        member.name,
-
-      action: "Repayment"
-
+      amount: x.amount || 0,
+      action: "Repay",
+      desc: "Loan Repayment",
+      time: x.createdAt,
+      by: x.createdBy || member.name
     });
-
   });
 
-  /* =========================================================
-     WITHDRAWALS
-  ========================================================= */
+  /* ================= WITHDRAWALS ================= */
+  const wSnap = await getDocs(query(collection(db, "withdrawals"), where("memberId", "==", member.id)));
+  wSnap.forEach(d => {
+    const x = d.data();
+    totalWithdrawals += Number(x.amount || 0);
 
-  const withdrawalSnap = await getDocs(
-    query(
-      collection(db, "withdrawals"),
-      where("memberId", "==", member.id)
-    )
-  );
-
-  withdrawalSnap.forEach(docSnap => {
-
-    const d = docSnap.data();
-
-    totalWithdrawals += Number(d.amount || 0);
-
-    allTransactions.push({
-
+    all.push({
       type: "Withdrawal",
-
-      amount: d.amount || 0,
-
-      description: "Money Withdrawal",
-
-      createdAt: d.createdAt || null,
-
-      createdBy:
-        d.createdBy ||
-        member.name,
-
-      action: "Withdrawal"
-
+      amount: x.amount || 0,
+      action: "Withdraw",
+      desc: "Money Withdrawal",
+      time: x.createdAt,
+      by: x.createdBy || member.name
     });
-
   });
 
-  /* =========================================================
-     DISPLAY TOTALS
-  ========================================================= */
+  /* ================= TOP SUMMARY ================= */
 
   document.getElementById("profileSavings").innerHTML =
-    `${totalSavings.toLocaleString()} ETB`;
+    totalSavings + " ETB";
 
   document.getElementById("profileLoans").innerHTML =
-    `${totalLoans.toLocaleString()} ETB`;
+    totalLoans + " ETB";
 
   document.getElementById("profileRepayments").innerHTML =
-    `${totalRepayments.toLocaleString()} ETB`;
+    totalRepayments + " ETB";
 
   document.getElementById("profileWithdrawals").innerHTML =
-    `${totalWithdrawals.toLocaleString()} ETB`;
+    totalWithdrawals + " ETB";
 
-  /* =========================================================
-     SORT BY LATEST FIRST
-  ========================================================= */
+  /* ================= SORT LATEST ================= */
 
-  allTransactions.sort((a, b) => {
+  all.sort((a, b) =>
+    (b.time?.seconds || 0) - (a.time?.seconds || 0)
+  );
 
-    const aTime = a.createdAt?.seconds || 0;
-    const bTime = b.createdAt?.seconds || 0;
+  /* ================= EMPTY CHECK ================= */
 
-    return bTime - aTime;
-
-  });
-
-  /* =========================================================
-     EMPTY STATE
-  ========================================================= */
-
-  if (allTransactions.length === 0) {
-
+  if (all.length === 0) {
     historyTable.innerHTML = `
-
       <tr>
-        <td colspan="6" style="
-          text-align:center;
-          padding:30px;
-          font-weight:bold;
-          color:gray;
-        ">
-          No Transactions Found
+        <td colspan="5" style="text-align:center;padding:20px;">
+          No Transactions Yet
         </td>
       </tr>
-
     `;
-
     return;
-
   }
 
-  /* =========================================================
-     DISPLAY HISTORY
-  ========================================================= */
+  /* ================= RENDER ================= */
 
-  allTransactions.forEach(item => {
+  all.forEach(t => {
 
     const row = document.createElement("tr");
 
     row.innerHTML = `
-
-      <td class="type-${item.type.toLowerCase()}">
-        ${item.type}
-      </td>
-
-      <td>
-        ${Number(item.amount).toLocaleString()} ETB
-      </td>
-
-      <td>
-        ${item.description}
-      </td>
-
-      <td>
-        ${item.action}
-      </td>
-
-      <td>
-        ${
-          item.createdAt
-            ? new Date(
-                item.createdAt.seconds * 1000
-              ).toLocaleString()
-            : "-"
-        }
-      </td>
-
-      <td>
-        ${item.createdBy}
-      </td>
-
+      <td>${t.type}</td>
+      <td>${t.amount} ETB</td>
+      <td>${t.action}</td>
+      <td>${t.desc}</td>
+      <td>${
+        t.time
+          ? new Date(t.time.seconds * 1000).toLocaleString()
+          : "-"
+      }</td>
+      <td>${t.by}</td>
     `;
 
     historyTable.appendChild(row);
-
   });
 
 }

@@ -1,11 +1,13 @@
 import { db, auth } from "./firebase.js";
+
 import {
   collection,
   addDoc,
   getDocs,
   query,
   where,
-  serverTimestamp
+  serverTimestamp,
+  orderBy
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 /* =========================
@@ -61,11 +63,12 @@ searchInput?.addEventListener("input", async () => {
     const m = doc.data();
 
     if (
-      m.name.toLowerCase().includes(val) ||
-      m.phone.includes(val)
+      m.name?.toLowerCase().includes(val) ||
+      m.phone?.includes(val)
     ) {
 
       const div = document.createElement("div");
+
       div.className = "search-item";
 
       div.innerHTML = `
@@ -119,23 +122,38 @@ savingsForm?.addEventListener("submit", async (e) => {
       return;
     }
 
-    /* GET PREVIOUS SAVINGS */
-    const q = query(
+    /* =========================
+       GET PREVIOUS SAVINGS
+    ========================= */
+
+    const savingsQuery = query(
       collection(db, "savings"),
       where("memberId", "==", selected.id)
     );
 
-    const snap = await getDocs(q);
+    const savingsSnap = await getDocs(savingsQuery);
 
     let previousSaving = 0;
 
-    snap.forEach(doc => {
+    savingsSnap.forEach(doc => {
       previousSaving += Number(doc.data().amount || 0);
     });
 
     const totalSaving = previousSaving + amount;
 
-    /* SAVE */
+    /* =========================
+       CURRENT USER NAME
+    ========================= */
+
+    const currentUserName =
+      localStorage.getItem("userName") ||
+      auth.currentUser?.displayName ||
+      "Admin";
+
+    /* =========================
+       SAVE TO FIREBASE
+    ========================= */
+
     await addDoc(collection(db, "savings"), {
 
       memberId: selected.id,
@@ -143,16 +161,17 @@ savingsForm?.addEventListener("submit", async (e) => {
       memberPhone: selected.phone,
 
       amount,
-
       previousSaving,
       totalSaving,
 
       createdAt: serverTimestamp(),
-      createdBy: auth.currentUser?.email || "admin"
+
+      // ✅ SAVE NAME NOT EMAIL
+      createdBy: currentUserName
 
     });
 
-    alert("Saved successfully");
+    alert("Savings added successfully");
 
     amountInput.value = "";
 
@@ -177,21 +196,48 @@ async function loadSavings() {
 
   savingsTable.innerHTML = "";
 
-  const snap = await getDocs(collection(db, "savings"));
+  /* =========================
+     ORDER BY LATEST TIME
+  ========================= */
+
+  const q = query(
+    collection(db, "savings"),
+    orderBy("createdAt", "desc")
+  );
+
+  const snap = await getDocs(q);
 
   snap.forEach(doc => {
 
     const d = doc.data();
 
+    const createdDate = d.createdAt
+      ? new Date(d.createdAt.seconds * 1000).toLocaleString()
+      : "-";
+
     const row = `
       <tr>
-        <td>${d.memberName}</td>
-        <td>${d.memberPhone}</td>
-        <td>${d.amount} ETB</td>
-        <td>${d.previousSaving} ETB</td>
-        <td>${d.totalSaving} ETB</td>
-        <td>${d.createdAt ? new Date(d.createdAt.seconds * 1000).toLocaleDateString() : "-"}</td>
-        <td>${d.createdBy}</td>
+
+        <td>${d.memberName || "-"}</td>
+
+        <td>${d.memberPhone || "-"}</td>
+
+        <td>
+          ${Number(d.amount || 0).toLocaleString()} ETB
+        </td>
+
+        <td>
+          ${Number(d.previousSaving || 0).toLocaleString()} ETB
+        </td>
+
+        <td>
+          ${Number(d.totalSaving || 0).toLocaleString()} ETB
+        </td>
+
+        <td>${createdDate}</td>
+
+        <td>${d.createdBy || "Admin"}</td>
+
       </tr>
     `;
 
@@ -200,5 +246,9 @@ async function loadSavings() {
   });
 
 }
+
+/* =========================
+   START
+========================= */
 
 loadSavings();

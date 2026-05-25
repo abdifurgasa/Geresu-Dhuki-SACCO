@@ -1,335 +1,185 @@
-import { db, auth } from "./firebase.js";
+import { db } from "./firebase.js";
 
 import {
   collection,
-  addDoc,
   getDocs,
   query,
-  where,
-  serverTimestamp
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  orderBy,
+  limit
+}
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 /* =========================================================
-   ELEMENTS
+   CARD ELEMENTS
 ========================================================= */
 
-const memberForm =
-  document.getElementById("memberForm");
+const totalMembers =
+  document.getElementById("totalMembers");
 
-const membersTable =
-  document.getElementById("membersTable");
+const totalSavings =
+  document.getElementById("totalSavings");
 
-const searchInput =
-  document.getElementById("searchMember");
+const totalLoans =
+  document.getElementById("totalLoans");
 
-const searchResults =
-  document.getElementById("searchResults");
+const totalRepayments =
+  document.getElementById("totalRepayments");
 
-const selectedMember =
-  document.getElementById("selectedMember");
+const totalWithdrawals =
+  document.getElementById("totalWithdrawals");
 
-const modal =
-  document.getElementById("memberModal");
-
-const openModalBtn =
-  document.getElementById("openModalBtn");
-
-const closeModalBtn =
-  document.getElementById("closeModalBtn");
+const activeLoans =
+  document.getElementById("activeLoans");
 
 /* =========================================================
-   MODAL SYSTEM
+   LOAD DASHBOARD
 ========================================================= */
 
-function openModal() {
-
-  modal.style.display = "flex";
-
-}
-
-function closeModal() {
-
-  modal.style.display = "none";
-
-}
-
-/* OPEN BUTTON */
-if (openModalBtn) {
-
-  openModalBtn.addEventListener(
-    "click",
-    openModal
-  );
-
-}
-
-/* CLOSE BUTTON */
-if (closeModalBtn) {
-
-  closeModalBtn.addEventListener(
-    "click",
-    closeModal
-  );
-
-}
-
-/* CLOSE OUTSIDE */
-window.addEventListener("click", (e) => {
-
-  if (e.target === modal) {
-
-    closeModal();
-
-  }
-
-});
-
-/* =========================================================
-   SAVE MEMBER
-========================================================= */
-
-if (memberForm) {
-
-  memberForm.addEventListener(
-    "submit",
-    async (e) => {
-
-      e.preventDefault();
-
-      try {
-
-        /* VALUES */
-        const name =
-          document
-            .getElementById("name")
-            .value
-            .trim();
-
-        const phone =
-          document
-            .getElementById("phone")
-            .value
-            .trim();
-
-        const nid =
-          document
-            .getElementById("nid")
-            .value
-            .trim();
-
-        /* VALIDATION */
-        if (phone.length !== 9) {
-
-          alert(
-            "Phone must be 9 digits"
-          );
-
-          return;
-
-        }
-
-        if (nid.length !== 16) {
-
-          alert(
-            "NID must be 16 digits"
-          );
-
-          return;
-
-        }
-
-        /* DUPLICATE PHONE */
-        const phoneSnap =
-          await getDocs(
-
-            query(
-
-              collection(db, "members"),
-
-              where(
-                "phone",
-                "==",
-                phone
-              )
-
-            )
-
-          );
-
-        if (!phoneSnap.empty) {
-
-          alert(
-            "Phone already exists"
-          );
-
-          return;
-
-        }
-
-        /* DUPLICATE NID */
-        const nidSnap =
-          await getDocs(
-
-            query(
-
-              collection(db, "members"),
-
-              where(
-                "nid",
-                "==",
-                nid
-              )
-
-            )
-
-          );
-
-        if (!nidSnap.empty) {
-
-          alert(
-            "NID already exists"
-          );
-
-          return;
-
-        }
-
-        /* CURRENT USER */
-        const user =
-          auth.currentUser;
-
-        /* SAVE TO FIRESTORE */
-        await addDoc(
-
-          collection(db, "members"),
-
-          {
-
-            name,
-            phone,
-            nid,
-
-            savings: 0,
-
-            loanTotal: 0,
-
-            loanRemaining: 0,
-
-            status: "active",
-
-            createdAt:
-              serverTimestamp(),
-
-            createdBy:
-              user
-                ? user.email
-                : "admin"
-
-          }
-
-        );
-
-        alert(
-          "✅ Member saved successfully"
-        );
-
-        /* RESET */
-        memberForm.reset();
-
-        /* CLOSE MODAL */
-        closeModal();
-
-        /* RELOAD MEMBERS */
-        loadMembers();
-
-      } catch (error) {
-
-        console.error(error);
-
-        alert(
-          "❌ Error: " +
-          error.message
-        );
-
-      }
-
-    }
-
-  );
-
-}
-
-/* =========================================================
-   LOAD MEMBERS
-========================================================= */
-
-async function loadMembers() {
-
-  if (!membersTable) return;
-
-  membersTable.innerHTML = "";
+async function loadDashboard() {
 
   try {
 
-    const snapshot =
+    /* =====================================================
+       FETCH ALL COLLECTIONS
+    ===================================================== */
+
+    const membersSnap =
       await getDocs(
         collection(db, "members")
       );
 
-    snapshot.forEach((doc) => {
+    const savingsSnap =
+      await getDocs(
+        collection(db, "savings")
+      );
 
-      const m = doc.data();
+    const loansSnap =
+      await getDocs(
+        collection(db, "loans")
+      );
 
-      membersTable.innerHTML += `
+    const repaymentsSnap =
+      await getDocs(
+        collection(db, "repayments")
+      );
 
-        <tr>
+    const withdrawalsSnap =
+      await getDocs(
+        collection(db, "withdrawals")
+      );
 
-          <td>👤</td>
+    /* =====================================================
+       MEMBERS
+    ===================================================== */
 
-          <td>${m.name}</td>
+    totalMembers.textContent =
+      membersSnap.size;
 
-          <td>${m.phone}</td>
+    /* =====================================================
+       SAVINGS TOTAL
+    ===================================================== */
 
-          <td>${m.nid}</td>
+    let savingsTotal = 0;
 
-          <td>${m.savings}</td>
+    savingsSnap.forEach((doc) => {
 
-          <td>${m.loanTotal}</td>
+      const data = doc.data();
 
-          <td>${m.loanRemaining}</td>
-
-          <td>
-
-            <span class="badge active">
-
-              ${m.status}
-
-            </span>
-
-          </td>
-
-          <td>
-
-            ${
-              m.createdAt
-              ? new Date(
-                  m.createdAt.seconds
-                  * 1000
-                ).toLocaleDateString()
-              : "-"
-            }
-
-          </td>
-
-          <td>${m.createdBy}</td>
-
-        </tr>
-
-      `;
+      savingsTotal +=
+        Number(data.amount || 0);
 
     });
 
-  } catch (error) {
+    totalSavings.textContent =
+      savingsTotal.toLocaleString();
+
+    /* =====================================================
+       LOANS TOTAL
+    ===================================================== */
+
+    let loansTotal = 0;
+
+    let activeLoanCount = 0;
+
+    loansSnap.forEach((doc) => {
+
+      const data = doc.data();
+
+      loansTotal +=
+        Number(data.amount || 0);
+
+      if (
+        data.status === "active"
+      ) {
+
+        activeLoanCount++;
+
+      }
+
+    });
+
+    totalLoans.textContent =
+      loansTotal.toLocaleString();
+
+    activeLoans.textContent =
+      activeLoanCount;
+
+    /* =====================================================
+       REPAYMENTS TOTAL
+    ===================================================== */
+
+    let repaymentTotal = 0;
+
+    repaymentsSnap.forEach((doc) => {
+
+      const data = doc.data();
+
+      repaymentTotal +=
+        Number(data.amount || 0);
+
+    });
+
+    totalRepayments.textContent =
+      repaymentTotal.toLocaleString();
+
+    /* =====================================================
+       WITHDRAWALS TOTAL
+    ===================================================== */
+
+    let withdrawalTotal = 0;
+
+    withdrawalsSnap.forEach((doc) => {
+
+      const data = doc.data();
+
+      withdrawalTotal +=
+        Number(data.amount || 0);
+
+    });
+
+    totalWithdrawals.textContent =
+      withdrawalTotal.toLocaleString();
+
+    /* =====================================================
+       CHARTS
+    ===================================================== */
+
+    loadCharts(
+      savingsTotal,
+      loansTotal,
+      repaymentTotal,
+      withdrawalTotal
+    );
+
+    /* =====================================================
+       RECENT ACTIVITIES
+    ===================================================== */
+
+    loadRecentActivities();
+
+  }
+
+  catch (error) {
 
     console.error(error);
 
@@ -337,101 +187,218 @@ async function loadMembers() {
 
 }
 
-loadMembers();
-
 /* =========================================================
-   SEARCH MEMBER
+   LOAD CHARTS
 ========================================================= */
 
-if (searchInput) {
+function loadCharts(
+  savings,
+  loans,
+  repayments,
+  withdrawals
+) {
 
-  searchInput.addEventListener(
-    "input",
-    async () => {
+  /* BAR CHART */
 
-      const value =
-        searchInput.value
-          .toLowerCase();
+  const barCtx =
+    document
+    .getElementById("financeChart");
 
-      searchResults.innerHTML = "";
+  if (barCtx) {
 
-      if (!value) return;
+    new Chart(barCtx, {
 
-      const snapshot =
-        await getDocs(
-          collection(db, "members")
-        );
+      type: "bar",
 
-      snapshot.forEach((doc) => {
+      data: {
 
-        const m = doc.data();
+        labels: [
+          "Savings",
+          "Loans",
+          "Repayments",
+          "Withdrawals"
+        ],
 
-        if (
+        datasets: [{
 
-          m.name
-            .toLowerCase()
-            .includes(value)
+          label: "Amount",
 
-          ||
+          data: [
+            savings,
+            loans,
+            repayments,
+            withdrawals
+          ],
 
-          m.phone
-            .includes(value)
+          backgroundColor: [
 
-          ||
+            "#0ea5e9",
+            "#22c55e",
+            "#f59e0b",
+            "#ef4444"
 
-          m.nid
-            .includes(value)
+          ],
 
-        ) {
+          borderRadius: 10
 
-          const div =
-            document.createElement("div");
+        }]
 
-          div.className =
-            "search-item";
+      },
 
-          div.innerHTML = `
+      options: {
 
-            <strong>
-              ${m.name}
-            </strong>
+        responsive: true,
 
-            <small>
-              ${m.phone}
-            </small>
+        plugins: {
 
-          `;
-
-          div.onclick = () => {
-
-            selectedMember.innerHTML = `
-
-              👤 ${m.name}
-              <br>
-
-              📱 ${m.phone}
-              <br>
-
-              🆔 ${m.nid}
-              <br>
-
-              💰 Savings:
-              ${m.savings}
-
-            `;
-
-            searchResults.innerHTML = "";
-
-          };
-
-          searchResults.appendChild(div);
+          legend: {
+            display: false
+          }
 
         }
 
-      });
+      }
 
-    }
+    });
 
-  );
+  }
+
+  /* PIE CHART */
+
+  const pieCtx =
+    document
+    .getElementById("summaryChart");
+
+  if (pieCtx) {
+
+    new Chart(pieCtx, {
+
+      type: "doughnut",
+
+      data: {
+
+        labels: [
+          "Savings",
+          "Loans",
+          "Repayments",
+          "Withdrawals"
+        ],
+
+        datasets: [{
+
+          data: [
+            savings,
+            loans,
+            repayments,
+            withdrawals
+          ],
+
+          backgroundColor: [
+
+            "#0ea5e9",
+            "#22c55e",
+            "#f59e0b",
+            "#ef4444"
+
+          ]
+
+        }]
+
+      },
+
+      options: {
+
+        responsive: true
+
+      }
+
+    });
+
+  }
 
 }
+
+/* =========================================================
+   RECENT ACTIVITIES
+========================================================= */
+
+async function loadRecentActivities() {
+
+  const activityBox =
+    document.getElementById(
+      "recentActivities"
+    );
+
+  if (!activityBox) return;
+
+  activityBox.innerHTML = "";
+
+  try {
+
+    const q =
+      query(
+
+        collection(db, "members"),
+
+        orderBy(
+          "createdAt",
+          "desc"
+        ),
+
+        limit(5)
+
+      );
+
+    const snapshot =
+      await getDocs(q);
+
+    snapshot.forEach((doc) => {
+
+      const data = doc.data();
+
+      activityBox.innerHTML += `
+
+        <div class="activity-item">
+
+          <div>
+
+            👤 New Member:
+            <strong>
+              ${data.name}
+            </strong>
+
+          </div>
+
+          <small>
+
+            ${
+              data.createdAt
+              ? new Date(
+                  data.createdAt.seconds * 1000
+                ).toLocaleDateString()
+              : "-"
+            }
+
+          </small>
+
+        </div>
+
+      `;
+
+    });
+
+  }
+
+  catch (error) {
+
+    console.error(error);
+
+  }
+
+}
+
+/* =========================================================
+   START
+========================================================= */
+
+loadDashboard();

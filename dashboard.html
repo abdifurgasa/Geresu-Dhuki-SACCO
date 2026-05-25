@@ -2,99 +2,295 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title data-i18n="dashboard">Dashboard</title>
 
-  <link rel="stylesheet" href="css/style.css">
+  <meta charset="UTF-8" />
 
-  <!-- Chart.js -->
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
+
+  <title data-i18n="dashboard">
+    Dashboard
+  </title>
+
+  <!-- CSS -->
+  <link
+    rel="stylesheet"
+    href="css/style.css"
+  />
+
+  <!-- CHART JS -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 </head>
 
 <body>
 
-<!-- SIDEBAR -->
-<aside class="sidebar" id="sidebar">
+<!-- =========================================================
+     SIDEBAR
+========================================================= -->
 
-  <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+<aside
+  class="sidebar"
+  id="sidebar"
+>
 
-  <h2 class="logo">🏦 SACCO</h2>
+  <!-- TOGGLE -->
+  <button
+    class="toggle-btn"
+    onclick="toggleSidebar()"
+  >
+    ☰
+  </button>
 
+  <!-- LOGO -->
+  <h2 class="logo">
+    🏦 SACCO
+  </h2>
+
+  <!-- NAVIGATION -->
   <nav class="nav">
 
-    <a href="dashboard.html" class="nav-item active">
-      <span class="icon">📊</span>
-      <span class="text" data-i18n="dashboard">Dashboard</span>
+    <!-- DASHBOARD -->
+    <a
+      href="dashboard.html"
+      class="nav-item active"
+    >
+
+      <span class="icon">
+        📊
+      </span>
+
+      <span
+        class="text"
+        data-i18n="dashboard"
+      >
+        Dashboard
+      </span>
+
     </a>
 
-    <a href="members.html" class="nav-item admin-only">
-      <span class="icon">👥</span>
-      <span class="text" data-i18n="members">Members</span>
+    <!-- MEMBERS -->
+    <a
+      href="members.html"
+      class="nav-item admin-only"
+    >
+
+      <span class="icon">
+        👥
+      </span>
+
+      <span
+        class="text"
+        data-i18n="members"
+      >
+        Members
+      </span>
+
     </a>
 
-    <a href="savings.html" class="nav-item">
-      <span class="icon">💰</span>
-      <span class="text" data-i18n="savings">Savings</span>
+    <!-- SAVINGS -->
+    <a
+      href="savings.html"
+      class="nav-item"
+    >
+
+      <span class="icon">
+        💰
+      </span>
+
+      <span
+        class="text"
+        data-i18n="savings"
+      >
+        Savings
+      </span>
+
     </a>
 
-    <a href="loans.html" class="nav-item">
-      <span class="icon">🏦</span>
-      <span class="text" data-i18n="loans">Loans</span>
+    <!-- LOANS -->
+    <a
+      href="loans.html"
+      class="nav-item"
+    >
+
+      <span class="icon">
+        🏦
+      </span>
+
+      <span
+        class="text"
+        data-i18n="loans"
+      >
+        Loans
+      </span>
+
     </a>
 
-    <a href="repayments.html" class="nav-item">
-      <span class="icon">💵</span>
-      <span class="text" data-i18n="repayments">Repayments</span>
+    <!-- REPAYMENTS -->
+    <a
+      href="repayments.html"
+      class="nav-item"
+    >
+
+      <span class="icon">
+        💵
+      </span>
+
+      <span
+        class="text"
+        data-i18n="repayments"
+      >
+        Repayments
+      </span>
+
     </a>
 
-    <a href="withdrawals.html" class="nav-item admin-only">
-      <span class="icon">💸</span>
-      <span class="text" data-i18n="withdrawals">Withdrawals</span>
+    <!-- WITHDRAWALS -->
+    <a
+      href="withdrawals.html"
+      class="nav-item admin-only"
+    >
+
+      <span class="icon">
+        💸
+      </span>
+
+      <span
+        class="text"
+        data-i18n="withdrawals"
+      >
+        Withdrawals
+      </span>
+
     </a>
 
-    <a href="reports.html" class="nav-item admin-only">
-      <span class="icon">📄</span>
-      <span class="text" data-i18n="reports">Reports</span>
+    <!-- REPORTS -->
+    <a
+      href="reports.html"
+      class="nav-item admin-only"
+    >
+
+      <span class="icon">
+        📄
+      </span>
+
+      <span
+        class="text"
+        data-i18n="reports"
+      >
+        Reports
+      </span>
+
     </a>
 
-    <a href="users.html" class="nav-item admin-only">
-      <span class="icon">👤</span>
-      <span class="text" data-i18n="users">Users</span>
+    <!-- USERS -->
+    <a
+      href="users.html"
+      class="nav-item admin-only"
+    >
+
+      <span class="icon">
+        👤
+      </span>
+
+      <span
+        class="text"
+        data-i18n="users"
+      >
+        Users
+      </span>
+
     </a>
 
-    <a href="settings.html" class="nav-item">
-      <span class="icon">⚙️</span>
-      <span class="text" data-i18n="settings">Settings</span>
+    <!-- SETTINGS -->
+    <a
+      href="settings.html"
+      class="nav-item"
+    >
+
+      <span class="icon">
+        ⚙️
+      </span>
+
+      <span
+        class="text"
+        data-i18n="settings"
+      >
+        Settings
+      </span>
+
     </a>
 
-    <a href="#" class="nav-item logout" id="logoutBtn">
-      <span class="icon">🚪</span>
-      <span class="text" data-i18n="logout">Logout</span>
+    <!-- LOGOUT -->
+    <a
+      href="#"
+      class="nav-item logout"
+      id="logoutBtn"
+    >
+
+      <span class="icon">
+        🚪
+      </span>
+
+      <span
+        class="text"
+        data-i18n="logout"
+      >
+        Logout
+      </span>
+
     </a>
 
   </nav>
 
 </aside>
 
-<!-- MAIN -->
-<main class="main" id="main">
+<!-- =========================================================
+     MAIN CONTENT
+========================================================= -->
 
+<main
+  class="main"
+  id="main"
+>
+
+  <!-- TOPBAR -->
   <div class="topbar">
 
-    <h2 data-i18n="financialDashboard">Financial Dashboard</h2>
+    <h2 data-i18n="financialDashboard">
+      Financial Dashboard
+    </h2>
 
     <div class="topbar-actions">
 
-      <!-- LANGUAGE SWITCH -->
-      <select id="languageSelect" onchange="changeLanguage(this.value)">
-        <option value="en">English</option>
-        <option value="am">አማርኛ</option>
-        <option value="om">Afaan Oromoo</option>
+      <!-- LANGUAGE -->
+      <select
+        id="languageSelect"
+        class="lang-select"
+        onchange="changeLanguage(this.value)"
+      >
+
+        <option value="en">
+          English
+        </option>
+
+        <option value="am">
+          አማርኛ
+        </option>
+
+        <option value="om">
+          Afaan Oromoo
+        </option>
+
       </select>
 
-      <!-- ✅ FIXED: ROLE BOX ADDED HERE -->
-      <div class="selected-box" id="roleBox">
+      <!-- ROLE -->
+      <div
+        class="selected-box"
+        id="roleBox"
+      >
         👤 Loading...
       </div>
 
@@ -102,84 +298,223 @@
 
   </div>
 
+  <!-- =========================================================
+       OVERVIEW
+  ========================================================= -->
+
   <div style="margin-top:25px;">
-    <h1 data-i18n="overview">DASHBOARD OVERVIEW</h1>
-    <p data-i18n="welcome">Welcome to SACCO Banking System</p>
+
+    <h1 data-i18n="overview">
+      DASHBOARD OVERVIEW
+    </h1>
+
+    <p data-i18n="welcome">
+      Welcome to SACCO Banking System
+    </p>
+
   </div>
 
-  <!-- CARDS -->
+  <!-- =========================================================
+       DASHBOARD CARDS
+  ========================================================= -->
+
   <section class="cards">
 
+    <!-- MEMBERS -->
     <div class="card blue">
-      <h3 data-i18n="totalMembers">Total Members</h3>
-      <p id="members">0</p>
+
+      <h3 data-i18n="totalMembers">
+        Total Members
+      </h3>
+
+      <p id="members">
+        0
+      </p>
+
     </div>
 
+    <!-- SAVINGS -->
     <div class="card green">
-      <h3 data-i18n="totalSavings">Total Savings</h3>
-      <p id="savings">0 ETB</p>
+
+      <h3 data-i18n="totalSavings">
+        Total Savings
+      </h3>
+
+      <p id="savings">
+        0 ETB
+      </p>
+
     </div>
 
+    <!-- LOANS -->
     <div class="card orange">
-      <h3 data-i18n="totalLoans">Total Loans</h3>
-      <p id="loans">0 ETB</p>
+
+      <h3 data-i18n="totalLoans">
+        Total Loans
+      </h3>
+
+      <p id="loans">
+        0 ETB
+      </p>
+
     </div>
 
+    <!-- WITHDRAWALS -->
     <div class="card red">
-      <h3 data-i18n="withdrawals">Total Withdrawals</h3>
-      <p id="withdrawals">0 ETB</p>
+
+      <h3 data-i18n="withdrawals">
+        Total Withdrawals
+      </h3>
+
+      <p id="withdrawals">
+        0 ETB
+      </p>
+
     </div>
 
+    <!-- PROFIT -->
     <div class="card purple">
-      <h3 data-i18n="netProfit">Net Profit</h3>
-      <p id="profit">0 ETB</p>
+
+      <h3 data-i18n="netProfit">
+        Net Profit
+      </h3>
+
+      <p id="profit">
+        0 ETB
+      </p>
+
     </div>
 
   </section>
 
-  <!-- QUICK ACTIONS -->
+  <!-- =========================================================
+       QUICK ACTIONS
+  ========================================================= -->
+
   <section style="margin-top:35px;">
 
-    <h2 data-i18n="quickActions">Quick Actions</h2>
+    <h2 data-i18n="quickActions">
+      Quick Actions
+    </h2>
 
     <div class="cards">
 
-      <a href="members.html" class="card teal admin-only">
-        <h3 data-i18n="addMember">Add Member</h3>
+      <!-- ADD MEMBER -->
+      <a
+        href="members.html"
+        class="card teal admin-only"
+      >
+
+        <h3 data-i18n="addMember">
+          Add Member
+        </h3>
+
         👥
+
       </a>
 
-      <a href="savings.html" class="card green">
-        <h3 data-i18n="depositSavings">Savings</h3>
+      <!-- SAVINGS -->
+      <a
+        href="savings.html"
+        class="card green"
+      >
+
+        <h3 data-i18n="depositSavings">
+          Savings
+        </h3>
+
         💰
+
       </a>
 
-      <a href="loans.html" class="card orange">
-        <h3 data-i18n="createLoan">Loans</h3>
+      <!-- LOANS -->
+      <a
+        href="loans.html"
+        class="card orange"
+      >
+
+        <h3 data-i18n="createLoan">
+          Loans
+        </h3>
+
         🏦
+
       </a>
 
-      <a href="withdrawals.html" class="card red admin-only">
-        <h3 data-i18n="withdrawals">Withdrawals</h3>
+      <!-- WITHDRAWALS -->
+      <a
+        href="withdrawals.html"
+        class="card red admin-only"
+      >
+
+        <h3 data-i18n="withdrawals">
+          Withdrawals
+        </h3>
+
         💸
+
       </a>
 
     </div>
 
   </section>
 
-  <!-- CHART -->
+  <!-- =========================================================
+       MAIN FINANCIAL CHART
+  ========================================================= -->
+
   <section style="margin-top:40px;">
-    <h2 data-i18n="overview">Performance Overview</h2>
-    <canvas id="financeChart"></canvas>
+
+    <h2>
+      Performance Overview
+    </h2>
+
+    <div class="table-card" style="padding:20px;">
+
+      <canvas id="financeChart"></canvas>
+
+    </div>
+
+  </section>
+
+  <!-- =========================================================
+       LOANS VS REPAYMENTS
+  ========================================================= -->
+
+  <section style="margin-top:40px;">
+
+    <h2>
+      Loans vs Repayments
+    </h2>
+
+    <div class="table-card" style="padding:20px;">
+
+      <canvas id="loanRepaymentChart"></canvas>
+
+    </div>
+
   </section>
 
 </main>
 
-<!-- SCRIPTS -->
-<script type="module" src="js/layout.js"></script>
+<!-- =========================================================
+     SCRIPTS
+========================================================= -->
+
+<!-- LAYOUT -->
+<script
+  type="module"
+  src="js/layout.js"
+></script>
+
+<!-- LANGUAGE -->
 <script src="js/i18n.js"></script>
-<script type="module" src="js/dashboard.js"></script>
+
+<!-- DASHBOARD -->
+<script
+  type="module"
+  src="js/dashboard.js"
+></script>
 
 </body>
 </html>

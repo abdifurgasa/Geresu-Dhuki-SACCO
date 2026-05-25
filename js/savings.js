@@ -188,59 +188,113 @@ savingsForm?.addEventListener("submit", async (e) => {
 
 });
 
-/* =========================
-   LOAD SAVINGS TABLE
-========================= */
-
 async function loadSavings() {
 
   savingsTable.innerHTML = "";
 
   /* =========================
-     ORDER BY LATEST TIME
+     GET MEMBERS
   ========================= */
 
-  const q = query(
-    collection(db, "savings"),
-    orderBy("createdAt", "desc")
-  );
+  const membersSnap = await getDocs(collection(db, "members"));
 
-  const snap = await getDocs(q);
+  /* =========================
+     GET SAVINGS
+  ========================= */
 
-  snap.forEach(doc => {
+  const savingsSnap = await getDocs(collection(db, "savings"));
 
-    const d = doc.data();
+  let savingsData = [];
 
-    const createdDate = d.createdAt
-      ? new Date(d.createdAt.seconds * 1000).toLocaleString()
-      : "-";
+  savingsSnap.forEach(doc => {
+    savingsData.push({
+      id: doc.id,
+      ...doc.data()
+    });
+  });
+
+  /* =========================
+     SORT BY LATEST DATE
+  ========================= */
+
+  savingsData.sort((a, b) => {
+
+    const aTime = a.createdAt?.seconds || 0;
+    const bTime = b.createdAt?.seconds || 0;
+
+    return bTime - aTime;
+
+  });
+
+  /* =========================
+     SHOW MEMBERS + SAVINGS
+  ========================= */
+
+  membersSnap.forEach(memberDoc => {
+
+    const member = memberDoc.data();
+
+    /* MEMBER SAVINGS */
+    const memberSavings = savingsData.filter(
+      s => s.memberId === memberDoc.id
+    );
+
+    let latestSaving = 0;
+    let previousSaving = 0;
+    let totalSaving = 0;
+    let createdDate = "-";
+    let createdBy = member.createdBy || "Admin";
+
+    if (memberSavings.length > 0) {
+
+      const latest = memberSavings[0];
+
+      latestSaving = Number(latest.amount || 0);
+
+      previousSaving = Number(latest.previousSaving || 0);
+
+      totalSaving = Number(latest.totalSaving || 0);
+
+      createdBy = latest.createdBy || member.createdBy || "Admin";
+
+      createdDate = latest.createdAt
+        ? new Date(
+            latest.createdAt.seconds * 1000
+          ).toLocaleString()
+        : "-";
+    }
 
     const row = `
-  <tr>
+      <tr>
 
-    <td>${d.memberName || "-"}</td>
+        <td>${member.name || "-"}</td>
 
-    <td>${d.memberPhone || "-"}</td>
+        <td>${member.phone || "-"}</td>
 
-    <td>
-      ${Number(d.amount || 0).toLocaleString()} ETB
-    </td>
+        <td>
+          ${latestSaving.toLocaleString()} ETB
+        </td>
 
-    <td>
-      ${Number(d.previousSaving || 0).toLocaleString()} ETB
-    </td>
+        <td>
+          ${previousSaving.toLocaleString()} ETB
+        </td>
 
-    <td>
-      ${Number(d.totalSaving || 0).toLocaleString()} ETB
-    </td>
+        <td>
+          ${totalSaving.toLocaleString()} ETB
+        </td>
 
-    <td>${createdDate}</td>
+        <td>${createdDate}</td>
 
-    <td>${d.createdBy || "Admin"}</td>
+        <td>${createdBy}</td>
 
-  </tr>
-`;
+      </tr>
+    `;
 
+    savingsTable.innerHTML += row;
+
+  });
+
+}
 /* =========================
    START
 ========================= */

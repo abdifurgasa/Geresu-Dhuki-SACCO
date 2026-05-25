@@ -16,144 +16,78 @@ const withdrawalsEl = document.getElementById("withdrawals");
 const profitEl = document.getElementById("profit");
 
 /* =========================
-   TOTALS
+   LIVE DASHBOARD
 ========================= */
 
-let totalMembers = 0;
-let totalSavings = 0;
-let totalLoans = 0;
-let totalRepayments = 0;
-let totalWithdrawals = 0;
+function loadDashboard() {
 
-/* =========================
-   UPDATE DASHBOARD
-========================= */
+  /* MEMBERS */
+  onSnapshot(collection(db, "members"), (snap) => {
+    membersEl.textContent = snap.size;
+  });
 
-function updateUI() {
+  /* SAVINGS */
+  onSnapshot(collection(db, "savings"), (snap) => {
 
-  const netProfit =
-    totalSavings +
-    totalRepayments -
-    totalLoans -
-    totalWithdrawals;
+    let total = 0;
 
-  membersEl.textContent = totalMembers;
-  savingsEl.textContent = totalSavings + " ETB";
-  loansEl.textContent = totalLoans + " ETB";
-  withdrawalsEl.textContent = totalWithdrawals + " ETB";
-  profitEl.textContent = netProfit + " ETB";
+    snap.forEach(doc => {
+      total += Number(doc.data().amount || 0);
+    });
 
-  updateChart();
+    savingsEl.textContent = total + " ETB";
+  });
+
+  /* LOANS */
+  onSnapshot(collection(db, "loans"), (snap) => {
+
+    let total = 0;
+
+    snap.forEach(doc => {
+      total += Number(doc.data().amount || 0);
+    });
+
+    loansEl.textContent = total + " ETB";
+  });
+
+  /* WITHDRAWALS */
+  onSnapshot(collection(db, "withdrawals"), (snap) => {
+
+    let total = 0;
+
+    snap.forEach(doc => {
+      total += Number(doc.data().amount || 0);
+    });
+
+    withdrawalsEl.textContent = total + " ETB";
+  });
+
 }
 
 /* =========================
-   MEMBERS
+   PROFIT CALCULATION
 ========================= */
 
-onSnapshot(collection(db, "members"), (snap) => {
-  totalMembers = snap.size;
-  updateUI();
-});
+function loadProfit() {
 
-/* =========================
-   SAVINGS
-========================= */
+  onSnapshot(collection(db, "savings"), (savSnap) => {
+    onSnapshot(collection(db, "withdrawals"), (withSnap) => {
 
-onSnapshot(collection(db, "savings"), (snap) => {
+      let savings = 0;
+      let withdrawals = 0;
 
-  totalSavings = 0;
+      savSnap.forEach(d => savings += Number(d.data().amount || 0));
+      withSnap.forEach(d => withdrawals += Number(d.data().amount || 0));
 
-  snap.forEach(doc => {
-    totalSavings += Number(doc.data().amount || 0);
+      const profit = savings - withdrawals;
+
+      profitEl.textContent = profit + " ETB";
+
+    });
   });
 
-  updateUI();
-});
-
-/* =========================
-   LOANS
-========================= */
-
-onSnapshot(collection(db, "loans"), (snap) => {
-
-  totalLoans = 0;
-
-  snap.forEach(doc => {
-    totalLoans += Number(doc.data().amount || 0);
-  });
-
-  updateUI();
-});
-
-/* =========================
-   REPAYMENTS
-========================= */
-
-onSnapshot(collection(db, "repayments"), (snap) => {
-
-  totalRepayments = 0;
-
-  snap.forEach(doc => {
-    totalRepayments += Number(doc.data().amount || 0);
-  });
-
-  updateUI();
-});
-
-/* =========================
-   WITHDRAWALS
-========================= */
-
-onSnapshot(collection(db, "withdrawals"), (snap) => {
-
-  totalWithdrawals = 0;
-
-  snap.forEach(doc => {
-    totalWithdrawals += Number(doc.data().amount || 0);
-  });
-
-  updateUI();
-});
-
-/* =========================
-   CHART (LOANS vs REPAYMENTS)
-========================= */
-
-let chart;
-
-function updateChart() {
-
-  const ctx = document.getElementById("financeChart");
-
-  if (!ctx) return;
-
-  if (chart) chart.destroy();
-
-  chart = new Chart(ctx, {
-    type: "bar",
-    data: {
-      labels: ["Loans", "Repayments"],
-      datasets: [
-        {
-          label: "Amount (ETB)",
-          data: [totalLoans, totalRepayments],
-          backgroundColor: ["#f97316", "#22c55e"]
-        }
-      ]
-    },
-    options: {
-      responsive: true,
-      plugins: {
-        legend: {
-          display: false
-        }
-      }
-    }
-  });
 }
 
-/* =========================
-   INITIAL LOAD
-========================= */
-
-updateUI();
+/* RUN */
+loadDashboard();
+loadProfit();

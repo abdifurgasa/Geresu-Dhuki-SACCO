@@ -2,163 +2,624 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <title data-i18n="dashboard"> Geresu Dhuki SACCO Login</title>
+
+  <meta charset="UTF-8" />
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
+
+  <title>
+    Geresu Dhuki SACCO Login
+  </title>
+
+  <!-- =========================================================
+       STYLE
+  ========================================================= -->
 
   <style>
-    /* =========================
-       BACKGROUND
-    ========================= */
-     body {
+
+    /* =========================================================
+       BODY
+    ========================================================= */
+
+    body {
+
       margin: 0;
+
       height: 100vh;
 
-      /* Times New Roman Font */
+      display: flex;
+
+      justify-content: center;
+
+      align-items: center;
+
+      overflow: hidden;
+
+      position: relative;
+
       font-family: "Times New Roman", Times, serif;
 
-      /* Background image less zoom */
-      background: url("assets/images/background.jpg") no-repeat center center;
-      background-size: contain;
-      justify-content: center;
-      align-items: center;
-      position: relative;
-      overflow: hidden;
-    }
-    body::before {
-      content: "";
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.6);
+      background:
+        url("assets/images/background.jpg")
+        no-repeat center center;
+
+      background-size: cover;
+
     }
 
-    /* =========================
-       LANGUAGE SELECT (ONE PLACE)
-    ========================= */
-    .lang-select {
+    /* DARK OVERLAY */
+
+    body::before {
+
+      content: "";
+
       position: absolute;
-      top: 15px;
-      right: 15px;
-      z-index: 10;
+
+      inset: 0;
+
+      background: rgba(0,0,0,0.55);
+
+      z-index: 1;
+
+    }
+
+    /* =========================================================
+       LANGUAGE SELECT
+    ========================================================= */
+
+    .lang-select {
+
+      position: absolute;
+
+      top: 20px;
+
+      right: 20px;
+
+      z-index: 100;
+
     }
 
     .lang-select select {
-      padding: 6px 10px;
-      border-radius: 6px;
+
+      padding: 10px 14px;
+
       border: none;
+
+      border-radius: 10px;
+
       outline: none;
+
+      font-size: 14px;
+
+      background: white;
+
+      cursor: pointer;
+
     }
 
-    /* =========================
+    /* =========================================================
        LOGIN BOX
-    ========================= */
-    .login-box {
-      position: relative;
-      z-index: 2;
-      width: 360px;
-      padding: 30px;
-      border-radius: 14px;
+    ========================================================= */
 
-      background: rgba(255,255,255,0.1);
-      backdrop-filter: blur(15px);
-      border: 1px solid rgba(255,255,255,0.2);
+    .login-box {
+
+      position: relative;
+
+      z-index: 10;
+
+      width: 380px;
+
+      max-width: 92%;
+
+      padding: 35px;
+
+      border-radius: 22px;
 
       text-align: center;
+
+      background: rgba(255,255,255,0.12);
+
+      backdrop-filter: blur(18px);
+
+      border: 1px solid rgba(255,255,255,0.2);
+
+      box-shadow:
+        0 20px 50px rgba(0,0,0,0.35);
+
       animation: fadeIn 0.8s ease;
+
     }
 
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(30px); }
-      to { opacity: 1; transform: translateY(0); }
+
+      from {
+
+        opacity: 0;
+
+        transform: translateY(40px);
+
+      }
+
+      to {
+
+        opacity: 1;
+
+        transform: translateY(0);
+
+      }
+
     }
 
-    h2, p {
+    /* =========================================================
+       LOGO
+    ========================================================= */
+
+    .logo {
+
+      font-size: 55px;
+
+      margin-bottom: 10px;
+
+      animation: floatLogo 3s ease-in-out infinite;
+
+    }
+
+    @keyframes floatLogo {
+
+      0% {
+        transform: translateY(0px);
+      }
+
+      50% {
+        transform: translateY(-6px);
+      }
+
+      100% {
+        transform: translateY(0px);
+      }
+
+    }
+
+    /* =========================================================
+       TEXT
+    ========================================================= */
+
+    h2 {
+
+      margin: 10px 0;
+
       color: white;
+
+      font-size: 30px;
+
+      letter-spacing: 1px;
+
     }
 
-    input {
+    p {
+
+      color: rgba(255,255,255,0.9);
+
+      margin-bottom: 25px;
+
+    }
+
+    /* =========================================================
+       INPUT GROUP
+    ========================================================= */
+
+    .input-group {
+
+      margin-bottom: 18px;
+
+      text-align: left;
+
+    }
+
+    .input-group label {
+
+      display: block;
+
+      margin-bottom: 7px;
+
+      color: white;
+
+      font-size: 15px;
+
+    }
+
+    .input-box {
+
+      display: flex;
+
+      align-items: center;
+
+      background: rgba(255,255,255,0.15);
+
+      border-radius: 12px;
+
+      padding: 0 12px;
+
+      border: 1px solid rgba(255,255,255,0.2);
+
+    }
+
+    .input-box i {
+
+      color: white;
+
+      font-size: 15px;
+
+    }
+
+    .input-box input {
+
       width: 100%;
-      padding: 12px;
-      margin: 8px 0;
+
+      padding: 14px;
+
       border: none;
-      border-radius: 8px;
+
       outline: none;
+
+      background: transparent;
+
+      color: white;
+
+      font-size: 15px;
+
     }
 
-    /* 🔵 LOGIN BUTTON */
-    button {
+    .input-box input::placeholder {
+
+      color: rgba(255,255,255,0.7);
+
+    }
+
+    /* =========================================================
+       BUTTON
+    ========================================================= */
+
+    .login-btn {
+
       width: 100%;
-      padding: 12px;
+
+      padding: 14px;
+
       margin-top: 10px;
 
+      border: none;
+
+      border-radius: 14px;
+
       background: #2563eb;
+
       color: white;
 
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
+      font-size: 16px;
 
       font-weight: bold;
+
+      cursor: pointer;
+
       transition: 0.3s;
+
     }
 
-    button:hover {
+    .login-btn:hover {
+
       background: #1d4ed8;
+
       transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(37, 99, 235, 0.4);
+
+      box-shadow:
+        0 10px 25px rgba(37,99,235,0.45);
+
     }
+
+    /* =========================================================
+       FOOTER
+    ========================================================= */
+
+    .footer {
+
+      margin-top: 20px;
+
+      color: rgba(255,255,255,0.7);
+
+      font-size: 13px;
+
+    }
+
+    /* =========================================================
+       MOBILE
+    ========================================================= */
+
+    @media(max-width:600px){
+
+      .login-box {
+
+        width: 90%;
+
+        padding: 25px;
+
+      }
+
+      h2 {
+
+        font-size: 24px;
+
+      }
+
+    }
+
   </style>
+
+  <!-- FONT AWESOME -->
+
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+  />
+
 </head>
 
 <body>
 
-  <!-- 🌍 LANGUAGE SELECTOR (ONLY ONE PLACE) -->
-  <div class="lang-select">
-    <select id="langSelect" onchange="changeLang(this.value)">
-      <option value="EN">English</option>
-      <option value="AM">Amharic</option>
-      <option value="OR">Afaan Oromo</option>
-    </select>
+<!-- =========================================================
+     LANGUAGE SELECT
+========================================================= -->
+
+<div class="lang-select">
+
+  <select
+    id="langSelect"
+    onchange="changeLanguage(this.value)"
+  >
+
+    <option value="en">
+      English
+    </option>
+
+    <option value="am">
+      አማርኛ
+    </option>
+
+    <option value="om">
+      Afaan Oromoo
+    </option>
+
+  </select>
+
+</div>
+
+<!-- =========================================================
+     LOGIN BOX
+========================================================= -->
+
+<div class="login-box">
+
+  <!-- LOGO -->
+
+  <div class="logo">
+    🏦
   </div>
 
-  <!-- LOGIN BOX -->
-  <div class="login-box">
+  <!-- TITLE -->
 
-    <h2 data-i18n="dashboard"> Geresu Dhuki SACCO LOGIN</h2>
+  <h2>
+    GERESU DHUKI SACCO
+  </h2>
 
-    <p data-i18n="welcome">Welcome back</p>
+  <p data-i18n="welcome">
+    Welcome Back
+  </p>
 
-    <input type="email" placeholder="Email">
-    <input type="password" placeholder="Password">
+  <!-- =========================================================
+       LOGIN FORM
+  ========================================================= -->
 
-    <button onclick="login()">Login</button>
+  <!-- EMAIL -->
+
+  <div class="input-group">
+
+    <label>
+      Email
+    </label>
+
+    <div class="input-box">
+
+      <i class="fa fa-envelope"></i>
+
+      <input
+        type="email"
+        id="email"
+        placeholder="Enter your email"
+      />
+
+    </div>
 
   </div>
 
-  <!-- =========================
-       FIREBASE LOGIN
-  ========================== -->
-  <script type="module">
-    import { auth } from "./js/firebase.js";
-    import {
-      signInWithEmailAndPassword
-    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  <!-- PASSWORD -->
 
-    window.login = function () {
-      const email = document.querySelector("input[type='email']").value;
-      const password = document.querySelector("input[type='password']").value;
+  <div class="input-group">
 
-      signInWithEmailAndPassword(auth, email, password)
-        .then(() => {
-          window.location.href = "dashboard.html";
-        })
-        .catch(err => alert(err.message));
-    };
-  </script>
+    <label>
+      Password
+    </label>
 
-  <!-- =========================
-       GLOBAL i18n.js (USED HERE)
-  ========================== -->
+    <div class="input-box">
+
+      <i class="fa fa-lock"></i>
+
+      <input
+        type="password"
+        id="password"
+        placeholder="Enter your password"
+      />
+
+    </div>
+
+  </div>
+
+  <!-- LOGIN BUTTON -->
+
+  <button
+    class="login-btn"
+    onclick="login()"
+  >
+
+    <i class="fa fa-right-to-bracket"></i>
+
+    Login
+
+  </button>
+
+  <!-- FOOTER -->
+
+  <div class="footer">
+
+    © 2026 Geresu Dhuki SACCO
+
+  </div>
+
+</div>
+
+<!-- =========================================================
+     FIREBASE LOGIN
+========================================================= -->
+
+<script type="module">
+
+import { auth, db }
+from "./js/firebase.js";
+
+import {
+
+  signInWithEmailAndPassword
+
+} from
+"https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+import {
+
+  doc,
+  getDoc
+
+} from
+"https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+/* =========================================================
+   LOGIN
+========================================================= */
+
+window.login = async function () {
+
+  const email =
+    document.getElementById("email").value;
+
+  const password =
+    document.getElementById("password").value;
+
+  if (!email || !password) {
+
+    alert("Please fill all fields");
+
+    return;
+
+  }
+
+  try {
+
+    /* LOGIN */
+
+    const userCredential =
+      await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+
+    const user =
+      userCredential.user;
+
+    /* =====================================================
+       GET USER ROLE + NAME
+    ===================================================== */
+
+    const userRef =
+      doc(db, "users", user.uid);
+
+    const userSnap =
+      await getDoc(userRef);
+
+    let role = "user";
+
+    let fullName =
+      user.email;
+
+    if (userSnap.exists()) {
+
+      const data =
+        userSnap.data();
+
+      role =
+        data.role || "user";
+
+      fullName =
+        data.name || user.email;
+
+    }
+
+    /* =====================================================
+       SAVE LOCAL STORAGE
+    ===================================================== */
+
+    localStorage.setItem(
+      "role",
+      role
+    );
+
+    localStorage.setItem(
+      "name",
+      fullName
+    );
+
+    localStorage.setItem(
+      "email",
+      user.email
+    );
+
+    /* =====================================================
+       REDIRECT
+    ===================================================== */
+
+    window.location.href =
+      "dashboard.html";
+
+  }
+
+  catch (error) {
+
+    console.error(error);
+
+    alert(error.message);
+
+  }
+
+};
+
+</script>
+
+<!-- =========================================================
+     LANGUAGE
+========================================================= -->
+
 <script src="js/i18n.js"></script>
+
 </body>
 </html>

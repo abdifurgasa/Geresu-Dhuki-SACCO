@@ -13,7 +13,7 @@ window.toggleSidebar = function () {
 };
 
 /* =========================================================
-   LOGOUT SYSTEM
+   LOGOUT SYSTEM (FIXED)
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -33,8 +33,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
         localStorage.clear();
 
-        window.location.href =
-          "/Geresu-Dhuki-Credit-and-Saving-Cooperative/index.html";
+        // ✅ FIXED PATH (NO 404)
+        window.location.href = "./index.html";
 
       } catch (error) {
         console.error("Logout error:", error);
@@ -67,13 +67,13 @@ function resetTimer() {
 
     localStorage.clear();
 
-    window.location.href =
-      "/Geresu-Dhuki-Credit-and-Saving-Cooperative/index.html";
+    // ✅ FIXED PATH (NO 404)
+    window.location.href = "./index.html";
 
   }, TIME_LIMIT);
 }
 
-/* user activity tracking */
+/* activity tracking */
 window.addEventListener("mousemove", resetTimer);
 window.addEventListener("keydown", resetTimer);
 window.addEventListener("click", resetTimer);

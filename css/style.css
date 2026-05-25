@@ -972,3 +972,276 @@ h1{
 .card p {
   transition: all 0.3s ease;
 }
+/* =========================================================
+   FINAL FIX — PROFILE MODAL + SCROLL
+========================================================= */
+
+/* FULL SCREEN MODAL */
+.profile-modal{
+
+  position: fixed;
+
+  inset: 0;
+
+  background: rgba(0,0,0,0.55);
+
+  display: none;
+
+  justify-content: center;
+
+  align-items: center;
+
+  z-index: 999999;
+
+  padding: 20px;
+
+}
+
+/* MAIN BOX */
+.profile-box{
+
+  width: 96%;
+
+  max-width: 1500px;
+
+  height: 92vh;
+
+  background: #fff;
+
+  border-radius: 20px;
+
+  display: flex;
+
+  flex-direction: column;
+
+  overflow: hidden;
+
+  box-shadow: 0 25px 60px rgba(0,0,0,0.25);
+
+  animation: fadeUp 0.3s ease;
+
+}
+
+/* HEADER */
+.profile-header{
+
+  background: linear-gradient(
+    135deg,
+    #2563eb,
+    #1d4ed8
+  );
+
+  color: white;
+
+  padding: 18px 25px;
+
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+
+  flex-shrink: 0;
+
+}
+
+/* TITLE */
+.profile-header h2{
+
+  font-size: 24px;
+
+  margin: 0;
+
+}
+
+/* CLOSE BUTTON */
+.profile-close{
+
+  width: 42px;
+
+  height: 42px;
+
+  border: none;
+
+  border-radius: 50%;
+
+  background: rgba(255,255,255,0.2);
+
+  color: white;
+
+  font-size: 22px;
+
+  cursor: pointer;
+
+  transition: 0.3s;
+
+}
+
+.profile-close:hover{
+
+  background: red;
+
+  transform: rotate(90deg);
+
+}
+
+/* CONTENT */
+.profile-content{
+
+  flex: 1;
+
+  padding: 20px;
+
+  overflow: hidden;
+
+  display: flex;
+
+  flex-direction: column;
+
+}
+
+/* SCROLL AREA */
+.history-container{
+
+  flex: 1;
+
+  overflow-y: auto;
+
+  overflow-x: auto;
+
+  border: 1px solid #dbeafe;
+
+  border-radius: 14px;
+
+  background: white;
+
+}
+
+/* TABLE */
+.history-container table{
+
+  width: 100%;
+
+  min-width: 1400px;
+
+  border-collapse: collapse;
+
+}
+
+/* HEADER */
+.history-container thead th{
+
+  position: sticky;
+
+  top: 0;
+
+  background: #2563eb;
+
+  color: white;
+
+  z-index: 10;
+
+  padding: 16px;
+
+  white-space: nowrap;
+
+  text-align: left;
+
+}
+
+/* BODY */
+.history-container td{
+
+  padding: 15px;
+
+  border-bottom: 1px solid #e5e7eb;
+
+  white-space: nowrap;
+
+}
+
+/* ROW HOVER */
+.history-container tbody tr:hover{
+
+  background: #eff6ff;
+
+}
+
+/* CUSTOM SCROLLBAR */
+.history-container::-webkit-scrollbar{
+
+  width: 12px;
+
+  height: 12px;
+
+}
+
+.history-container::-webkit-scrollbar-track{
+
+  background: #e5e7eb;
+
+  border-radius: 10px;
+
+}
+
+.history-container::-webkit-scrollbar-thumb{
+
+  background: #2563eb;
+
+  border-radius: 10px;
+
+}
+
+.history-container::-webkit-scrollbar-thumb:hover{
+
+  background: #1d4ed8;
+
+}
+
+/* TRANSACTION COLORS */
+.type-saving{
+
+  color: #16a34a;
+
+  font-weight: bold;
+
+}
+
+.type-loan{
+
+  color: #d97706;
+
+  font-weight: bold;
+
+}
+
+.type-repayment{
+
+  color: #2563eb;
+
+  font-weight: bold;
+
+}
+
+.type-withdrawal{
+
+  color: #dc2626;
+
+  font-weight: bold;
+
+}
+
+/* MOBILE */
+@media(max-width:768px){
+
+  .profile-box{
+
+    width: 100%;
+
+    height: 100vh;
+
+    border-radius: 0;
+
+  }
+
+}

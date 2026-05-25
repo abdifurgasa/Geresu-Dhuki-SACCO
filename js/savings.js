@@ -216,36 +216,30 @@ async function loadSavings() {
       : "-";
 
     const row = `
-      <tr>
+  <tr>
 
-        <td>${d.memberName || "-"}</td>
+    <td>${d.memberName || "-"}</td>
 
-        <td>${d.memberPhone || "-"}</td>
+    <td>${d.memberPhone || "-"}</td>
 
-        <td>
-          ${Number(d.amount || 0).toLocaleString()} ETB
-        </td>
+    <td>
+      ${Number(d.amount || 0).toLocaleString()} ETB
+    </td>
 
-        <td>
-          ${Number(d.previousSaving || 0).toLocaleString()} ETB
-        </td>
+    <td>
+      ${Number(d.previousSaving || 0).toLocaleString()} ETB
+    </td>
 
-        <td>
-          ${Number(d.totalSaving || 0).toLocaleString()} ETB
-        </td>
+    <td>
+      ${Number(d.totalSaving || 0).toLocaleString()} ETB
+    </td>
 
-        <td>${createdDate}</td>
+    <td>${createdDate}</td>
 
-        <td>${d.createdBy || "Admin"}</td>
+    <td>${d.createdBy || "Admin"}</td>
 
-      </tr>
-    `;
-
-    savingsTable.innerHTML += row;
-
-  });
-
-}
+  </tr>
+`;
 
 /* =========================
    START

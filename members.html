@@ -561,96 +561,58 @@
      MEMBER PROFILE MODAL
 ========================================================= -->
 
-<div class="modal" id="profileModal">
+<div class="profile-modal" id="profileModal">
 
-  <div class="modal-box modern-modal" style="max-width:1100px;">
+  <div class="profile-box">
 
     <!-- HEADER -->
-    <div class="modal-header">
+    <div class="profile-header">
 
-      <div>
-
-        <h2 id="profileName">
-          👤 Member Profile
-        </h2>
-
-        <p class="modal-subtitle">
-          Full transaction history
-        </p>
-
-      </div>
+      <h2 id="profileTitle">
+        Member Profile
+      </h2>
 
       <button
-        type="button"
-        class="modal-close-icon"
+        class="profile-close"
         id="closeProfileBtn"
       >
-        <i class="fa fa-times"></i>
+        ✕
       </button>
 
     </div>
 
-    <!-- MEMBER INFO -->
-    <div class="cards" style="margin-bottom:20px;">
+    <!-- CONTENT -->
+    <div class="profile-content">
 
-      <div class="card blue">
-        <h3>Total Savings</h3>
-        <p id="profileSavings">0 ETB</p>
-      </div>
+      <!-- TABLE -->
+      <div class="history-container">
 
-      <div class="card orange">
-        <h3>Total Loans</h3>
-        <p id="profileLoans">0 ETB</p>
-      </div>
+        <table class="table-modern">
 
-      <div class="card green">
-        <h3>Total Repayments</h3>
-        <p id="profileRepayments">0 ETB</p>
-      </div>
+          <thead>
 
-      <div class="card red">
-        <h3>Total Withdrawals</h3>
-        <p id="profileWithdrawals">0 ETB</p>
+            <tr>
+
+              <th>Type</th>
+              <th>Amount</th>
+              <th>Previous</th>
+              <th>Total</th>
+              <th>Description</th>
+              <th>Status</th>
+              <th>Created Date</th>
+              <th>Created By</th>
+
+            </tr>
+
+          </thead>
+
+          <tbody id="historyTable"></tbody>
+
+        </table>
+
       </div>
 
     </div>
-<!-- =========================================================
-     FULL TRANSACTION HISTORY
-========================================================= -->
-
-<div class="table-card">
-
-  <div class="history-container">
-
-    <table class="table-modern">
-
-      <thead>
-
-        <tr>
-
-          <th>Type</th>
-
-          <th>Amount</th>
-
-          <th>Previous</th>
-
-          <th>Total</th>
-
-          <th>Description</th>
-
-          <th>Status</th>
-
-          <th>Created Date</th>
-
-          <th>Created By</th>
-
-        </tr>
-
-      </thead>
-
-      <tbody id="historyTable"></tbody>
-
-    </table>
 
   </div>
 

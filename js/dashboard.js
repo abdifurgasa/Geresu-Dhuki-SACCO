@@ -2,380 +2,158 @@ import { db } from "./firebase.js";
 
 import {
   collection,
-  getDocs
-}
-from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  onSnapshot
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-/* =========================================================
-   CARD ELEMENTS
-========================================================= */
+/* =========================
+   ELEMENTS
+========================= */
 
-const membersEl =
-  document.getElementById("members");
+const membersEl = document.getElementById("members");
+const savingsEl = document.getElementById("savings");
+const loansEl = document.getElementById("loans");
+const withdrawalsEl = document.getElementById("withdrawals");
+const profitEl = document.getElementById("profit");
 
-const savingsEl =
-  document.getElementById("savings");
+/* =========================
+   TOTALS
+========================= */
 
-const loansEl =
-  document.getElementById("loans");
+let totalMembers = 0;
+let totalSavings = 0;
+let totalLoans = 0;
+let totalRepayments = 0;
+let totalWithdrawals = 0;
 
-const withdrawalsEl =
-  document.getElementById("withdrawals");
+/* =========================
+   UPDATE DASHBOARD
+========================= */
 
-const profitEl =
-  document.getElementById("profit");
+function updateUI() {
 
-/* =========================================================
-   LOAD DASHBOARD
-========================================================= */
+  const netProfit =
+    totalSavings +
+    totalRepayments -
+    totalLoans -
+    totalWithdrawals;
 
-async function loadDashboard() {
+  membersEl.textContent = totalMembers;
+  savingsEl.textContent = totalSavings + " ETB";
+  loansEl.textContent = totalLoans + " ETB";
+  withdrawalsEl.textContent = totalWithdrawals + " ETB";
+  profitEl.textContent = netProfit + " ETB";
 
-  try {
-
-    /* =====================================================
-       FETCH COLLECTIONS
-    ===================================================== */
-
-    const membersSnap =
-      await getDocs(
-        collection(db, "members")
-      );
-
-    const savingsSnap =
-      await getDocs(
-        collection(db, "savings")
-      );
-
-    const loansSnap =
-      await getDocs(
-        collection(db, "loans")
-      );
-
-    const withdrawalsSnap =
-      await getDocs(
-        collection(db, "withdrawals")
-      );
-
-    const repaymentsSnap =
-      await getDocs(
-        collection(db, "repayments")
-      );
-
-    /* =====================================================
-       MEMBERS
-    ===================================================== */
-
-    const totalMembers =
-      membersSnap.size;
-
-    membersEl.textContent =
-      totalMembers;
-
-    /* =====================================================
-       TOTAL SAVINGS
-    ===================================================== */
-
-    let totalSavings = 0;
-
-    savingsSnap.forEach((doc) => {
-
-      const data = doc.data();
-
-      totalSavings +=
-        Number(data.amount || 0);
-
-    });
-
-    savingsEl.textContent =
-      totalSavings.toLocaleString() +
-      " ETB";
-
-    /* =====================================================
-       TOTAL LOANS
-    ===================================================== */
-
-    let totalLoans = 0;
-
-    loansSnap.forEach((doc) => {
-
-      const data = doc.data();
-
-      totalLoans +=
-        Number(data.amount || 0);
-
-    });
-
-    loansEl.textContent =
-      totalLoans.toLocaleString() +
-      " ETB";
-
-    /* =====================================================
-       TOTAL WITHDRAWALS
-    ===================================================== */
-
-    let totalWithdrawals = 0;
-
-    withdrawalsSnap.forEach((doc) => {
-
-      const data = doc.data();
-
-      totalWithdrawals +=
-        Number(data.amount || 0);
-
-    });
-
-    withdrawalsEl.textContent =
-      totalWithdrawals.toLocaleString() +
-      " ETB";
-
-    /* =====================================================
-       TOTAL REPAYMENTS
-    ===================================================== */
-
-    let totalRepayments = 0;
-
-    repaymentsSnap.forEach((doc) => {
-
-      const data = doc.data();
-
-      totalRepayments +=
-        Number(data.amount || 0);
-
-    });
-
-    /* =====================================================
-       NET PROFIT
-    ===================================================== */
-
-    const profit =
-      totalRepayments -
-      totalWithdrawals;
-
-    profitEl.textContent =
-      profit.toLocaleString() +
-      " ETB";
-
-    /* =====================================================
-       LOAD CHARTS
-    ===================================================== */
-
-    loadCharts(
-
-      totalSavings,
-      totalLoans,
-      totalWithdrawals,
-      totalRepayments
-
-    );
-
-  }
-
-  catch (error) {
-
-    console.error(
-      "Dashboard Error:",
-      error
-    );
-
-  }
-
+  updateChart();
 }
 
-/* =========================================================
-   LOAD CHARTS
-========================================================= */
+/* =========================
+   MEMBERS
+========================= */
 
-function loadCharts(
+onSnapshot(collection(db, "members"), (snap) => {
+  totalMembers = snap.size;
+  updateUI();
+});
 
-  savings,
-  loans,
-  withdrawals,
-  repayments
+/* =========================
+   SAVINGS
+========================= */
 
-) {
+onSnapshot(collection(db, "savings"), (snap) => {
 
-  /* =====================================================
-     MAIN FINANCIAL CHART
-  ===================================================== */
+  totalSavings = 0;
 
-  const financeCanvas =
-    document.getElementById(
-      "financeChart"
-    );
+  snap.forEach(doc => {
+    totalSavings += Number(doc.data().amount || 0);
+  });
 
-  if (financeCanvas) {
+  updateUI();
+});
 
-    new Chart(financeCanvas, {
+/* =========================
+   LOANS
+========================= */
 
-      type: "bar",
+onSnapshot(collection(db, "loans"), (snap) => {
 
-      data: {
+  totalLoans = 0;
 
-        labels: [
+  snap.forEach(doc => {
+    totalLoans += Number(doc.data().amount || 0);
+  });
 
-          "Savings",
-          "Loans",
-          "Withdrawals",
-          "Repayments"
+  updateUI();
+});
 
-        ],
+/* =========================
+   REPAYMENTS
+========================= */
 
-        datasets: [{
+onSnapshot(collection(db, "repayments"), (snap) => {
 
-          label: "ETB",
+  totalRepayments = 0;
 
-          data: [
+  snap.forEach(doc => {
+    totalRepayments += Number(doc.data().amount || 0);
+  });
 
-            savings,
-            loans,
-            withdrawals,
-            repayments
+  updateUI();
+});
 
-          ],
+/* =========================
+   WITHDRAWALS
+========================= */
 
-          backgroundColor: [
+onSnapshot(collection(db, "withdrawals"), (snap) => {
 
-            "#0ea5e9",
-            "#22c55e",
-            "#ef4444",
-            "#f59e0b"
+  totalWithdrawals = 0;
 
-          ],
+  snap.forEach(doc => {
+    totalWithdrawals += Number(doc.data().amount || 0);
+  });
 
-          borderRadius: 12
+  updateUI();
+});
 
-        }]
+/* =========================
+   CHART (LOANS vs REPAYMENTS)
+========================= */
 
-      },
+let chart;
 
-      options: {
+function updateChart() {
 
-        responsive: true,
+  const ctx = document.getElementById("financeChart");
 
-        plugins: {
+  if (!ctx) return;
 
-          legend: {
+  if (chart) chart.destroy();
 
-            display: false
-
-          }
-
-        },
-
-        scales: {
-
-          y: {
-
-            beginAtZero: true
-
-          }
-
+  chart = new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels: ["Loans", "Repayments"],
+      datasets: [
+        {
+          label: "Amount (ETB)",
+          data: [totalLoans, totalRepayments],
+          backgroundColor: ["#f97316", "#22c55e"]
         }
-
-      }
-
-    });
-
-  }
-
-  /* =====================================================
-     LOANS VS REPAYMENTS
-  ===================================================== */
-
-  const compareCanvas =
-    document.getElementById(
-      "loanRepaymentChart"
-    );
-
-  if (compareCanvas) {
-
-    new Chart(compareCanvas, {
-
-      type: "bar",
-
-      data: {
-
-        labels: [
-
-          "Financial Comparison"
-
-        ],
-
-        datasets: [
-
-          {
-
-            label: "Loans",
-
-            data: [
-
-              loans
-
-            ],
-
-            backgroundColor:
-              "#f59e0b",
-
-            borderRadius: 12
-
-          },
-
-          {
-
-            label: "Repayments",
-
-            data: [
-
-              repayments
-
-            ],
-
-            backgroundColor:
-              "#22c55e",
-
-            borderRadius: 12
-
-          }
-
-        ]
-
-      },
-
-      options: {
-
-        responsive: true,
-
-        plugins: {
-
-          legend: {
-
-            position: "top"
-
-          }
-
-        },
-
-        scales: {
-
-          y: {
-
-            beginAtZero: true
-
-          }
-
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          display: false
         }
-
       }
-
-    });
-
-  }
-
+    }
+  });
 }
 
-/* =========================================================
-   START
-========================================================= */
+/* =========================
+   INITIAL LOAD
+========================= */
 
-loadDashboard();
+updateUI();

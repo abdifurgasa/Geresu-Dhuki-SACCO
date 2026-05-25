@@ -606,3 +606,16 @@ h1{
     width:95%;
   }
 }
+.card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+
+/* Number pop effect */
+.card p {
+  transition: all 0.3s ease;
+}

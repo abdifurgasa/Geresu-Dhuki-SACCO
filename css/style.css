@@ -261,150 +261,102 @@ h1{
    MODERN MEMBER MODAL
 ========================================================= */
 .modern-modal{
-  width:450px;
-  border-radius:28px;
-  padding:30px;
+  width:380px;
+  padding:22px;
+  border-radius:18px;
   background:white;
-  box-shadow:0 25px 60px rgba(0,0,0,0.25);
-  animation:popup 0.3s ease;
 }
 
 /* HEADER */
 .modal-header{
   display:flex;
   justify-content:space-between;
-  align-items:flex-start;
-  margin-bottom:25px;
+  align-items:center;
+  margin-bottom:18px;
 }
 
 .modal-header h2{
-  font-size:28px;
-  color:#0f172a;
-  margin-bottom:6px;
+  font-size:20px;
+  margin:0;
 }
 
 .modal-subtitle{
+  font-size:12px;
   color:#64748b;
-  font-size:14px;
+  margin-top:3px;
 }
 
-/* CLOSE ICON */
+/* CLOSE BUTTON */
 .modal-close-icon{
-  width:42px;
-  height:42px;
+  width:34px;
+  height:34px;
   border:none;
-  border-radius:12px;
+  border-radius:10px;
   background:#f1f5f9;
   cursor:pointer;
-  font-size:16px;
-  transition:0.25s;
-}
-
-.modal-close-icon:hover{
-  background:#fee2e2;
-  color:#dc2626;
 }
 
 /* INPUT GROUP */
 .input-group{
-  margin-bottom:18px;
+  margin-bottom:14px;
 }
 
 .input-group label{
   display:block;
-  margin-bottom:8px;
-  font-weight:700;
-  color:#0f172a;
+  margin-bottom:6px;
+  font-size:14px;
+  font-weight:600;
 }
 
 /* INPUT BOX */
 .input-box{
   display:flex;
   align-items:center;
-  gap:12px;
+  gap:10px;
+  padding:0 12px;
+  border-radius:12px;
   background:#f8fafc;
-  border:2px solid transparent;
-  border-radius:16px;
-  padding:0 16px;
-  transition:0.25s;
-}
-
-.input-box i{
-  color:#64748b;
-  font-size:15px;
+  border:1px solid #dbeafe;
 }
 
 .input-box input{
   width:100%;
   border:none;
   background:transparent;
-  padding:16px 0;
   outline:none;
-  font-size:15px;
+  padding:12px 0;
+  font-size:14px;
 }
 
-.input-box:focus-within{
-  border-color:#2563eb;
-  background:white;
-  box-shadow:0 0 0 5px rgba(37,99,235,0.10);
+.input-box i{
+  color:#64748b;
+  font-size:13px;
 }
 
 /* BUTTONS */
 .modal-buttons{
   display:flex;
-  gap:12px;
-  margin-top:25px;
+  gap:10px;
+  margin-top:18px;
 }
 
-.modal-buttons .save-btn,
-.modal-buttons .close-btn{
+.modal-buttons button{
   flex:1;
-  padding:14px;
+  padding:12px;
   border:none;
-  border-radius:14px;
-  font-weight:700;
+  border-radius:12px;
+  font-weight:600;
   cursor:pointer;
-  transition:0.25s;
-}
-
-/* SAVE */
-.modal-buttons .save-btn{
-  background:linear-gradient(
-    135deg,
-    #16a34a,
-    #15803d
-  );
-  color:white;
-}
-
-.modal-buttons .save-btn:hover{
-  transform:translateY(-2px);
-}
-
-/* CANCEL */
-.modal-buttons .close-btn{
-  background:#f1f5f9;
-  color:#0f172a;
-}
-
-.modal-buttons .close-btn:hover{
-  background:#e2e8f0;
 }
 
 /* MOBILE */
 @media(max-width:600px){
 
   .modern-modal{
-    width:95%;
-    padding:22px;
-  }
-
-  .modal-buttons{
-    flex-direction:column;
+    width:94%;
   }
 
 }
-
 /* =========================================================
    🎴 CARDS
 ========================================================= */

@@ -560,6 +560,93 @@
   </div>
 
 </div>
+
+ <!-- =========================================================
+     MEMBER PROFILE MODAL
+========================================================= -->
+
+<div class="modal" id="profileModal">
+
+  <div class="modal-box modern-modal" style="max-width:1100px;">
+
+    <!-- HEADER -->
+    <div class="modal-header">
+
+      <div>
+
+        <h2 id="profileName">
+          👤 Member Profile
+        </h2>
+
+        <p class="modal-subtitle">
+          Full transaction history
+        </p>
+
+      </div>
+
+      <button
+        type="button"
+        class="modal-close-icon"
+        id="closeProfileBtn"
+      >
+        <i class="fa fa-times"></i>
+      </button>
+
+    </div>
+
+    <!-- MEMBER INFO -->
+    <div class="cards" style="margin-bottom:20px;">
+
+      <div class="card blue">
+        <h3>Total Savings</h3>
+        <p id="profileSavings">0 ETB</p>
+      </div>
+
+      <div class="card orange">
+        <h3>Total Loans</h3>
+        <p id="profileLoans">0 ETB</p>
+      </div>
+
+      <div class="card green">
+        <h3>Total Repayments</h3>
+        <p id="profileRepayments">0 ETB</p>
+      </div>
+
+      <div class="card red">
+        <h3>Total Withdrawals</h3>
+        <p id="profileWithdrawals">0 ETB</p>
+      </div>
+
+    </div>
+
+    <!-- HISTORY TABLE -->
+    <div class="table-card">
+
+      <table class="table-modern">
+
+        <thead>
+
+          <tr>
+
+            <th>Type</th>
+            <th>Amount</th>
+            <th>Description</th>
+            <th>Date</th>
+            <th>Created By</th>
+
+          </tr>
+
+        </thead>
+
+        <tbody id="historyTable"></tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+</div> 
 <!-- =========================================================
      SCRIPTS
 ========================================================= -->

@@ -14,7 +14,7 @@
 <body>
 
 <!-- ================= SIDEBAR ================= -->
-<aside class="sidebar">
+<aside class="sidebar" id="sidebar">
 
   <h2 class="logo">🏦 SACCO</h2>
 
@@ -47,22 +47,27 @@
 <!-- ================= MAIN ================= -->
 <main class="main">
 
+  <!-- TOP BAR -->
   <div class="topbar">
+
     <h2 data-i18n="savings_management">💰 Savings Management</h2>
 
-    <select id="langSelect">
-      <option value="en">EN</option>
-      <option value="om">OM</option>
-      <option value="am">AM</option>
+    <!-- LANGUAGE -->
+    <select id="languageSelect" onchange="changeLanguage(this.value)">
+      <option value="en">English</option>
+      <option value="am">አማርኛ</option>
+      <option value="om">Afaan Oromoo</option>
     </select>
 
+    <!-- BUTTON -->
     <button class="add-btn" id="openModalBtn">
       <i class="fa fa-plus"></i>
       <span data-i18n="add_savings">Add Savings</span>
     </button>
+
   </div>
 
-  <!-- SEARCH MEMBER -->
+  <!-- SEARCH -->
   <div class="search-container">
     <input id="searchMember"
            class="search-input"
@@ -72,7 +77,7 @@
     <div id="searchResults" class="search-dropdown"></div>
   </div>
 
-  <!-- SELECTED MEMBER -->
+  <!-- SELECTED -->
   <div id="selectedMember" class="selected-box">
     👤 Select a member
   </div>
@@ -84,7 +89,7 @@
 
       <thead>
         <tr>
-          <th data-i18n="member_name">Name</th>
+          <th data-i18n="name">Name</th>
           <th data-i18n="phone">Phone</th>
           <th>Amount</th>
           <th>Previous Saving</th>
@@ -107,7 +112,11 @@
 
   <div class="modal-box">
 
-    <h3 data-i18n="add_savings">Add Savings</h3>
+    <div class="modal-header">
+      <h2 data-i18n="add_savings">Add Savings</h2>
+
+      <button class="modal-close-icon" id="closeModalBtn">✖</button>
+    </div>
 
     <form id="savingsForm">
 
@@ -121,10 +130,6 @@
         <span data-i18n="save">Save</span>
       </button>
 
-      <button type="button" class="close-btn" id="closeModalBtn">
-        <span data-i18n="cancel">Cancel</span>
-      </button>
-
     </form>
 
   </div>
@@ -132,8 +137,8 @@
 </div>
 
 <!-- ================= SCRIPTS ================= -->
-<script type="module" src="js/i18n.js"></script>
 <script type="module" src="js/layout.js"></script>
+<script src="js/i18n.js"></script>
 <script type="module" src="js/savings.js"></script>
 
 </body>

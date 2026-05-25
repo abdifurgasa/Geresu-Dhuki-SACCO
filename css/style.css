@@ -354,6 +354,49 @@ h1{
   }
 
 }
+.modal{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.5);
+
+  justify-content:center;
+  align-items:center;
+
+  z-index:9999;
+}
+
+/* modal box */
+.modal-box{
+  width:360px;
+  background:#fff;
+  padding:20px;
+  border-radius:14px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.2);
+}
+
+/* header */
+.modal-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:15px;
+}
+
+/* X button top right */
+.modal-close-icon{
+  border:none;
+  background:#eee;
+  width:32px;
+  height:32px;
+  border-radius:8px;
+  cursor:pointer;
+}
+
+.modal-close-icon:hover{
+  background:#ffdddd;
+  color:red;
+}
 /* =========================================================
    🎴 CARDS
 ========================================================= */

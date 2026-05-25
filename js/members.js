@@ -6,107 +6,165 @@ import {
   getDocs,
   query,
   where,
-  serverTimestamp,
-  doc,
-  getDoc
+  serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 /* =========================
-   GET USER NAME (IMPORTANT)
+   ELEMENTS
 ========================= */
-async function getUserName(uid) {
-  if (!uid) return "Admin";
 
-  const snap = await getDoc(doc(db, "users", uid));
+const memberForm = document.getElementById("memberForm");
+const membersTable = document.getElementById("membersTable");
 
-  if (snap.exists()) {
-    return snap.data().name || "Admin";
-  }
+const modal = document.getElementById("memberModal");
+const openModalBtn = document.getElementById("openModalBtn");
+const closeModalBtns = document.querySelectorAll("#closeModalBtn");
 
-  return "Admin";
+/* =========================
+   MODAL OPEN
+========================= */
+
+if (openModalBtn) {
+  openModalBtn.addEventListener("click", () => {
+    modal.style.display = "flex";
+  });
 }
 
 /* =========================
-   MODAL
+   MODAL CLOSE (MULTI BUTTON FIX)
 ========================= */
-const modal = document.getElementById("memberModal");
-document.getElementById("openModalBtn").onclick = () => modal.style.display = "flex";
-document.getElementById("closeModalBtn").onclick = () => modal.style.display = "none";
+
+closeModalBtns.forEach(btn => {
+  btn.addEventListener("click", () => {
+    modal.style.display = "none";
+  });
+});
 
 /* =========================
    SAVE MEMBER
 ========================= */
-document.getElementById("memberForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
 
-  const name = document.getElementById("name").value;
-  const phone = document.getElementById("phone").value;
-  const nid = document.getElementById("nid").value;
+if (memberForm) {
 
-  try {
+  memberForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-    // duplicate check
-    const phoneCheck = await getDocs(query(collection(db, "members"), where("phone", "==", phone)));
-    if (!phoneCheck.empty) return alert("Phone already exists");
+    try {
 
-    const nidCheck = await getDocs(query(collection(db, "members"), where("nid", "==", nid)));
-    if (!nidCheck.empty) return alert("NID already exists");
+      const name = document.getElementById("name").value.trim();
+      const phone = document.getElementById("phone").value.trim();
+      const nid = document.getElementById("nid").value.trim();
 
-    // get user
-    const user = auth.currentUser;
-    const createdByName = await getUserName(user?.uid);
+      /* VALIDATION */
+      if (!name || name.length < 2) {
+        alert("Enter valid name");
+        return;
+      }
 
-    await addDoc(collection(db, "members"), {
-      name,
-      phone,
-      nid,
-      savings: 0,
-      loanTotal: 0,
-      loanRemaining: 0,
-      status: "active",
-      createdAt: serverTimestamp(),
-      createdBy: createdByName
-    });
+      if (phone.length !== 9) {
+        alert("Phone must be 9 digits");
+        return;
+      }
 
-    alert("Member saved");
+      if (nid.length !== 16) {
+        alert("NID must be 16 digits");
+        return;
+      }
 
-    e.target.reset();
-    modal.style.display = "none";
+      /* CHECK DUPLICATE PHONE */
+      const phoneCheck = await getDocs(
+        query(collection(db, "members"), where("phone", "==", phone))
+      );
 
-    loadMembers();
+      if (!phoneCheck.empty) {
+        alert("Phone already exists");
+        return;
+      }
 
-  } catch (err) {
-    console.error(err);
-    alert(err.message);
-  }
-});
+      /* CHECK DUPLICATE NID */
+      const nidCheck = await getDocs(
+        query(collection(db, "members"), where("nid", "==", nid))
+      );
+
+      if (!nidCheck.empty) {
+        alert("NID already exists");
+        return;
+      }
+
+      /* USER NAME ONLY */
+      const user = auth.currentUser;
+
+      const createdBy = user?.displayName || "Unknown";
+
+      /* SAVE TO FIRESTORE */
+      await addDoc(collection(db, "members"), {
+
+        name,
+        phone,
+        nid,
+
+        savings: 0,
+        loanTotal: 0,
+        loanRemaining: 0,
+
+        status: "active",
+
+        createdAt: serverTimestamp(),
+        createdBy
+
+      });
+
+      alert("Member added successfully");
+
+      memberForm.reset();
+      modal.style.display = "none";
+
+      loadMembers();
+
+    } catch (error) {
+      console.error(error);
+      alert("Error: " + error.message);
+    }
+  });
+}
 
 /* =========================
    LOAD MEMBERS TABLE
 ========================= */
+
 async function loadMembers() {
-  const table = document.getElementById("membersTable");
-  table.innerHTML = "";
+
+  if (!membersTable) return;
+
+  membersTable.innerHTML = "";
 
   const snap = await getDocs(collection(db, "members"));
 
   snap.forEach(doc => {
+
     const m = doc.data();
 
-    table.innerHTML += `
+    membersTable.innerHTML += `
       <tr>
-        <td>${m.name}</td>
-        <td>${m.phone}</td>
-        <td>${m.nid}</td>
-        <td>${m.savings}</td>
-        <td>${m.loanTotal}</td>
-        <td>${m.loanRemaining}</td>
-        <td>${m.status}</td>
-        <td>${m.createdAt ? new Date(m.createdAt.seconds * 1000).toLocaleDateString() : ""}</td>
-        <td>${m.createdBy}</td>
+        <td>${m.name || "-"}</td>
+        <td>${m.phone || "-"}</td>
+        <td>${m.nid || "-"}</td>
+        <td>${m.savings ?? 0}</td>
+        <td>${m.loanTotal ?? 0}</td>
+        <td>${m.loanRemaining ?? 0}</td>
+        <td>${m.status || "active"}</td>
+        <td>
+          ${
+            m.createdAt
+              ? new Date(m.createdAt.seconds * 1000).toLocaleDateString()
+              : "-"
+          }
+        </td>
+        <td>${m.createdBy || "Unknown"}</td>
       </tr>
     `;
   });
 }
 
+/* INIT */
 loadMembers();

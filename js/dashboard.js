@@ -2,10 +2,7 @@ import { db } from "./firebase.js";
 
 import {
   collection,
-  getDocs,
-  query,
-  orderBy,
-  limit
+  getDocs
 }
 from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
@@ -13,23 +10,20 @@ from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
    CARD ELEMENTS
 ========================================================= */
 
-const totalMembers =
-  document.getElementById("totalMembers");
+const membersEl =
+  document.getElementById("members");
 
-const totalSavings =
-  document.getElementById("totalSavings");
+const savingsEl =
+  document.getElementById("savings");
 
-const totalLoans =
-  document.getElementById("totalLoans");
+const loansEl =
+  document.getElementById("loans");
 
-const totalRepayments =
-  document.getElementById("totalRepayments");
+const withdrawalsEl =
+  document.getElementById("withdrawals");
 
-const totalWithdrawals =
-  document.getElementById("totalWithdrawals");
-
-const activeLoans =
-  document.getElementById("activeLoans");
+const profitEl =
+  document.getElementById("profit");
 
 /* =========================================================
    LOAD DASHBOARD
@@ -40,7 +34,7 @@ async function loadDashboard() {
   try {
 
     /* =====================================================
-       FETCH ALL COLLECTIONS
+       FETCH DATA
     ===================================================== */
 
     const membersSnap =
@@ -58,124 +52,120 @@ async function loadDashboard() {
         collection(db, "loans")
       );
 
-    const repaymentsSnap =
-      await getDocs(
-        collection(db, "repayments")
-      );
-
     const withdrawalsSnap =
       await getDocs(
         collection(db, "withdrawals")
+      );
+
+    const repaymentsSnap =
+      await getDocs(
+        collection(db, "repayments")
       );
 
     /* =====================================================
        MEMBERS
     ===================================================== */
 
-    totalMembers.textContent =
+    const totalMembers =
       membersSnap.size;
 
+    membersEl.textContent =
+      totalMembers;
+
     /* =====================================================
-       SAVINGS TOTAL
+       SAVINGS
     ===================================================== */
 
-    let savingsTotal = 0;
+    let totalSavings = 0;
 
     savingsSnap.forEach((doc) => {
 
       const data = doc.data();
 
-      savingsTotal +=
+      totalSavings +=
         Number(data.amount || 0);
 
     });
 
-    totalSavings.textContent =
-      savingsTotal.toLocaleString();
+    savingsEl.textContent =
+      totalSavings.toLocaleString() +
+      " ETB";
 
     /* =====================================================
-       LOANS TOTAL
+       LOANS
     ===================================================== */
 
-    let loansTotal = 0;
-
-    let activeLoanCount = 0;
+    let totalLoans = 0;
 
     loansSnap.forEach((doc) => {
 
       const data = doc.data();
 
-      loansTotal +=
-        Number(data.amount || 0);
-
-      if (
-        data.status === "active"
-      ) {
-
-        activeLoanCount++;
-
-      }
-
-    });
-
-    totalLoans.textContent =
-      loansTotal.toLocaleString();
-
-    activeLoans.textContent =
-      activeLoanCount;
-
-    /* =====================================================
-       REPAYMENTS TOTAL
-    ===================================================== */
-
-    let repaymentTotal = 0;
-
-    repaymentsSnap.forEach((doc) => {
-
-      const data = doc.data();
-
-      repaymentTotal +=
+      totalLoans +=
         Number(data.amount || 0);
 
     });
 
-    totalRepayments.textContent =
-      repaymentTotal.toLocaleString();
+    loansEl.textContent =
+      totalLoans.toLocaleString() +
+      " ETB";
 
     /* =====================================================
-       WITHDRAWALS TOTAL
+       WITHDRAWALS
     ===================================================== */
 
-    let withdrawalTotal = 0;
+    let totalWithdrawals = 0;
 
     withdrawalsSnap.forEach((doc) => {
 
       const data = doc.data();
 
-      withdrawalTotal +=
+      totalWithdrawals +=
         Number(data.amount || 0);
 
     });
 
-    totalWithdrawals.textContent =
-      withdrawalTotal.toLocaleString();
+    withdrawalsEl.textContent =
+      totalWithdrawals.toLocaleString() +
+      " ETB";
 
     /* =====================================================
-       CHARTS
+       REPAYMENTS
     ===================================================== */
 
-    loadCharts(
-      savingsTotal,
-      loansTotal,
-      repaymentTotal,
-      withdrawalTotal
+    let totalRepayments = 0;
+
+    repaymentsSnap.forEach((doc) => {
+
+      const data = doc.data();
+
+      totalRepayments +=
+        Number(data.amount || 0);
+
+    });
+
+    /* =====================================================
+       NET PROFIT
+    ===================================================== */
+
+    const profit =
+      totalRepayments -
+      totalWithdrawals;
+
+    profitEl.textContent =
+      profit.toLocaleString() +
+      " ETB";
+
+    /* =====================================================
+       LOAD CHART
+    ===================================================== */
+
+    loadChart(
+      totalSavings,
+      totalLoans,
+      totalWithdrawals,
+      totalRepayments
     );
-
-    /* =====================================================
-       RECENT ACTIVITIES
-    ===================================================== */
-
-    loadRecentActivities();
 
   }
 
@@ -188,212 +178,92 @@ async function loadDashboard() {
 }
 
 /* =========================================================
-   LOAD CHARTS
+   CHART
 ========================================================= */
 
-function loadCharts(
+function loadChart(
   savings,
   loans,
-  repayments,
-  withdrawals
+  withdrawals,
+  repayments
 ) {
 
-  /* BAR CHART */
-
-  const barCtx =
+  const ctx =
     document
     .getElementById("financeChart");
 
-  if (barCtx) {
+  if (!ctx) return;
 
-    new Chart(barCtx, {
+  new Chart(ctx, {
 
-      type: "bar",
+    type: "bar",
 
-      data: {
+    data: {
 
-        labels: [
-          "Savings",
-          "Loans",
-          "Repayments",
-          "Withdrawals"
+      labels: [
+
+        "Savings",
+        "Loans",
+        "Withdrawals",
+        "Repayments"
+
+      ],
+
+      datasets: [{
+
+        label: "ETB",
+
+        data: [
+
+          savings,
+          loans,
+          withdrawals,
+          repayments
+
         ],
 
-        datasets: [{
+        backgroundColor: [
 
-          label: "Amount",
+          "#0ea5e9",
+          "#22c55e",
+          "#ef4444",
+          "#f59e0b"
 
-          data: [
-            savings,
-            loans,
-            repayments,
-            withdrawals
-          ],
+        ],
 
-          backgroundColor: [
+        borderRadius: 12
 
-            "#0ea5e9",
-            "#22c55e",
-            "#f59e0b",
-            "#ef4444"
+      }]
 
-          ],
+    },
 
-          borderRadius: 10
+    options: {
 
-        }]
+      responsive: true,
+
+      plugins: {
+
+        legend: {
+
+          display: false
+
+        }
 
       },
 
-      options: {
+      scales: {
 
-        responsive: true,
+        y: {
 
-        plugins: {
-
-          legend: {
-            display: false
-          }
+          beginAtZero: true
 
         }
 
       }
 
-    });
+    }
 
-  }
-
-  /* PIE CHART */
-
-  const pieCtx =
-    document
-    .getElementById("summaryChart");
-
-  if (pieCtx) {
-
-    new Chart(pieCtx, {
-
-      type: "doughnut",
-
-      data: {
-
-        labels: [
-          "Savings",
-          "Loans",
-          "Repayments",
-          "Withdrawals"
-        ],
-
-        datasets: [{
-
-          data: [
-            savings,
-            loans,
-            repayments,
-            withdrawals
-          ],
-
-          backgroundColor: [
-
-            "#0ea5e9",
-            "#22c55e",
-            "#f59e0b",
-            "#ef4444"
-
-          ]
-
-        }]
-
-      },
-
-      options: {
-
-        responsive: true
-
-      }
-
-    });
-
-  }
-
-}
-
-/* =========================================================
-   RECENT ACTIVITIES
-========================================================= */
-
-async function loadRecentActivities() {
-
-  const activityBox =
-    document.getElementById(
-      "recentActivities"
-    );
-
-  if (!activityBox) return;
-
-  activityBox.innerHTML = "";
-
-  try {
-
-    const q =
-      query(
-
-        collection(db, "members"),
-
-        orderBy(
-          "createdAt",
-          "desc"
-        ),
-
-        limit(5)
-
-      );
-
-    const snapshot =
-      await getDocs(q);
-
-    snapshot.forEach((doc) => {
-
-      const data = doc.data();
-
-      activityBox.innerHTML += `
-
-        <div class="activity-item">
-
-          <div>
-
-            👤 New Member:
-            <strong>
-              ${data.name}
-            </strong>
-
-          </div>
-
-          <small>
-
-            ${
-              data.createdAt
-              ? new Date(
-                  data.createdAt.seconds * 1000
-                ).toLocaleDateString()
-              : "-"
-            }
-
-          </small>
-
-        </div>
-
-      `;
-
-    });
-
-  }
-
-  catch (error) {
-
-    console.error(error);
-
-  }
+  });
 
 }
 

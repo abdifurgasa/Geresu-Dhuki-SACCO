@@ -14,35 +14,222 @@
 <body>
 
 <!-- ================= SIDEBAR ================= -->
-<aside class="sidebar" id="sidebar">
+<aside
+  class="sidebar"
+  id="sidebar"
+>
 
-  <h2 class="logo">🏦 SACCO</h2>
+  <!-- TOGGLE -->
+  <button
+    class="toggle-btn"
+    onclick="toggleSidebar()"
+  >
+    ☰
+  </button>
 
+  <!-- LOGO -->
+  <h2 class="logo">
+    🏦 SACCO
+  </h2>
+
+  <!-- NAVIGATION -->
   <nav class="nav">
 
-    <a href="dashboard.html" class="nav-item">
-      📊 <span data-i18n="dashboard">Dashboard</span>
+    <!-- DASHBOARD -->
+    <a
+      href="dashboard.html"
+      class="nav-item active"
+    >
+
+      <span class="icon">
+        📊
+      </span>
+
+      <span
+        class="text"
+        data-i18n="dashboard"
+      >
+        Dashboard
+      </span>
+
     </a>
 
-    <a href="members.html" class="nav-item">
-      👥 <span data-i18n="members">Members</span>
+    <!-- MEMBERS -->
+    <a
+      href="members.html"
+      class="nav-item admin-only"
+    >
+
+      <span class="icon">
+        👥
+      </span>
+
+      <span
+        class="text"
+        data-i18n="members"
+      >
+        Members
+      </span>
+
     </a>
 
-    <a href="savings.html" class="nav-item active">
-      💰 <span data-i18n="savings">Savings</span>
+    <!-- SAVINGS -->
+    <a
+      href="savings.html"
+      class="nav-item"
+    >
+
+      <span class="icon">
+        💰
+      </span>
+
+      <span
+        class="text"
+        data-i18n="savings"
+      >
+        Savings
+      </span>
+
     </a>
 
-    <a href="loans.html" class="nav-item">
-      🏦 <span data-i18n="loans">Loans</span>
+    <!-- LOANS -->
+    <a
+      href="loans.html"
+      class="nav-item"
+    >
+
+      <span class="icon">
+        🏦
+      </span>
+
+      <span
+        class="text"
+        data-i18n="loans"
+      >
+        Loans
+      </span>
+
     </a>
 
-    <a href="settings.html" class="nav-item">
-      ⚙️ <span data-i18n="settings">Settings</span>
+    <!-- REPAYMENTS -->
+    <a
+      href="repayments.html"
+      class="nav-item"
+    >
+
+      <span class="icon">
+        💵
+      </span>
+
+      <span
+        class="text"
+        data-i18n="repayments"
+      >
+        Repayments
+      </span>
+
+    </a>
+
+    <!-- WITHDRAWALS -->
+    <a
+      href="withdrawals.html"
+      class="nav-item admin-only"
+    >
+
+      <span class="icon">
+        💸
+      </span>
+
+      <span
+        class="text"
+        data-i18n="withdrawals"
+      >
+        Withdrawals
+      </span>
+
+    </a>
+
+    <!-- REPORTS -->
+    <a
+      href="reports.html"
+      class="nav-item admin-only"
+    >
+
+      <span class="icon">
+        📄
+      </span>
+
+      <span
+        class="text"
+        data-i18n="reports"
+      >
+        Reports
+      </span>
+
+    </a>
+
+    <!-- USERS -->
+    <a
+      href="users.html"
+      class="nav-item admin-only"
+    >
+
+      <span class="icon">
+        👤
+      </span>
+
+      <span
+        class="text"
+        data-i18n="users"
+      >
+        Users
+      </span>
+
+    </a>
+
+    <!-- SETTINGS -->
+    <a
+      href="settings.html"
+      class="nav-item"
+    >
+
+      <span class="icon">
+        ⚙️
+      </span>
+
+      <span
+        class="text"
+        data-i18n="settings"
+      >
+        Settings
+      </span>
+
+    </a>
+
+    <!-- LOGOUT -->
+    <a
+      href="#"
+      class="nav-item logout"
+      id="logoutBtn"
+    >
+
+      <span class="icon">
+        🚪
+      </span>
+
+      <span
+        class="text"
+        data-i18n="logout"
+      >
+        Logout
+      </span>
+
     </a>
 
   </nav>
 
 </aside>
+
 
 <!-- ================= MAIN ================= -->
 <main class="main">

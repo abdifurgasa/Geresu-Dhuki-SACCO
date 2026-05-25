@@ -34,7 +34,7 @@ async function loadDashboard() {
   try {
 
     /* =====================================================
-       FETCH DATA
+       FETCH COLLECTIONS
     ===================================================== */
 
     const membersSnap =
@@ -73,7 +73,7 @@ async function loadDashboard() {
       totalMembers;
 
     /* =====================================================
-       SAVINGS
+       TOTAL SAVINGS
     ===================================================== */
 
     let totalSavings = 0;
@@ -92,7 +92,7 @@ async function loadDashboard() {
       " ETB";
 
     /* =====================================================
-       LOANS
+       TOTAL LOANS
     ===================================================== */
 
     let totalLoans = 0;
@@ -111,7 +111,7 @@ async function loadDashboard() {
       " ETB";
 
     /* =====================================================
-       WITHDRAWALS
+       TOTAL WITHDRAWALS
     ===================================================== */
 
     let totalWithdrawals = 0;
@@ -130,7 +130,7 @@ async function loadDashboard() {
       " ETB";
 
     /* =====================================================
-       REPAYMENTS
+       TOTAL REPAYMENTS
     ===================================================== */
 
     let totalRepayments = 0;
@@ -157,113 +157,220 @@ async function loadDashboard() {
       " ETB";
 
     /* =====================================================
-       LOAD CHART
+       LOAD CHARTS
     ===================================================== */
 
-    loadChart(
+    loadCharts(
+
       totalSavings,
       totalLoans,
       totalWithdrawals,
       totalRepayments
+
     );
 
   }
 
   catch (error) {
 
-    console.error(error);
+    console.error(
+      "Dashboard Error:",
+      error
+    );
 
   }
 
 }
 
 /* =========================================================
-   CHART
+   LOAD CHARTS
 ========================================================= */
 
-function loadChart(
+function loadCharts(
+
   savings,
   loans,
   withdrawals,
   repayments
+
 ) {
 
-  const ctx =
-    document
-    .getElementById("financeChart");
+  /* =====================================================
+     MAIN FINANCIAL CHART
+  ===================================================== */
 
-  if (!ctx) return;
+  const financeCanvas =
+    document.getElementById(
+      "financeChart"
+    );
 
-  new Chart(ctx, {
+  if (financeCanvas) {
 
-    type: "bar",
+    new Chart(financeCanvas, {
 
-    data: {
+      type: "bar",
 
-      labels: [
+      data: {
 
-        "Savings",
-        "Loans",
-        "Withdrawals",
-        "Repayments"
+        labels: [
 
-      ],
-
-      datasets: [{
-
-        label: "ETB",
-
-        data: [
-
-          savings,
-          loans,
-          withdrawals,
-          repayments
+          "Savings",
+          "Loans",
+          "Withdrawals",
+          "Repayments"
 
         ],
 
-        backgroundColor: [
+        datasets: [{
 
-          "#0ea5e9",
-          "#22c55e",
-          "#ef4444",
-          "#f59e0b"
+          label: "ETB",
 
-        ],
+          data: [
 
-        borderRadius: 12
+            savings,
+            loans,
+            withdrawals,
+            repayments
 
-      }]
+          ],
 
-    },
+          backgroundColor: [
 
-    options: {
+            "#0ea5e9",
+            "#22c55e",
+            "#ef4444",
+            "#f59e0b"
 
-      responsive: true,
+          ],
 
-      plugins: {
+          borderRadius: 12
 
-        legend: {
-
-          display: false
-
-        }
+        }]
 
       },
 
-      scales: {
+      options: {
 
-        y: {
+        responsive: true,
 
-          beginAtZero: true
+        plugins: {
+
+          legend: {
+
+            display: false
+
+          }
+
+        },
+
+        scales: {
+
+          y: {
+
+            beginAtZero: true
+
+          }
 
         }
 
       }
 
-    }
+    });
 
-  });
+  }
+
+  /* =====================================================
+     LOANS VS REPAYMENTS
+  ===================================================== */
+
+  const compareCanvas =
+    document.getElementById(
+      "loanRepaymentChart"
+    );
+
+  if (compareCanvas) {
+
+    new Chart(compareCanvas, {
+
+      type: "bar",
+
+      data: {
+
+        labels: [
+
+          "Financial Comparison"
+
+        ],
+
+        datasets: [
+
+          {
+
+            label: "Loans",
+
+            data: [
+
+              loans
+
+            ],
+
+            backgroundColor:
+              "#f59e0b",
+
+            borderRadius: 12
+
+          },
+
+          {
+
+            label: "Repayments",
+
+            data: [
+
+              repayments
+
+            ],
+
+            backgroundColor:
+              "#22c55e",
+
+            borderRadius: 12
+
+          }
+
+        ]
+
+      },
+
+      options: {
+
+        responsive: true,
+
+        plugins: {
+
+          legend: {
+
+            position: "top"
+
+          }
+
+        },
+
+        scales: {
+
+          y: {
+
+            beginAtZero: true
+
+          }
+
+        }
+
+      }
+
+    });
+
+  }
 
 }
 

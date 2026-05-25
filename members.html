@@ -390,80 +390,156 @@
      MEMBER MODAL
 ========================================================= -->
 
+<!-- =========================================================
+     MEMBER MODAL
+========================================================= -->
+
 <div
   class="modal"
   id="memberModal"
 >
 
-  <div class="modal-box">
+  <div class="modal-box modern-modal">
 
-    <h3 data-i18n="addMember">
-      Add New Member
-    </h3>
+    <!-- HEADER -->
+    <div class="modal-header">
+
+      <div>
+
+        <h2 data-i18n="addMember">
+          Add New Member
+        </h2>
+
+        <p class="modal-subtitle">
+          Register SACCO member information
+        </p>
+
+      </div>
+
+      <!-- CLOSE ICON -->
+      <button
+        type="button"
+        class="modal-close-icon"
+        id="closeModalBtn"
+      >
+        <i class="fa fa-times"></i>
+      </button>
+
+    </div>
 
     <!-- FORM -->
     <form id="memberForm">
 
-      <!-- NAME -->
-      <input
-        type="text"
-        id="name"
-        placeholder="Full Name"
-        data-i18n-placeholder="fullName"
-        required
-      />
+      <!-- FULL NAME -->
+      <div class="input-group">
+
+        <label data-i18n="fullName">
+          Full Name
+        </label>
+
+        <div class="input-box">
+
+          <i class="fa fa-user"></i>
+
+          <input
+            type="text"
+            id="name"
+            placeholder="Enter full name"
+            data-i18n-placeholder="fullName"
+            required
+          />
+
+        </div>
+
+      </div>
 
       <!-- PHONE -->
-      <input
-        type="text"
-        id="phone"
-        maxlength="9"
-        placeholder="9 Digit Phone"
-        data-i18n-placeholder="phone"
-        required
-      />
+      <div class="input-group">
+
+        <label data-i18n="phone">
+          Phone
+        </label>
+
+        <div class="input-box">
+
+          <i class="fa fa-phone"></i>
+
+          <input
+            type="text"
+            id="phone"
+            maxlength="9"
+            placeholder="9 Digit Phone"
+            data-i18n-placeholder="phone"
+            required
+          />
+
+        </div>
+
+      </div>
 
       <!-- NID -->
-      <input
-        type="text"
-        id="nid"
-        maxlength="16"
-        placeholder="16 Digit National ID"
-        data-i18n-placeholder="nid"
-        required
-      />
+      <div class="input-group">
 
-      <!-- SAVE -->
-      <button
-        type="submit"
-        class="save-btn"
-      >
+        <label data-i18n="nid">
+          National ID
+        </label>
 
-        <span data-i18n="save">
-          Save Member
-        </span>
+        <div class="input-box">
 
-      </button>
+          <i class="fa fa-id-card"></i>
 
-      <!-- CANCEL -->
-      <button
-        type="button"
-        class="close-btn"
-        id="closeModalBtn"
-      >
+          <input
+            type="text"
+            id="nid"
+            maxlength="16"
+            placeholder="16 Digit National ID"
+            data-i18n-placeholder="nid"
+            required
+          />
 
-        <span data-i18n="cancel">
-          Cancel
-        </span>
+        </div>
 
-      </button>
+      </div>
+
+      <!-- BUTTONS -->
+      <div class="modal-buttons">
+
+        <!-- SAVE -->
+        <button
+          type="submit"
+          class="save-btn"
+        >
+
+          <i class="fa fa-save"></i>
+
+          <span data-i18n="save">
+            Save Member
+          </span>
+
+        </button>
+
+        <!-- CANCEL -->
+        <button
+          type="button"
+          class="close-btn"
+          id="closeModalBtn"
+        >
+
+          <i class="fa fa-times"></i>
+
+          <span data-i18n="cancel">
+            Cancel
+          </span>
+
+        </button>
+
+      </div>
 
     </form>
 
   </div>
 
 </div>
-
 <!-- =========================================================
      SCRIPTS
 ========================================================= -->

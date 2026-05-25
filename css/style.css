@@ -545,52 +545,150 @@ h1{
   font-weight:800;
 }
 /* =========================================================
-   PROFILE MODAL SCROLLABLE HISTORY
+   FULL SCROLLABLE HISTORY TABLE
 ========================================================= */
 
 .history-container{
-  max-height: 500px;
-  overflow-y: auto;
-  overflow-x: auto;
+
+  width: 100%;
+
+  max-height: 550px;
+
+  overflow-y: auto;   /* vertical scroll */
+  overflow-x: auto;   /* horizontal scroll */
+
   border-radius: 12px;
+
+  border: 1px solid #dbeafe;
+
+  background: white;
+
 }
 
-/* CUSTOM SCROLLBAR */
+/* =========================================================
+   TABLE
+========================================================= */
 
-.history-container::-webkit-scrollbar{
-  width: 10px;
-  height: 10px;
+.history-container table{
+
+  min-width: 1200px;
+
+  border-collapse: collapse;
+
 }
 
-.history-container::-webkit-scrollbar-track{
-  background: #e5e7eb;
-  border-radius: 10px;
-}
-
-.history-container::-webkit-scrollbar-thumb{
-  background: #2563eb;
-  border-radius: 10px;
-}
-
-.history-container::-webkit-scrollbar-thumb:hover{
-  background: #1d4ed8;
-}
-
-/* STICKY HEADER */
+/* =========================================================
+   STICKY HEADER
+========================================================= */
 
 .history-container thead th{
+
   position: sticky;
+
   top: 0;
+
   background: #2563eb;
+
   color: white;
-  z-index: 5;
+
+  z-index: 10;
+
+  padding: 14px;
+
+  white-space: nowrap;
+
 }
 
-/* HOVER EFFECT */
+/* =========================================================
+   TABLE BODY
+========================================================= */
 
-#historyTable tr:hover{
+.history-container td{
+
+  padding: 14px;
+
+  border-bottom: 1px solid #eee;
+
+  white-space: nowrap;
+
+}
+
+/* =========================================================
+   ROW HOVER
+========================================================= */
+
+.history-container tbody tr:hover{
+
   background: rgba(37,99,235,0.08);
+
   transition: 0.3s;
+
+}
+
+/* =========================================================
+   CUSTOM SCROLLBAR
+========================================================= */
+
+/* vertical */
+
+.history-container::-webkit-scrollbar{
+
+  width: 12px;
+  height: 12px;
+
+}
+
+/* track */
+
+.history-container::-webkit-scrollbar-track{
+
+  background: #e5e7eb;
+
+  border-radius: 10px;
+
+}
+
+/* thumb */
+
+.history-container::-webkit-scrollbar-thumb{
+
+  background: #2563eb;
+
+  border-radius: 10px;
+
+}
+
+/* hover */
+
+.history-container::-webkit-scrollbar-thumb:hover{
+
+  background: #1d4ed8;
+
+}
+
+/* =========================================================
+   TYPE COLORS
+========================================================= */
+
+.type-saving{
+  color: green;
+  font-weight: bold;
+}
+
+.type-loan{
+  color: orange;
+  font-weight: bold;
+}
+
+.type-repayment{
+  color: blue;
+  font-weight: bold;
+}
+
+.type-withdrawal{
+  color: red;
+  font-weight: bold;
+}
 }
 /* =========================================================
    📊 COUNTER (BANK STYLE)

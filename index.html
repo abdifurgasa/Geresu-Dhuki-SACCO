@@ -24,34 +24,52 @@
        BODY
     ========================================================= */
 
-body {
+    body {
 
-  margin: 0;
+      margin: 0;
 
-  height: 100vh;
+      height: 100vh;
 
-  display: flex;
+      display: flex;
 
-  justify-content: center;
+      justify-content: center;
 
-  align-items: center;
+      align-items: center;
 
-  overflow: hidden;
+      overflow: hidden;
 
-  position: relative;
+      position: relative;
 
-  font-family: "Times New Roman", Times, serif;
+      font-family: "Times New Roman", Times, serif;
 
-  background-image: url("./assets/image/background.jpg");
+      background-image: url("./assets/image/background.jpg");
 
-  background-repeat: no-repeat;
+      background-repeat: no-repeat;
 
-  background-position: center;
+      background-position: center;
 
-  background-size: cover;
+      background-size: contain;
 
-}    
-    
+      background-color: #0f172a;
+
+    }
+
+    /* DARK OVERLAY */
+
+    body::before {
+
+      content: "";
+
+      position: absolute;
+
+      inset: 0;
+
+      background: rgba(0,0,0,0.45);
+
+      z-index: 1;
+
+    }
+
     /* =========================================================
        LANGUAGE SELECT
     ========================================================= */
@@ -83,6 +101,8 @@ body {
       background: white;
 
       cursor: pointer;
+
+      font-family: "Times New Roman", Times, serif;
 
     }
 
@@ -177,19 +197,27 @@ body {
 
       margin: 10px 0;
 
-      color: white;
+      color: #ff2b2b;
 
       font-size: 30px;
 
       letter-spacing: 1px;
 
+      font-weight: bold;
+
+      text-shadow: 0 2px 10px rgba(0,0,0,0.4);
+
     }
 
     p {
 
-      color: rgba(255,255,255,0.9);
+      color: #ff4d4d;
 
       margin-bottom: 25px;
+
+      font-size: 17px;
+
+      font-weight: bold;
 
     }
 
@@ -211,9 +239,11 @@ body {
 
       margin-bottom: 7px;
 
-      color: white;
+      color: #ff4d4d;
 
       font-size: 15px;
+
+      font-weight: bold;
 
     }
 
@@ -235,7 +265,7 @@ body {
 
     .input-box i {
 
-      color: white;
+      color: #ff4d4d;
 
       font-size: 15px;
 
@@ -253,15 +283,19 @@ body {
 
       background: transparent;
 
-      color: white;
+      color: #ff4d4d;
 
       font-size: 15px;
+
+      font-weight: bold;
+
+      font-family: "Times New Roman", Times, serif;
 
     }
 
     .input-box input::placeholder {
 
-      color: rgba(255,255,255,0.7);
+      color: rgba(255,77,77,0.7);
 
     }
 
@@ -281,7 +315,7 @@ body {
 
       border-radius: 14px;
 
-      background: #2563eb;
+      background: #dc2626;
 
       color: white;
 
@@ -293,16 +327,18 @@ body {
 
       transition: 0.3s;
 
+      font-family: "Times New Roman", Times, serif;
+
     }
 
     .login-btn:hover {
 
-      background: #1d4ed8;
+      background: #b91c1c;
 
       transform: translateY(-2px);
 
       box-shadow:
-        0 10px 25px rgba(37,99,235,0.45);
+        0 10px 25px rgba(220,38,38,0.45);
 
     }
 
@@ -314,9 +350,11 @@ body {
 
       margin-top: 20px;
 
-      color: rgba(255,255,255,0.7);
+      color: #ffb3b3;
 
       font-size: 13px;
+
+      font-weight: bold;
 
     }
 
@@ -325,6 +363,12 @@ body {
     ========================================================= */
 
     @media(max-width:600px){
+
+      body{
+
+        background-size: cover;
+
+      }
 
       .login-box {
 
@@ -404,10 +448,6 @@ body {
     Welcome Back
   </p>
 
-  <!-- =========================================================
-       LOGIN FORM
-  ========================================================= -->
-
   <!-- EMAIL -->
 
   <div class="input-group">
@@ -474,138 +514,6 @@ body {
   </div>
 
 </div>
-
-<!-- =========================================================
-     FIREBASE LOGIN
-========================================================= -->
-
-<script type="module">
-
-import { auth, db }
-from "./js/firebase.js";
-
-import {
-
-  signInWithEmailAndPassword
-
-} from
-"https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-
-import {
-
-  doc,
-  getDoc
-
-} from
-"https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-/* =========================================================
-   LOGIN
-========================================================= */
-
-window.login = async function () {
-
-  const email =
-    document.getElementById("email").value;
-
-  const password =
-    document.getElementById("password").value;
-
-  if (!email || !password) {
-
-    alert("Please fill all fields");
-
-    return;
-
-  }
-
-  try {
-
-    /* LOGIN */
-
-    const userCredential =
-      await signInWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
-
-    const user =
-      userCredential.user;
-
-    /* =====================================================
-       GET USER ROLE + NAME
-    ===================================================== */
-
-    const userRef =
-      doc(db, "users", user.uid);
-
-    const userSnap =
-      await getDoc(userRef);
-
-    let role = "user";
-
-    let fullName =
-      user.email;
-
-    if (userSnap.exists()) {
-
-      const data =
-        userSnap.data();
-
-      role =
-        data.role || "user";
-
-      fullName =
-        data.name || user.email;
-
-    }
-
-    /* =====================================================
-       SAVE LOCAL STORAGE
-    ===================================================== */
-
-    localStorage.setItem(
-      "role",
-      role
-    );
-
-    localStorage.setItem(
-      "name",
-      fullName
-    );
-
-    localStorage.setItem(
-      "email",
-      user.email
-    );
-
-    /* =====================================================
-       REDIRECT
-    ===================================================== */
-
-    window.location.href =
-      "dashboard.html";
-
-  }
-
-  catch (error) {
-
-    console.error(error);
-
-    alert(error.message);
-
-  }
-
-};
-
-</script>
-
-<!-- =========================================================
-     LANGUAGE
-========================================================= -->
-
-<script src="js/i18n.js"></script>
 
 </body>
 </html>

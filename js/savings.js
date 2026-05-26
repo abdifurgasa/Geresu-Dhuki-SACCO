@@ -6,11 +6,7 @@ import {
   getDocs,
   query,
   where,
-  serverTimestamp,
-  orderBy,
-  deleteDoc,
-  doc,
-  updateDoc
+  serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 /* =========================
@@ -32,7 +28,7 @@ const selectedMemberBox = document.getElementById("selectedMember");
 let selectedMember = null;
 
 /* =========================
-   MODAL
+   OPEN / CLOSE MODAL
 ========================= */
 
 openModalBtn?.addEventListener("click", () => {
@@ -44,7 +40,7 @@ closeModalBtn?.addEventListener("click", () => {
 });
 
 /* =========================
-   SEARCH MEMBER (INSIDE MODAL)
+   SEARCH MEMBER
 ========================= */
 
 searchInput?.addEventListener("input", async () => {
@@ -55,8 +51,8 @@ searchInput?.addEventListener("input", async () => {
 
   const snap = await getDocs(collection(db, "members"));
 
-  snap.forEach((docSnap) => {
-    const m = docSnap.data();
+  snap.forEach(doc => {
+    const m = doc.data();
 
     if (
       m.name?.toLowerCase().includes(val) ||
@@ -65,16 +61,17 @@ searchInput?.addEventListener("input", async () => {
       const div = document.createElement("div");
 
       div.className = "search-item";
-      div.innerHTML = `<strong>${m.name}</strong><br><small>${m.phone}</small>`;
+
+      div.innerHTML = `
+        <strong>${m.name}</strong><br>
+        <small>${m.phone}</small>
+      `;
 
       div.onclick = () => {
-        selectedMember = {
-          id: docSnap.id,
-          ...m
-        };
+        selectedMember = { id: doc.id, ...m };
 
         selectedMemberBox.innerHTML = `
-          👤 ${m.name} <br>
+          👤 ${m.name}<br>
           📱 ${m.phone}
         `;
 
@@ -87,35 +84,71 @@ searchInput?.addEventListener("input", async () => {
 });
 
 /* =========================
-   ADD SAVING
+   SAVE SAVINGS
 ========================= */
 
 savingsForm?.addEventListener("submit", async (e) => {
   e.preventDefault();
 
   if (!selectedMember) {
-    alert("Select a member first");
+    alert("Select member first");
     return;
   }
 
-  const amount = Number(amountInput.value);
+  const deposit = Number(amountInput.value);
 
-  if (!amount || amount <= 0) {
-    alert("Invalid amount");
+  if (!deposit || deposit <= 0) {
+    alert("Enter valid amount");
     return;
   }
+
+  /* =========================
+     GET ALL SAVINGS
+  ========================= */
+
+  const q = query(
+    collection(db, "savings"),
+    where("memberId", "==", selectedMember.id)
+  );
+
+  const snap = await getDocs(q);
+
+  let allDeposits = [];
+
+  snap.forEach(d => {
+    allDeposits.push(d.data());
+  });
+
+  /* =========================
+     TOTAL SAVING (BEFORE INSERT)
+  ========================= */
+
+  const totalBefore = allDeposits.reduce(
+    (sum, x) => sum + Number(x.amount || 0),
+    0
+  );
+
+  const previousSaving = totalBefore;
+  const totalSaving = totalBefore + deposit;
 
   const createdBy =
     localStorage.getItem("name") ||
     auth.currentUser?.displayName ||
     "Admin";
 
+  /* =========================
+     SAVE NEW TRANSACTION
+  ========================= */
+
   await addDoc(collection(db, "savings"), {
     memberId: selectedMember.id,
     memberName: selectedMember.name,
     memberPhone: selectedMember.phone,
 
-    amount, // CURRENT DEPOSIT ONLY
+    amount: deposit,
+    previousSaving,
+    totalSaving,
+
     createdAt: serverTimestamp(),
     createdBy
   });
@@ -136,103 +169,52 @@ async function loadSavings() {
   savingsTable.innerHTML = "";
 
   const membersSnap = await getDocs(collection(db, "members"));
+  const savingsSnap = await getDocs(collection(db, "savings"));
 
-  const savingsQuery = query(
-    collection(db, "savings"),
-    orderBy("createdAt", "desc")
-  );
+  let savings = [];
 
-  const savingsSnap = await getDocs(savingsQuery);
-
-  const savingsData = [];
-
-  savingsSnap.forEach(docSnap => {
-    savingsData.push({
-      id: docSnap.id,
-      ...docSnap.data()
-    });
+  savingsSnap.forEach(d => {
+    savings.push(d.data());
   });
+
+  savings.sort((a, b) =>
+    (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)
+  );
 
   membersSnap.forEach(memberDoc => {
     const member = memberDoc.data();
 
-    const memberSavings = savingsData.filter(
+    const memberSavings = savings.filter(
       s => s.memberId === memberDoc.id
     );
 
-    let currentDeposit = 0;
-    let totalSaving = 0;
-    let previousSaving = 0;
-    let createdBy = "-";
-    let createdDate = "-";
+    let last = memberSavings[0] || null;
 
-    if (memberSavings.length > 0) {
+    let depositAmount = last ? last.amount : 0;
+    let previousSaving = last ? last.previousSaving : 0;
+    let totalSaving = last ? last.totalSaving : 0;
+    let createdBy = last ? last.createdBy : "-";
 
-      const latest = memberSavings[0];
-
-      currentDeposit = Number(latest.amount || 0);
-
-      totalSaving = memberSavings.reduce(
-        (sum, s) => sum + Number(s.amount || 0),
-        0
-      );
-
-      previousSaving = totalSaving - currentDeposit;
-
-      createdBy = latest.createdBy || "Admin";
-
-      createdDate = latest.createdAt
-        ? new Date(latest.createdAt.seconds * 1000).toLocaleString()
-        : "-";
-    }
+    let createdDate = last?.createdAt
+      ? new Date(last.createdAt.seconds * 1000).toLocaleString()
+      : "-";
 
     const row = `
       <tr>
-        <td>${member.name || "-"}</td>
-        <td>${member.phone || "-"}</td>
+        <td>${member.name}</td>
+        <td>${member.phone}</td>
 
-        <td>${currentDeposit.toLocaleString()} ETB</td>
+        <td>${depositAmount.toLocaleString()} ETB</td>
         <td>${previousSaving.toLocaleString()} ETB</td>
         <td>${totalSaving.toLocaleString()} ETB</td>
 
         <td>${createdDate}</td>
         <td>${createdBy}</td>
-
-        <td>
-          <button onclick="deleteSaving('${memberDoc.id}')">Delete</button>
-        </td>
       </tr>
     `;
 
     savingsTable.innerHTML += row;
   });
 }
-
-/* =========================
-   DELETE SAVING (OPTION)
-========================= */
-
-window.deleteSaving = async function(memberId) {
-  const confirmDelete = confirm("Delete all savings for this member?");
-
-  if (!confirmDelete) return;
-
-  const q = query(
-    collection(db, "savings"),
-    where("memberId", "==", memberId)
-  );
-
-  const snap = await getDocs(q);
-
-  snap.forEach(async (docSnap) => {
-    await deleteDoc(doc(db, "savings", docSnap.id));
-  });
-
-  loadSavings();
-};
-
-/* =========================
-   INIT
-========================= */
 
 loadSavings();

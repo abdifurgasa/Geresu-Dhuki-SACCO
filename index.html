@@ -42,15 +42,31 @@ body {
 
   font-family: "Times New Roman", Times, serif;
 
+  background: #000;
+
+}
+
+/* BACKGROUND IMAGE */
+
+body::before {
+
+  content: "";
+
+  position: absolute;
+
+  inset: 0;
+
   background-image: url("./assets/image/background.jpg");
 
   background-repeat: no-repeat;
 
   background-position: center;
 
-  background-size: contain;
+  background-size: cover;
 
-  background-color: #000;
+  transform: scale(0.9);
+
+  filter: brightness(0.6);
 
 }
     /* =========================================================

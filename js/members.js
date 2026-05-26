@@ -69,7 +69,7 @@ memberForm?.addEventListener("submit", async (e) => {
 
       createdBy:
         auth.currentUser?.displayName ||
-        auth.currentUser?.email ||
+        auth.currentUser?.name ||
         name
 
     });

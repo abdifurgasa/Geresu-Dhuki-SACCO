@@ -13,32 +13,17 @@ import {
    ELEMENTS
 ========================= */
 
-const savingsTable =
-  document.getElementById("savingsTable");
+const savingsTable = document.getElementById("savingsTable");
+const savingsForm = document.getElementById("savingsForm");
+const amountInput = document.getElementById("amount");
 
-const savingsForm =
-  document.getElementById("savingsForm");
+const modal = document.getElementById("savingsModal");
+const openModalBtn = document.getElementById("openModalBtn");
+const closeModalBtn = document.getElementById("closeModalBtn");
 
-const amountInput =
-  document.getElementById("amount");
-
-const openModalBtn =
-  document.getElementById("openModalBtn");
-
-const closeModalBtn =
-  document.getElementById("closeModalBtn");
-
-const modal =
-  document.getElementById("savingsModal");
-
-const searchInput =
-  document.getElementById("searchMember");
-
-const searchResults =
-  document.getElementById("searchResults");
-
-const selectedMember =
-  document.getElementById("selectedMember");
+const searchInput = document.getElementById("searchMember");
+const searchResults = document.getElementById("searchResults");
+const selectedMember = document.getElementById("selectedMember");
 
 /* =========================
    MODAL
@@ -53,19 +38,17 @@ closeModalBtn?.addEventListener("click", () => {
 });
 
 /* =========================
-   GLOBAL MEMBER
+   SELECTED MEMBER
 ========================= */
 
 let selected = null;
 
 /* =========================
-   SEARCH MEMBER
+   SEARCH MEMBER (INSIDE MODAL)
 ========================= */
 
 searchInput?.addEventListener("input", async () => {
-
   const val = searchInput.value.toLowerCase();
-
   searchResults.innerHTML = "";
 
   if (!val) return;
@@ -73,16 +56,13 @@ searchInput?.addEventListener("input", async () => {
   const snap = await getDocs(collection(db, "members"));
 
   snap.forEach(doc => {
-
     const m = doc.data();
 
     if (
       m.name?.toLowerCase().includes(val) ||
       m.phone?.includes(val)
     ) {
-
       const div = document.createElement("div");
-
       div.className = "search-item";
 
       div.innerHTML = `
@@ -91,11 +71,7 @@ searchInput?.addEventListener("input", async () => {
       `;
 
       div.onclick = () => {
-
-        selected = {
-          id: doc.id,
-          ...m
-        };
+        selected = { id: doc.id, ...m };
 
         selectedMember.innerHTML = `
           👤 ${m.name}<br>
@@ -103,15 +79,11 @@ searchInput?.addEventListener("input", async () => {
         `;
 
         searchResults.innerHTML = "";
-
       };
 
       searchResults.appendChild(div);
-
     }
-
   });
-
 });
 
 /* =========================
@@ -119,52 +91,74 @@ searchInput?.addEventListener("input", async () => {
 ========================= */
 
 savingsForm?.addEventListener("submit", async (e) => {
-
   e.preventDefault();
 
-  try {
-
-    if (!selected) {
-      alert("Select a member first");
-      return;
-    }
-
-    const amount = Number(amountInput.value);
-
-    if (!amount || amount <= 0) {
-      alert("Enter valid amount");
-      return;
-    }
-
-    createdBy:
-     localStorage.getItem("name") ||
-     auth.currentUser?.displayName ||
-     "Admin
-
-    await addDoc(collection(db, "savings"), {
-
-      memberId: selected.id,
-      memberName: selected.name,
-      memberPhone: selected.phone,
-
-      amount,
-      createdAt: serverTimestamp(),
-      createdBy: currentUserName
-
-    });
-
-    alert("Savings added successfully");
-
-    amountInput.value = "";
-    modal.style.display = "none";
-
-    loadSavings();
-
-  } catch (err) {
-    console.error(err);
-    alert(err.message);
+  if (!selected) {
+    alert("Select member first");
+    return;
   }
 
+  const amount = Number(amountInput.value);
+
+  if (!amount || amount <= 0) {
+    alert("Enter valid amount");
+    return;
+  }
+
+  /* GET ALL SAVINGS OF MEMBER */
+  const q = query(
+    collection(db, "savings"),
+    where("memberId", "==", selected.id)
+  );
+
+  const snap = await getDocs(q);
+
+  let totalBefore = 0;
+
+  const transactions = [];
+
+  snap.forEach(d => {
+    const data = d.data();
+    const amt = Number(data.amount || 0);
+
+    totalBefore += amt;
+
+    transactions.push({
+      ...data,
+      amount: amt
+    });
+  });
+
+  // previous saving = before this deposit
+  const previousSaving = totalBefore;
+
+  // total after deposit
+  const totalSaving = previousSaving + amount;
+
+  const createdBy =
+    localStorage.getItem("name") ||
+    auth.currentUser?.displayName ||
+    "Admin";
+
+  await addDoc(collection(db, "savings"), {
+    memberId: selected.id,
+    memberName: selected.name,
+    memberPhone: selected.phone,
+
+    amount, // current deposit ONLY
+    previousSaving,
+    totalSaving,
+
+    createdAt: serverTimestamp(),
+    createdBy
+  });
+
+  alert("Saved successfully");
+
+  amountInput.value = "";
+  modal.style.display = "none";
+
+  loadSavings();
 });
 
 /* =========================
@@ -172,83 +166,64 @@ savingsForm?.addEventListener("submit", async (e) => {
 ========================= */
 
 async function loadSavings() {
-
   savingsTable.innerHTML = "";
 
   const membersSnap = await getDocs(collection(db, "members"));
+
   const savingsSnap = await getDocs(collection(db, "savings"));
 
-  let savingsData = [];
+  let savings = [];
 
-  savingsSnap.forEach(doc => {
-    savingsData.push({
-      id: doc.id,
-      ...doc.data()
-    });
+  savingsSnap.forEach(d => {
+    savings.push({ id: d.id, ...d.data() });
   });
 
-  savingsData.sort((a, b) =>
+  savings.sort((a, b) =>
     (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)
   );
 
   membersSnap.forEach(memberDoc => {
-
     const member = memberDoc.data();
 
-    const memberSavings =
-      savingsData.filter(s => s.memberId === memberDoc.id);
-
-    memberSavings.sort((a, b) =>
-      (a.createdAt?.seconds || 0) - (b.createdAt?.seconds || 0)
+    const memberSavings = savings.filter(
+      s => s.memberId === memberDoc.id
     );
 
     let depositAmount = 0;
     let previousSaving = 0;
     let totalSaving = 0;
-    let createdDate = "-";
     let createdBy = "-";
+    let createdDate = "-";
 
     if (memberSavings.length > 0) {
+      const latest = memberSavings[0];
 
-      const latest =
-        memberSavings[memberSavings.length - 1];
-
-      depositAmount =
-        Number(latest.amount || 0);
-
-      totalSaving =
-        memberSavings.reduce(
-          (sum, s) => sum + Number(s.amount || 0),
-          0
-        );
-
-      previousSaving =
-        totalSaving - depositAmount;
+      depositAmount = latest.amount || 0;
+      previousSaving = latest.previousSaving || 0;
+      totalSaving = latest.totalSaving || 0;
+      createdBy = latest.createdBy || "-";
 
       createdDate = latest.createdAt
         ? new Date(latest.createdAt.seconds * 1000).toLocaleString()
         : "-";
-
-      createdBy =
-        latest.createdBy || "Admin";
     }
 
     const row = `
       <tr>
         <td>${member.name || "-"}</td>
         <td>${member.phone || "-"}</td>
+
         <td>${depositAmount.toLocaleString()} ETB</td>
         <td>${previousSaving.toLocaleString()} ETB</td>
         <td>${totalSaving.toLocaleString()} ETB</td>
+
         <td>${createdDate}</td>
         <td>${createdBy}</td>
       </tr>
     `;
 
     savingsTable.innerHTML += row;
-
   });
-
 }
 
 /* =========================

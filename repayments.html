@@ -1,1 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="UTF-8" />
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
+
+  <title data-i18n="repayments">
+    Repayments
+  </title>
+
+  <!-- CSS -->
+  <link
+    rel="stylesheet"
+    href="css/style.css"
+  />
+
+  <!-- FONT AWESOME -->
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+  />
+
+</head>
+
+<body>
+
+<!-- =========================================================
+     SIDEBAR
+========================================================= -->
+
+<aside
+  class="sidebar"
+  id="sidebar"
+>
+
+  <!-- TOGGLE -->
+  <button
+    class="toggle-btn"
+    onclick="toggleSidebar()"
+  >
+    ☰
+  </button>
+
+  <!-- LOGO -->
+  <h2 class="logo">
+    🏦 SACCO
+  </h2>
+
+  <!-- NAVIGATION -->
+  <nav class="nav">
+
+    <!-- DASHBOARD -->
+    <a
+      href="dashboard.html"
+      class="nav-item active"
+    >
+
+      <span class="icon">
+        📊
+      </span>
+
+      <span
+        class="text"
+        data-i18n="dashboard"
+      >
+        Dashboard
+      </span>
+
+    </a>
+
+    <!-- MEMBERS -->
+    <a
+      href="members.html"
+      class="nav-item admin-only"
+    >
+
+      <span class="icon">
+        👥
+      </span>
+
+      <span
+        class="text"
+        data-i18n="members"
+      >
+        Members
+      </span>
+
+    </a>
+
+    <!-- SAVINGS -->
+    <a
+      href="savings.html"
+      class="nav-item"
+    >
+
+      <span class="icon">
+        💰
+      </span>
+
+      <span
+        class="text"
+        data-i18n="savings"
+      >
+        Savings
+      </span>
+
+    </a>
+
+    <!-- LOANS -->
+    <a
+      href="loans.html"
+      class="nav-item"
+    >
+
+      <span class="icon">
+        🏦
+      </span>
+
+      <span
+        class="text"
+        data-i18n="loans"
+      >
+        Loans
+      </span>
+
+    </a>
+
+    <!-- REPAYMENTS -->
+    <a
+      href="repayments.html"
+      class="nav-item"
+    >
+
+      <span class="icon">
+        💵
+      </span>
+
+      <span
+        class="text"
+        data-i18n="repayments"
+      >
+        Repayments
+      </span>
+
+    </a>
+
+    <!-- WITHDRAWALS -->
+    <a
+      href="withdrawals.html"
+      class="nav-item admin-only"
+    >
+
+      <span class="icon">
+        💸
+      </span>
+
+      <span
+        class="text"
+        data-i18n="withdrawals"
+      >
+        Withdrawals
+      </span>
+
+    </a>
+
+    <!-- REPORTS -->
+    <a
+      href="reports.html"
+      class="nav-item admin-only"
+    >
+
+      <span class="icon">
+        📄
+      </span>
+
+      <span
+        class="text"
+        data-i18n="reports"
+      >
+        Reports
+      </span>
+
+    </a>
+
+    <!-- USERS -->
+    <a
+      href="users.html"
+      class="nav-item admin-only"
+    >
+
+      <span class="icon">
+        👤
+      </span>
+
+      <span
+        class="text"
+        data-i18n="users"
+      >
+        Users
+      </span>
+
+    </a>
+
+    <!-- SETTINGS -->
+    <a
+      href="settings.html"
+      class="nav-item"
+    >
+
+      <span class="icon">
+        ⚙️
+      </span>
+
+      <span
+        class="text"
+        data-i18n="settings"
+      >
+        Settings
+      </span>
+
+    </a>
+
+    <!-- LOGOUT -->
+    <a
+      href="#"
+      class="nav-item logout"
+      id="logoutBtn"
+    >
+
+      <span class="icon">
+        🚪
+      </span>
+
+      <span
+        class="text"
+        data-i18n="logout"
+      >
+        Logout
+      </span>
+
+    </a>
+
+  </nav>
+
+</aside>
 

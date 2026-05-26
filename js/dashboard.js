@@ -70,7 +70,7 @@ function loadDashboard() {
     let total = 0;
 
     snap.forEach(doc => {
-      total += Number(doc.data().amount || 0);
+      total += Number(doc.data().amount || 0 ETB);
     });
 
     animateValue(savingsEl, 0, total);
@@ -82,7 +82,7 @@ function loadDashboard() {
     let total = 0;
 
     snap.forEach(doc => {
-      total += Number(doc.data().amount || 0);
+      total += Number(doc.data().amount || 0 ETB);
     });
 
     animateValue(loansEl, 0, total);
@@ -94,7 +94,7 @@ function loadDashboard() {
     let total = 0;
 
     snap.forEach(doc => {
-      total += Number(doc.data().amount || 0);
+      total += Number(doc.data().amount || 0 ETB);
     });
 
     animateValue(withdrawalsEl, 0, total);

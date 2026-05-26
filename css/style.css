@@ -336,6 +336,89 @@ h1{
   display: none;
 }
 /* =========================================================
+   MEMBER ACTION BAR
+========================================================= */
+
+.member-action-bar {
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 15px;
+
+  margin-bottom: 20px;
+
+  flex-wrap: wrap;
+
+}
+
+/* SEARCH */
+
+.search-container {
+
+  position: relative;
+
+  flex: 1;
+
+  min-width: 260px;
+
+}
+
+/* SEARCH INPUT */
+
+.search-input {
+
+  width: 100%;
+
+  padding: 12px 15px;
+
+  border-radius: 12px;
+
+  border: 1px solid #ddd;
+
+  outline: none;
+
+  font-size: 15px;
+
+}
+
+/* SELECTED MEMBER */
+
+.selected-box {
+
+  min-width: 230px;
+
+  padding: 12px 15px;
+
+  border-radius: 12px;
+
+  background: #f3f4f6;
+
+  font-weight: bold;
+
+}
+
+/* MOBILE */
+
+@media(max-width:768px){
+
+  .member-action-bar {
+
+    flex-direction: column;
+
+    align-items: stretch;
+
+  }
+
+  .selected-box {
+
+    width: 100%;
+
+  }
+
+}
+/* =========================================================
    🎴 CARDS
 ========================================================= */
 

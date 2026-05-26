@@ -164,7 +164,6 @@ async function loadMembers() {
 /* =========================================================
    PROFILE VIEW (FIXED - WORKING VERSION)
 ========================================================= */
-
 async function openMemberProfile(member) {
 
   profileModal.style.display = "flex";
@@ -181,127 +180,221 @@ async function openMemberProfile(member) {
 
   const all = [];
 
-  /* ================= SAVINGS ================= */
-  const sSnap = await getDocs(query(collection(db, "savings"), where("memberId", "==", member.id)));
-  sSnap.forEach(d => {
-    const x = d.data();
-    totalSavings += Number(x.amount || 0);
+  /* =====================================================
+     LOAD SAVINGS
+  ===================================================== */
 
-    all.push({
-      type: "Savings",
-      amount: x.amount || 0,
-      action: "Deposit",
-      desc: "Saving Deposit",
-      time: x.createdAt,
-      by: x.createdBy || member.name
-    });
-  });
-
-  /* ================= LOANS ================= */
-  const lSnap = await getDocs(query(collection(db, "loans"), where("memberId", "==", member.id)));
-  lSnap.forEach(d => {
-    const x = d.data();
-    totalLoans += Number(x.amount || 0);
-
-    all.push({
-      type: "Loan",
-      amount: x.amount || 0,
-      action: "Loan",
-      desc: "Loan Created",
-      time: x.createdAt,
-      by: x.createdBy || member.name
-    });
-  });
-
-  /* ================= REPAYMENTS ================= */
-  const rSnap = await getDocs(query(collection(db, "repayments"), where("memberId", "==", member.id)));
-  rSnap.forEach(d => {
-    const x = d.data();
-    totalRepayments += Number(x.amount || 0);
-
-    all.push({
-      type: "Repayment",
-      amount: x.amount || 0,
-      action: "Repay",
-      desc: "Loan Repayment",
-      time: x.createdAt,
-      by: x.createdBy || member.name
-    });
-  });
-
-  /* ================= WITHDRAWALS ================= */
-  const wSnap = await getDocs(query(collection(db, "withdrawals"), where("memberId", "==", member.id)));
-  wSnap.forEach(d => {
-    const x = d.data();
-    totalWithdrawals += Number(x.amount || 0);
-
-    all.push({
-      type: "Withdrawal",
-      amount: x.amount || 0,
-      action: "Withdraw",
-      desc: "Money Withdrawal",
-      time: x.createdAt,
-      by: x.createdBy || member.name
-    });
-  });
-
-  /* ================= TOP SUMMARY ================= */
-
-  document.getElementById("profileSavings").innerHTML =
-    totalSavings + " ETB";
-
-  document.getElementById("profileLoans").innerHTML =
-    totalLoans + " ETB";
-
-  document.getElementById("profileRepayments").innerHTML =
-    totalRepayments + " ETB";
-
-  document.getElementById("profileWithdrawals").innerHTML =
-    totalWithdrawals + " ETB";
-
-  /* ================= SORT LATEST ================= */
-
-  all.sort((a, b) =>
-    (b.time?.seconds || 0) - (a.time?.seconds || 0)
+  const savingsSnap = await getDocs(
+    collection(db, "savings")
   );
 
-  /* ================= EMPTY CHECK ================= */
+  savingsSnap.forEach(doc => {
+
+    const d = doc.data();
+
+    if (d.memberId === member.id) {
+
+      totalSavings += Number(d.amount || 0);
+
+      all.push({
+        type: "Savings",
+        amount: d.amount || 0,
+        action: "Deposit",
+        description: "Saving Deposit",
+        createdAt: d.createdAt || null,
+        createdBy: d.createdBy || member.name
+      });
+
+    }
+
+  });
+
+  /* =====================================================
+     LOAD LOANS
+  ===================================================== */
+
+  const loansSnap = await getDocs(
+    collection(db, "loans")
+  );
+
+  loansSnap.forEach(doc => {
+
+    const d = doc.data();
+
+    if (d.memberId === member.id) {
+
+      totalLoans += Number(d.amount || 0);
+
+      all.push({
+        type: "Loan",
+        amount: d.amount || 0,
+        action: "Loan",
+        description: "Loan Created",
+        createdAt: d.createdAt || null,
+        createdBy: d.createdBy || member.name
+      });
+
+    }
+
+  });
+
+  /* =====================================================
+     LOAD REPAYMENTS
+  ===================================================== */
+
+  const repaySnap = await getDocs(
+    collection(db, "repayments")
+  );
+
+  repaySnap.forEach(doc => {
+
+    const d = doc.data();
+
+    if (d.memberId === member.id) {
+
+      totalRepayments += Number(d.amount || 0);
+
+      all.push({
+        type: "Repayment",
+        amount: d.amount || 0,
+        action: "Repayment",
+        description: "Loan Repayment",
+        createdAt: d.createdAt || null,
+        createdBy: d.createdBy || member.name
+      });
+
+    }
+
+  });
+
+  /* =====================================================
+     LOAD WITHDRAWALS
+  ===================================================== */
+
+  const withdrawSnap = await getDocs(
+    collection(db, "withdrawals")
+  );
+
+  withdrawSnap.forEach(doc => {
+
+    const d = doc.data();
+
+    if (d.memberId === member.id) {
+
+      totalWithdrawals += Number(d.amount || 0);
+
+      all.push({
+        type: "Withdrawal",
+        amount: d.amount || 0,
+        action: "Withdrawal",
+        description: "Money Withdrawal",
+        createdAt: d.createdAt || null,
+        createdBy: d.createdBy || member.name
+      });
+
+    }
+
+  });
+
+  /* =====================================================
+     DISPLAY TOTALS
+  ===================================================== */
+
+  document.getElementById("profileSavings").innerHTML =
+    totalSavings.toLocaleString() + " ETB";
+
+  document.getElementById("profileLoans").innerHTML =
+    totalLoans.toLocaleString() + " ETB";
+
+  document.getElementById("profileRepayments").innerHTML =
+    totalRepayments.toLocaleString() + " ETB";
+
+  document.getElementById("profileWithdrawals").innerHTML =
+    totalWithdrawals.toLocaleString() + " ETB";
+
+  /* =====================================================
+     SORT LATEST FIRST
+  ===================================================== */
+
+  all.sort((a, b) => {
+
+    const aTime = a.createdAt?.seconds || 0;
+    const bTime = b.createdAt?.seconds || 0;
+
+    return bTime - aTime;
+
+  });
+
+  /* =====================================================
+     NO DATA
+  ===================================================== */
 
   if (all.length === 0) {
+
     historyTable.innerHTML = `
       <tr>
-        <td colspan="5" style="text-align:center;padding:20px;">
-          No Transactions Yet
+        <td colspan="6"
+          style="
+            text-align:center;
+            padding:30px;
+            font-weight:bold;
+            color:gray;
+          ">
+          No Transaction History
         </td>
       </tr>
     `;
+
     return;
   }
 
-  /* ================= RENDER ================= */
+  /* =====================================================
+     DISPLAY HISTORY
+  ===================================================== */
 
-  all.forEach(t => {
+  all.forEach(item => {
 
     const row = document.createElement("tr");
 
     row.innerHTML = `
-      <td>${t.type}</td>
-      <td>${t.amount} ETB</td>
-      <td>${t.action}</td>
-      <td>${t.desc}</td>
-      <td>${
-        t.time
-          ? new Date(t.time.seconds * 1000).toLocaleString()
-          : "-"
-      }</td>
-      <td>${t.by}</td>
+
+      <td class="type-${item.type.toLowerCase()}">
+        ${item.type}
+      </td>
+
+      <td>
+        ${Number(item.amount).toLocaleString()} ETB
+      </td>
+
+      <td>
+        ${item.action}
+      </td>
+
+      <td>
+        ${item.description}
+      </td>
+
+      <td>
+        ${
+          item.createdAt
+            ? new Date(
+                item.createdAt.seconds * 1000
+              ).toLocaleString()
+            : "-"
+        }
+      </td>
+
+      <td>
+        ${item.createdBy}
+      </td>
+
     `;
 
     historyTable.appendChild(row);
+
   });
 
 }
-
 /* =========================================================
    START
 ========================================================= */

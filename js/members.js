@@ -67,10 +67,10 @@ memberForm?.addEventListener("submit", async (e) => {
       status: "Active",
       createdAt: serverTimestamp(),
 
-      createdBy:
-        auth.currentUser?.displayName ||
-        auth.currentUser?.name ||
-        name
+  createdBy:
+     localStorage.getItem("name") ||
+     auth.currentUser?.displayName ||
+     "Admin"
 
     });
 

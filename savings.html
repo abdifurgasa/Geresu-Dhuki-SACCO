@@ -2,18 +2,38 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title data-i18n="savings_title">Savings</title>
 
-  <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <meta charset="UTF-8" />
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
+
+  <title data-i18n="savings_title">
+    Savings
+  </title>
+
+  <!-- CSS -->
+  <link
+    rel="stylesheet"
+    href="css/style.css"
+  />
+
+  <!-- FONT AWESOME -->
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+  />
+
 </head>
 
 <body>
 
-<!-- ================= SIDEBAR ================= -->
+<!-- =========================================================
+     SIDEBAR
+========================================================= -->
+
 <aside
   class="sidebar"
   id="sidebar"
@@ -38,7 +58,7 @@
     <!-- DASHBOARD -->
     <a
       href="dashboard.html"
-      class="nav-item active"
+      class="nav-item"
     >
 
       <span class="icon">
@@ -76,7 +96,7 @@
     <!-- SAVINGS -->
     <a
       href="savings.html"
-      class="nav-item"
+      class="nav-item active"
     >
 
       <span class="icon">
@@ -230,120 +250,192 @@
 
 </aside>
 
+<!-- =========================================================
+     MAIN CONTENT
+========================================================= -->
 
-<!-- ================= MAIN ================= -->
 <main class="main">
 
-  <!-- TOP BAR -->
+  <!-- TOPBAR -->
   <div class="topbar">
 
-    <h2 data-i18n="savings_management">💰 Savings Management</h2>
+    <h2 data-i18n="savings_management">
+      💰 Savings Management
+    </h2>
 
     <!-- LANGUAGE -->
-    <select id="languageSelect" onchange="changeLanguage(this.value)">
-      <option value="en">English</option>
-      <option value="am">አማርኛ</option>
-      <option value="om">Afaan Oromoo</option>
+    <select
+      id="languageSelect"
+      onchange="changeLanguage(this.value)"
+    >
+
+      <option value="en">
+        English
+      </option>
+
+      <option value="am">
+        አማርኛ
+      </option>
+
+      <option value="om">
+        Afaan Oromoo
+      </option>
+
     </select>
 
-    <!-- BUTTON -->
-    <button class="add-btn" id="openModalBtn">
+  </div>
+
+  <!-- =========================================================
+       MEMBER ACTION BAR
+  ========================================================= -->
+
+  <div class="member-action-bar">
+
+    <!-- SEARCH MEMBER -->
+    <div class="search-container">
+
+      <input
+        id="searchMember"
+        class="search-input"
+        data-i18n-placeholder="search_member"
+        placeholder="🔍 Search member"
+        autocomplete="off"
+      >
+
+      <!-- SEARCH RESULTS -->
+      <div
+        id="searchResults"
+        class="search-dropdown"
+      ></div>
+
+    </div>
+
+    <!-- SELECTED MEMBER -->
+    <div
+      id="selectedMember"
+      class="selected-box"
+    >
+
+      👤 Select a member
+
+    </div>
+
+    <!-- ADD SAVINGS BUTTON -->
+    <button
+      class="add-btn"
+      id="openModalBtn"
+    >
+
       <i class="fa fa-plus"></i>
-      <span data-i18n="add_savings">Add Savings</span>
+
+      <span data-i18n="add_savings">
+        Add Savings
+      </span>
+
     </button>
 
   </div>
 
-  <!-- SEARCH -->
-  <div class="search-container">
-    <input id="searchMember"
-           class="search-input"
-           data-i18n-placeholder="search_member"
-           placeholder="Search member">
-
-    <div id="searchResults" class="search-dropdown"></div>
-  </div>
-
-  <!-- SELECTED -->
-  <div id="selectedMember" class="selected-box">
-    👤 Select a member
-  </div>
-
-  <!-- TABLE -->
   <!-- =========================================================
-     SAVINGS TABLE
-========================================================= -->
+       TABLE
+  ========================================================= -->
 
-<div class="table-card">
+  <div class="table-card">
 
-  <table class="table-modern">
+    <table class="table-modern">
 
-    <thead>
+      <thead>
 
-      <tr>
+        <tr>
 
-        <th data-i18n="name">
-          Name
-        </th>
+          <th data-i18n="name">
+            Name
+          </th>
 
-        <th data-i18n="phone">
-          Phone
-        </th>
+          <th data-i18n="phone">
+            Phone
+          </th>
 
-        <th data-i18n="depositAmount">
-          Deposit Amount
-        </th>
+          <th data-i18n="depositAmount">
+            Deposit Amount
+          </th>
 
-        <th data-i18n="previousSaving">
-          Previous Saving
-        </th>
+          <th data-i18n="previousSaving">
+            Previous Saving
+          </th>
 
-        <th data-i18n="totalSavings">
-          Total Saving
-        </th>
+          <th data-i18n="totalSavings">
+            Total Savings
+          </th>
 
-        <th data-i18n="createdDate">
-          Created Date
-        </th>
+          <th data-i18n="createdDate">
+            Created Date
+          </th>
 
-        <th data-i18n="createdBy">
-          Created By
-        </th>
+          <th data-i18n="createdBy">
+            Created By
+          </th>
 
-      </tr>
+        </tr>
 
-    </thead>
+      </thead>
 
-    <!-- SAVINGS -->
-    <tbody id="savingsTable"></tbody>
+      <!-- TABLE BODY -->
+      <tbody id="savingsTable"></tbody>
 
-  </table>
+    </table>
 
-</div>
+  </div>
 
 </main>
 
-<!-- ================= MODAL ================= -->
-<div class="modal" id="savingsModal">
+<!-- =========================================================
+     MODAL
+========================================================= -->
+
+<div
+  class="modal"
+  id="savingsModal"
+>
 
   <div class="modal-box">
 
+    <!-- HEADER -->
     <div class="modal-header">
-      <h2 data-i18n="add_savings">Add Savings</h2>
 
-      <button class="modal-close-icon" id="closeModalBtn">✖</button>
+      <h2 data-i18n="add_savings">
+        Add Savings
+      </h2>
+
+      <button
+        class="modal-close-icon"
+        id="closeModalBtn"
+      >
+        ✖
+      </button>
+
     </div>
 
+    <!-- FORM -->
     <form id="savingsForm">
 
-      <input type="number"
-             id="amount"
-             data-i18n-placeholder="enter_amount"
-             placeholder="Enter amount"
-             required>
+      <input
+        type="number"
+        id="amount"
+        placeholder="Enter amount"
+        data-i18n-placeholder="enter_amount"
+        required
+      >
 
-      <button type="submit" class="save-btn">
-        <span data-i18n="save">Save</span>
+      <button
+        type="submit"
+        class="save-btn"
+      >
+
+        <span data-i18n="save">
+          Save
+        </span>
+
       </button>
 
     </form>
@@ -352,10 +444,21 @@
 
 </div>
 
-<!-- ================= SCRIPTS ================= -->
-<script type="module" src="js/layout.js"></script>
+<!-- =========================================================
+     SCRIPTS
+========================================================= -->
+
+<script
+  type="module"
+  src="js/layout.js"
+></script>
+
 <script src="js/i18n.js"></script>
-<script type="module" src="js/savings.js"></script>
+
+<script
+  type="module"
+  src="js/savings.js"
+></script>
 
 </body>
 </html>

@@ -136,10 +136,10 @@ savingsForm?.addEventListener("submit", async (e) => {
       return;
     }
 
-    const currentUserName =
-      localStorage.getItem("name") ||
-      auth.currentUser?.displayName ||
-      "Admin";
+    createdBy:
+     localStorage.getItem("name") ||
+     auth.currentUser?.displayName ||
+     "Admin
 
     await addDoc(collection(db, "savings"), {
 

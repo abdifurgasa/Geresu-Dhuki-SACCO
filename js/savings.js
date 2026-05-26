@@ -41,7 +41,7 @@ const selectedMember =
   document.getElementById("selectedMember");
 
 /* =========================
-   MODAL OPEN / CLOSE
+   MODAL
 ========================= */
 
 openModalBtn?.addEventListener("click", () => {
@@ -65,6 +65,7 @@ let selected = null;
 searchInput?.addEventListener("input", async () => {
 
   const val = searchInput.value.toLowerCase();
+
   searchResults.innerHTML = "";
 
   if (!val) return;
@@ -140,7 +141,6 @@ savingsForm?.addEventListener("submit", async (e) => {
       auth.currentUser?.displayName ||
       "Admin";
 
-    /* SAVE */
     await addDoc(collection(db, "savings"), {
 
       memberId: selected.id,
@@ -175,11 +175,8 @@ async function loadSavings() {
 
   savingsTable.innerHTML = "";
 
-  const membersSnap =
-    await getDocs(collection(db, "members"));
-
-  const savingsSnap =
-    await getDocs(collection(db, "savings"));
+  const membersSnap = await getDocs(collection(db, "members"));
+  const savingsSnap = await getDocs(collection(db, "savings"));
 
   let savingsData = [];
 
@@ -190,10 +187,8 @@ async function loadSavings() {
     });
   });
 
-  /* SORT LATEST FIRST */
   savingsData.sort((a, b) =>
-    (b.createdAt?.seconds || 0) -
-    (a.createdAt?.seconds || 0)
+    (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)
   );
 
   membersSnap.forEach(memberDoc => {
@@ -201,11 +196,13 @@ async function loadSavings() {
     const member = memberDoc.data();
 
     const memberSavings =
-      savingsData.filter(
-        s => s.memberId === memberDoc.id
-      );
+      savingsData.filter(s => s.memberId === memberDoc.id);
 
-    let depositTotal = 0;
+    memberSavings.sort((a, b) =>
+      (a.createdAt?.seconds || 0) - (b.createdAt?.seconds || 0)
+    );
+
+    let depositAmount = 0;
     let previousSaving = 0;
     let totalSaving = 0;
     let createdDate = "-";
@@ -213,30 +210,34 @@ async function loadSavings() {
 
     if (memberSavings.length > 0) {
 
-      memberSavings.forEach(s => {
-        depositTotal += Number(s.amount || 0);
-      });
+      const latest =
+        memberSavings[memberSavings.length - 1];
 
-      const latest = memberSavings[0];
+      depositAmount =
+        Number(latest.amount || 0);
 
-      previousSaving = 0; // you can change logic later
-      totalSaving = depositTotal;
+      totalSaving =
+        memberSavings.reduce(
+          (sum, s) => sum + Number(s.amount || 0),
+          0
+        );
+
+      previousSaving =
+        totalSaving - depositAmount;
 
       createdDate = latest.createdAt
-        ? new Date(
-            latest.createdAt.seconds * 1000
-          ).toLocaleString()
+        ? new Date(latest.createdAt.seconds * 1000).toLocaleString()
         : "-";
 
-      createdBy = latest.createdBy || "Admin";
-
+      createdBy =
+        latest.createdBy || "Admin";
     }
 
     const row = `
       <tr>
         <td>${member.name || "-"}</td>
         <td>${member.phone || "-"}</td>
-        <td>${depositTotal.toLocaleString()} ETB</td>
+        <td>${depositAmount.toLocaleString()} ETB</td>
         <td>${previousSaving.toLocaleString()} ETB</td>
         <td>${totalSaving.toLocaleString()} ETB</td>
         <td>${createdDate}</td>

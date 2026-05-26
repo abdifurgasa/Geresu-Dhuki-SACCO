@@ -243,7 +243,9 @@ async function loadSavings() {
     let previousSaving = 0;
     let totalSaving = 0;
     let createdDate = "-";
-    let createdBy = member.createdBy || "Admin";
+    let createdBy: localStorage.getItem("name") ||
+    auth.currentUser?.displayName ||
+    "Admin"
 
     if (memberSavings.length > 0) {
 
@@ -255,7 +257,9 @@ async function loadSavings() {
 
       totalSaving = Number(latest.totalSaving || 0);
 
-      createdBy = latest.createdBy || member.createdBy || "Admin";
+      createdBy: localStorage.getItem("name") ||
+      auth.currentUser?.displayName ||
+      "Admin"
 
       createdDate = latest.createdAt
         ? new Date(

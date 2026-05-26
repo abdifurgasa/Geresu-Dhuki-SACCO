@@ -6,8 +6,7 @@ import {
   getDocs,
   query,
   where,
-  serverTimestamp,
-  orderBy
+  serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 /* =========================================================
@@ -42,7 +41,7 @@ const selectedMember =
   document.getElementById("selectedMember");
 
 /* =========================================================
-   MODAL
+   OPEN / CLOSE MODAL
 ========================================================= */
 
 openModalBtn?.addEventListener(
@@ -64,7 +63,7 @@ closeModalBtn?.addEventListener(
 );
 
 /* =========================================================
-   SELECTED MEMBER
+   GLOBAL MEMBER
 ========================================================= */
 
 let selected = null;
@@ -193,10 +192,10 @@ savingsForm?.addEventListener(
       }
 
       /* =====================================================
-         GET ALL PREVIOUS SAVINGS
+         GET PREVIOUS SAVINGS
       ===================================================== */
 
-      const savingsQuery = query(
+      const q = query(
 
         collection(db, "savings"),
 
@@ -208,12 +207,12 @@ savingsForm?.addEventListener(
 
       );
 
-      const savingsSnap =
-        await getDocs(savingsQuery);
+      const snap =
+        await getDocs(q);
 
       let previousSaving = 0;
 
-      savingsSnap.forEach((doc) => {
+      snap.forEach((doc) => {
 
         previousSaving += Number(
           doc.data().amount || 0
@@ -222,18 +221,14 @@ savingsForm?.addEventListener(
       });
 
       /* =====================================================
-         CALCULATIONS
+         CALCULATE TOTAL
       ===================================================== */
 
-      const currentDeposit =
-        amount;
-
       const totalSaving =
-        previousSaving +
-        currentDeposit;
+        previousSaving + amount;
 
       /* =====================================================
-         CREATED BY
+         CURRENT USER
       ===================================================== */
 
       const currentUserName =
@@ -263,8 +258,8 @@ savingsForm?.addEventListener(
           memberPhone:
             selected.phone,
 
-          depositAmount:
-            currentDeposit,
+          amount:
+            amount,
 
           previousSaving:
             previousSaving,
@@ -283,10 +278,10 @@ savingsForm?.addEventListener(
       );
 
       alert(
-        "Savings added successfully"
+        "Savings Added Successfully"
       );
 
-      amountInput.value = "";
+      savingsForm.reset();
 
       selected = null;
 
@@ -312,7 +307,7 @@ savingsForm?.addEventListener(
 );
 
 /* =========================================================
-   LOAD SAVINGS TABLE
+   LOAD SAVINGS
 ========================================================= */
 
 async function loadSavings() {
@@ -320,76 +315,155 @@ async function loadSavings() {
   savingsTable.innerHTML = "";
 
   /* =====================================================
+     GET MEMBERS
+  ===================================================== */
+
+  const membersSnap =
+    await getDocs(
+      collection(db, "members")
+    );
+
+  /* =====================================================
      GET SAVINGS
   ===================================================== */
 
   const savingsSnap =
     await getDocs(
-
-      query(
-        collection(db, "savings"),
-        orderBy(
-          "createdAt",
-          "desc"
-        )
-      )
-
+      collection(db, "savings")
     );
 
-  /* =====================================================
-     DISPLAY TABLE
-  ===================================================== */
+  let savingsData = [];
 
   savingsSnap.forEach((doc) => {
 
-    const data =
-      doc.data();
+    savingsData.push({
+
+      id: doc.id,
+
+      ...doc.data()
+
+    });
+
+  });
+
+  /* =====================================================
+     SORT BY DATE
+  ===================================================== */
+
+  savingsData.sort((a, b) => {
+
+    const aTime =
+      a.createdAt?.seconds || 0;
+
+    const bTime =
+      b.createdAt?.seconds || 0;
+
+    return aTime - bTime;
+
+  });
+
+  /* =====================================================
+     MEMBER LOOP
+  ===================================================== */
+
+  membersSnap.forEach((memberDoc) => {
+
+    const member =
+      memberDoc.data();
+
+    const memberSavings =
+      savingsData.filter(
+        (s) =>
+          s.memberId === memberDoc.id
+      );
+
+    if (memberSavings.length === 0)
+      return;
+
+    let depositAmount = 0;
+
+    let previousSaving = 0;
+
+    let totalSaving = 0;
+
+    let createdDate = "-";
+
+    let createdBy = "-";
+
+    /* =====================================================
+       TOTAL SAVINGS
+    ===================================================== */
+
+    memberSavings.forEach((s) => {
+
+      totalSaving += Number(
+        s.amount || 0
+      );
+
+    });
+
+    /* =====================================================
+       LATEST TRANSACTION
+    ===================================================== */
+
+    const latest =
+      memberSavings[
+        memberSavings.length - 1
+      ];
+
+    depositAmount =
+      Number(latest.amount || 0);
+
+    previousSaving =
+      totalSaving - depositAmount;
+
+    createdBy =
+      latest.createdBy || "Admin";
+
+    createdDate =
+      latest.createdAt
+
+        ? new Date(
+            latest.createdAt.seconds *
+            1000
+          ).toLocaleString()
+
+        : "-";
+
+    /* =====================================================
+       TABLE ROW
+    ===================================================== */
 
     const row = `
 
       <tr>
 
         <td>
-          ${data.memberName || "-"}
+          ${member.name || "-"}
         </td>
 
         <td>
-          ${data.memberPhone || "-"}
+          ${member.phone || "-"}
         </td>
 
         <td>
-          ${Number(
-            data.depositAmount || 0
-          ).toLocaleString()} ETB
+          ${depositAmount.toLocaleString()} ETB
         </td>
 
         <td>
-          ${Number(
-            data.previousSaving || 0
-          ).toLocaleString()} ETB
+          ${previousSaving.toLocaleString()} ETB
         </td>
 
         <td>
-          ${Number(
-            data.totalSaving || 0
-          ).toLocaleString()} ETB
+          ${totalSaving.toLocaleString()} ETB
         </td>
 
         <td>
-
-          ${data.createdAt
-
-            ? new Date(
-                data.createdAt.seconds *
-                1000
-              ).toLocaleString()
-
-            : "-"}
-
+          ${createdDate}
         </td>
 
         <td>
-          ${data.createdBy || "Admin"}
+          ${createdBy}
         </td>
 
       </tr>

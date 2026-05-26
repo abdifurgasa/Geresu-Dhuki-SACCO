@@ -6,90 +6,70 @@ import {
   getDocs,
   query,
   where,
-  serverTimestamp,
-  orderBy
+  serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 /* =========================
-   ELEMENTS
+   WAIT FOR DOM
 ========================= */
 
-const savingsTable =
-  document.getElementById("savingsTable");
+document.addEventListener("DOMContentLoaded", () => {
 
-const savingsForm =
-  document.getElementById("savingsForm");
+  const savingsTable =
+    document.getElementById("savingsTable");
 
-const amountInput =
-  document.getElementById("amount");
+  const savingsForm =
+    document.getElementById("savingsForm");
 
-const openModalBtn =
-  document.getElementById("openModalBtn");
+  const amountInput =
+    document.getElementById("amount");
 
-const closeModalBtn =
-  document.getElementById("closeModalBtn");
+  const openModalBtn =
+    document.getElementById("openModalBtn");
 
-const modal =
-  document.getElementById("savingsModal");
+  const closeModalBtn =
+    document.getElementById("closeModalBtn");
 
-const searchInput =
-  document.getElementById("searchMember");
+  const modal =
+    document.getElementById("savingsModal");
 
-const searchResults =
-  document.getElementById("searchResults");
+  const searchInput =
+    document.getElementById("searchMember");
 
-const selectedMember =
-  document.getElementById("selectedMember");
+  const searchResults =
+    document.getElementById("searchResults");
 
-/* =========================
-   MODAL
-========================= */
+  const selectedMember =
+    document.getElementById("selectedMember");
 
-openModalBtn?.addEventListener(
-  "click",
-  () => {
+  let selected = null;
 
+  /* =========================
+     OPEN MODAL
+  ========================= */
+
+  openModalBtn?.addEventListener("click", () => {
     modal.style.display = "flex";
+  });
 
-  }
-);
-
-closeModalBtn?.addEventListener(
-  "click",
-  () => {
-
+  closeModalBtn?.addEventListener("click", () => {
     modal.style.display = "none";
+  });
 
-  }
-);
+  /* =========================
+     SEARCH MEMBER
+  ========================= */
 
-/* =========================
-   GLOBAL SELECTED MEMBER
-========================= */
+  searchInput?.addEventListener("input", async () => {
 
-let selected = null;
-
-/* =========================
-   SEARCH MEMBER
-========================= */
-
-searchInput?.addEventListener(
-  "input",
-  async () => {
-
-    const val =
-      searchInput.value.toLowerCase();
-
+    const val = searchInput.value.toLowerCase();
     searchResults.innerHTML = "";
 
     if (!val) return;
 
-    const snap =
-      await getDocs(
-        collection(db, "members")
-      );
+    const snap = await getDocs(collection(db, "members"));
 
-    snap.forEach((doc) => {
+    snap.forEach(doc => {
 
       const m = doc.data();
 
@@ -98,8 +78,7 @@ searchInput?.addEventListener(
         m.phone?.includes(val)
       ) {
 
-        const div =
-          document.createElement("div");
+        const div = document.createElement("div");
 
         div.className = "search-item";
 
@@ -111,10 +90,8 @@ searchInput?.addEventListener(
         div.onclick = () => {
 
           selected = {
-
             id: doc.id,
             ...m
-
           };
 
           selectedMember.innerHTML = `
@@ -132,292 +109,137 @@ searchInput?.addEventListener(
 
     });
 
-  }
-);
+  });
 
-/* =========================
-   SAVE SAVINGS
-========================= */
+  /* =========================
+     SAVE SAVINGS
+  ========================= */
 
-savingsForm?.addEventListener(
-  "submit",
-  async (e) => {
+  savingsForm?.addEventListener("submit", async (e) => {
 
     e.preventDefault();
 
     try {
 
       if (!selected) {
-
         alert("Select a member first");
-
         return;
-
       }
 
-      const amount =
-        Number(amountInput.value);
+      const amount = Number(amountInput.value);
 
       if (!amount || amount <= 0) {
-
         alert("Enter valid amount");
-
         return;
-
       }
-
-      /* =========================
-         GET PREVIOUS SAVINGS
-      ========================= */
-
-      const savingsQuery = query(
-        collection(db, "savings"),
-        where(
-          "memberId",
-          "==",
-          selected.id
-        )
-      );
-
-      const savingsSnap =
-        await getDocs(savingsQuery);
-
-      let previousSaving = 0;
-
-      savingsSnap.forEach((doc) => {
-
-        previousSaving += Number(
-          doc.data().amount || 0
-        );
-
-      });
-
-      const totalSaving =
-        previousSaving + amount;
-
-      /* =========================
-         CURRENT USER NAME
-      ========================= */
 
       const currentUserName =
         localStorage.getItem("name") ||
         auth.currentUser?.displayName ||
         "Admin";
 
-      /* =========================
-         SAVE TO FIREBASE
-      ========================= */
+      await addDoc(collection(db, "savings"), {
 
-      await addDoc(
-        collection(db, "savings"),
-        {
+        memberId: selected.id,
+        memberName: selected.name,
+        memberPhone: selected.phone,
 
-          memberId: selected.id,
+        amount,
+        createdAt: serverTimestamp(),
+        createdBy: currentUserName
 
-          memberName: selected.name,
+      });
 
-          memberPhone: selected.phone,
-
-          amount,
-
-          previousSaving,
-
-          totalSaving,
-
-          createdAt: serverTimestamp(),
-
-          createdBy: currentUserName
-
-        }
-      );
-
-      alert(
-        "Savings added successfully"
-      );
+      alert("Savings added successfully");
 
       amountInput.value = "";
-
       modal.style.display = "none";
 
       loadSavings();
 
-    }
-
-    catch (err) {
-
+    } catch (err) {
       console.error(err);
-
       alert(err.message);
-
     }
 
-  }
-);
-
-/* =========================
-   LOAD SAVINGS
-========================= */
-
-async function loadSavings() {
-
-  savingsTable.innerHTML = "";
+  });
 
   /* =========================
-     GET MEMBERS
+     LOAD SAVINGS
   ========================= */
 
-  const membersSnap =
-    await getDocs(
-      collection(db, "members")
+  async function loadSavings() {
+
+    savingsTable.innerHTML = "";
+
+    const membersSnap =
+      await getDocs(collection(db, "members"));
+
+    const savingsSnap =
+      await getDocs(collection(db, "savings"));
+
+    let savingsData = [];
+
+    savingsSnap.forEach(doc => {
+      savingsData.push({
+        id: doc.id,
+        ...doc.data()
+      });
+    });
+
+    savingsData.sort((a, b) =>
+      (b.createdAt?.seconds || 0) -
+      (a.createdAt?.seconds || 0)
     );
 
-  /* =========================
-     GET SAVINGS
-  ========================= */
+    membersSnap.forEach(memberDoc => {
 
-  const savingsSnap =
-    await getDocs(
-      collection(db, "savings")
-    );
+      const member = memberDoc.data();
 
-  let savingsData = [];
+      const memberSavings =
+        savingsData.filter(
+          s => s.memberId === memberDoc.id
+        );
 
-  savingsSnap.forEach((doc) => {
+      let latestSaving = 0;
+      let createdDate = "-";
+      let createdBy = "-";
 
-    savingsData.push({
+      if (memberSavings.length > 0) {
 
-      id: doc.id,
+        const latest = memberSavings[0];
 
-      ...doc.data()
+        latestSaving =
+          Number(latest.amount || 0);
+
+        createdBy =
+          latest.createdBy || "Admin";
+
+        createdDate =
+          latest.createdAt
+            ? new Date(
+                latest.createdAt.seconds * 1000
+              ).toLocaleString()
+            : "-";
+
+      }
+
+      const row = `
+        <tr>
+          <td>${member.name || "-"}</td>
+          <td>${member.phone || "-"}</td>
+          <td>${latestSaving.toLocaleString()} ETB</td>
+          <td>${createdDate}</td>
+          <td>${createdBy}</td>
+        </tr>
+      `;
+
+      savingsTable.innerHTML += row;
 
     });
 
-  });
+  }
 
-  /* =========================
-     SORT BY LATEST DATE
-  ========================= */
+  loadSavings();
 
-  savingsData.sort((a, b) => {
-
-    const aTime =
-      a.createdAt?.seconds || 0;
-
-    const bTime =
-      b.createdAt?.seconds || 0;
-
-    return bTime - aTime;
-
-  });
-
-  /* =========================
-     SHOW MEMBERS + SAVINGS
-  ========================= */
-
-  membersSnap.forEach((memberDoc) => {
-
-    const member =
-      memberDoc.data();
-
-    /* MEMBER SAVINGS */
-
-    const memberSavings =
-      savingsData.filter(
-        (s) =>
-          s.memberId === memberDoc.id
-      );
-
-    let latestSaving = 0;
-
-    let previousSaving = 0;
-
-    let totalSaving = 0;
-
-    let createdDate = "-";
-
-    let createdBy =
-      localStorage.getItem("name") ||
-      auth.currentUser?.displayName ||
-      "Admin";
-
-    if (memberSavings.length > 0) {
-
-      const latest =
-        memberSavings[0];
-
-      latestSaving =
-        Number(latest.amount || 0);
-
-      previousSaving =
-        Number(
-          latest.previousSaving || 0
-        );
-
-      totalSaving =
-        Number(
-          latest.totalSaving || 0
-        );
-
-      createdBy =
-        latest.createdBy ||
-        localStorage.getItem("name") ||
-        auth.currentUser?.displayName ||
-        "Admin";
-
-      createdDate =
-        latest.createdAt
-          ? new Date(
-              latest.createdAt.seconds *
-              1000
-            ).toLocaleString()
-          : "-";
-
-    }
-
-    const row = `
-
-      <tr>
-
-        <td>
-          ${member.name || "-"}
-        </td>
-
-        <td>
-          ${member.phone || "-"}
-        </td>
-
-        <td>
-          ${latestSaving.toLocaleString()} ETB
-        </td>
-
-        <td>
-          ${previousSaving.toLocaleString()} ETB
-        </td>
-
-        <td>
-          ${totalSaving.toLocaleString()} ETB
-        </td>
-
-        <td>
-          ${createdDate}
-        </td>
-
-        <td>
-          ${createdBy}
-        </td>
-
-      </tr>
-
-    `;
-
-    savingsTable.innerHTML += row;
-
-  });
-
-}
-
-/* =========================
-   START
-========================= */
-
-loadSavings();
+});

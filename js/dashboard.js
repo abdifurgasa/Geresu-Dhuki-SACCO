@@ -162,7 +162,7 @@ onAuthStateChanged(auth, (user) => {
   if (!user) return;
 
   // IMPORTANT FIX: use displayName NOT email
-  const name = user.displayName || "Unknown User";
+  const name = user.displayName || "Admin";
 
   const roleBox = document.getElementById("roleBox");
   if (roleBox) {

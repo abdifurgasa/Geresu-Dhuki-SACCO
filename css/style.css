@@ -297,7 +297,7 @@ table{
 }
 
 thead{
-  background:#2563eb;
+  background:var(--primary);
 }
 
 th{

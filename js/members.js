@@ -6,10 +6,7 @@ import {
   getDocs,
   query,
   where,
-  serverTimestamp,
-  orderBy,
-  limit,
-  startAfter
+  serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 /* =========================================================
@@ -18,11 +15,6 @@ import {
 
 let members = [];
 let currentMemberId = null;
-
-let transactionPage = 1;
-let lastTransactionDoc = null;
-let loadingTransactions = false;
-let hasMoreTransactions = true;
 
 /* =========================================================
    ELEMENTS
@@ -43,7 +35,7 @@ const historyTable = document.getElementById("historyTable");
 const historyContainer = document.getElementById("historyContainer");
 
 /* =========================================================
-   OPEN / CLOSE MEMBER MODAL
+   OPEN / CLOSE MODAL
 ========================================================= */
 
 openModalBtn?.addEventListener("click", () => {
@@ -54,17 +46,62 @@ closeModalBtn?.addEventListener("click", () => {
   memberModal.style.display = "none";
 });
 
+closeProfileBtn?.addEventListener("click", () => {
+  profileModal.classList.remove("active");
+});
+
 /* =========================================================
-   ADD MEMBER
+   ADD MEMBER (WITH VALIDATION + DUPLICATE CHECK)
 ========================================================= */
 
 memberForm?.addEventListener("submit", async (e) => {
   e.preventDefault();
 
   try {
-    const name = document.getElementById("name").value;
-    const phone = document.getElementById("phone").value;
-    const nid = document.getElementById("nid").value;
+
+    const name = document.getElementById("name").value.trim();
+    const phone = document.getElementById("phone").value.trim();
+    const nid = document.getElementById("nid").value.trim();
+
+    /* =========================
+       VALIDATION
+    ========================= */
+
+    if (!name) {
+      return alert("Name is required");
+    }
+
+    if (!/^\d{9}$/.test(phone)) {
+      return alert("Phone number must be EXACTLY 9 digits");
+    }
+
+    if (!/^\d{16}$/.test(nid)) {
+      return alert("National ID must be EXACTLY 16 digits");
+    }
+
+    /* =========================
+       DUPLICATE CHECK (SAFE)
+    ========================= */
+
+    const phoneSnap = await getDocs(
+      query(collection(db, "members"), where("phone", "==", phone))
+    );
+
+    if (!phoneSnap.empty) {
+      return alert("Phone number already exists");
+    }
+
+    const nidSnap = await getDocs(
+      query(collection(db, "members"), where("nid", "==", nid))
+    );
+
+    if (!nidSnap.empty) {
+      return alert("NID already exists");
+    }
+
+    /* =========================
+       SAVE MEMBER
+    ========================= */
 
     await addDoc(collection(db, "members"), {
       name,
@@ -105,17 +142,26 @@ async function loadMembers() {
     const id = docSnap.id;
 
     // SAVINGS
-    const sSnap = await getDocs(query(collection(db, "savings"), where("memberId", "==", id)));
+    const sSnap = await getDocs(
+      query(collection(db, "savings"), where("memberId", "==", id))
+    );
+
     let totalSavings = 0;
     sSnap.forEach(d => totalSavings += Number(d.data().amount || 0));
 
     // LOANS
-    const lSnap = await getDocs(query(collection(db, "loans"), where("memberId", "==", id)));
+    const lSnap = await getDocs(
+      query(collection(db, "loans"), where("memberId", "==", id))
+    );
+
     let totalLoans = 0;
     lSnap.forEach(d => totalLoans += Number(d.data().amount || 0));
 
     // REPAYMENTS
-    const rSnap = await getDocs(query(collection(db, "repayments"), where("memberId", "==", id)));
+    const rSnap = await getDocs(
+      query(collection(db, "repayments"), where("memberId", "==", id))
+    );
+
     let totalRepayments = 0;
     rSnap.forEach(d => totalRepayments += Number(d.data().amount || 0));
 
@@ -168,7 +214,7 @@ function renderMembers() {
 }
 
 /* =========================================================
-   OPEN PROFILE
+   OPEN PROFILE (ONLY ON CLICK)
 ========================================================= */
 
 async function openProfile(memberId) {
@@ -178,10 +224,6 @@ async function openProfile(memberId) {
   profileModal.classList.add("active");
 
   historyTable.innerHTML = "";
-
-  transactionPage = 1;
-  hasMoreTransactions = true;
-  lastTransactionDoc = null;
 
   const member = members.find(m => m.id === memberId);
 
@@ -203,29 +245,15 @@ async function openProfile(memberId) {
 }
 
 /* =========================================================
-   CLOSE PROFILE
-========================================================= */
-
-closeProfileBtn?.addEventListener("click", () => {
-  profileModal.classList.remove("active");
-});
-
-/* =========================================================
-   LOAD TRANSACTIONS (PAGINATION READY)
+   LOAD TRANSACTIONS (DEMO)
 ========================================================= */
 
 async function loadTransactions() {
 
-  if (loadingTransactions || !hasMoreTransactions) return;
-
-  loadingTransactions = true;
-
-  document.getElementById("loadingTransactions").style.display = "block";
-
-  // DEMO DATA (replace later with Firestore)
   const data = [];
 
   for (let i = 0; i < 20; i++) {
+
     data.push({
       type: i % 2 === 0 ? "Saving" : "Loan",
       amount: 5000 + i * 100,
@@ -238,6 +266,7 @@ async function loadTransactions() {
   }
 
   data.forEach(tx => {
+
     historyTable.innerHTML += `
       <tr>
         <td>${tx.type}</td>
@@ -253,26 +282,7 @@ async function loadTransactions() {
 
   document.getElementById("profileTransactions").innerText =
     historyTable.children.length;
-
-  transactionPage++;
-
-  if (transactionPage > 10) {
-    hasMoreTransactions = false;
-  }
-
-  loadingTransactions = false;
-  document.getElementById("loadingTransactions").style.display = "none";
 }
-
-/* =========================================================
-   INFINITE SCROLL UPWARD
-========================================================= */
-
-historyContainer?.addEventListener("scroll", async () => {
-  if (historyContainer.scrollTop <= 50) {
-    await loadTransactions();
-  }
-});
 
 /* =========================================================
    INIT

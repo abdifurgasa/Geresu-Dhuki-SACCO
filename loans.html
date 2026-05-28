@@ -250,89 +250,65 @@
 
 </aside>
   
-<!-- =========================================================
-     MAIN
-========================================================= -->
 
 <main class="main">
 
   <!-- TOPBAR -->
   <div class="topbar">
 
-    <h2>
-      🏦 Loans Management
+    <h2 data-i18n="loan_management">
+      🏦 Loan Management
     </h2>
 
-    <div
-      style="
-        display:flex;
-        gap:10px;
-        align-items:center;
-      "
-    >
+    <!-- LANGUAGE -->
+    <select id="languageSelect" onchange="changeLanguage(this.value)">
 
-      <select
-        id="languageSelect"
-        onchange="changeLanguage(this.value)"
-      >
+      <option value="en">English</option>
+      <option value="am">አማርኛ</option>
+      <option value="om">Afaan Oromoo</option>
 
-        <option value="en">
-          English
-        </option>
+    </select>
 
-        <option value="am">
-          አማርኛ
-        </option>
+  </div>
 
-        <option value="om">
-          Afaan Oromoo
-        </option>
+  <!-- =========================================================
+       MEMBER ACTION BAR (SAME AS SAVINGS)
+  ========================================================= -->
 
-      </select>
+  <div class="member-action-bar">
 
-      <button
-        class="add-btn"
-        id="openModalBtn"
-      >
+    <!-- SEARCH MEMBER -->
+    <div class="search-container">
 
-        <i class="fa fa-plus"></i>
+      <input
+        id="searchMember"
+        class="search-input"
+        data-i18n-placeholder="search_member"
+        placeholder="🔍 Search member"
+        autocomplete="off"
+      />
 
-        Add Loan
-
-      </button>
+      <div id="searchResults" class="search-dropdown"></div>
 
     </div>
 
-  </div>
+    <!-- SELECTED MEMBER -->
+    <div id="selectedMember" class="selected-box">
+      👤 Select a member
+    </div>
 
-  <!-- SEARCH -->
-  <div class="search-container">
-
-    <input
-      type="text"
-      id="searchMember"
-      class="search-input"
-      placeholder="Search member..."
-    />
-
-    <div
-      id="searchResults"
-      class="search-dropdown"
-    ></div>
+    <!-- ADD BUTTON -->
+    <button class="add-btn" id="openModalBtn">
+      <i class="fa fa-plus"></i>
+      <span data-i18n="add_loan">Add Loan</span>
+    </button>
 
   </div>
 
-  <!-- SELECTED -->
-  <div
-    id="selectedMember"
-    class="selected-box"
-  >
+  <!-- =========================================================
+       TABLE (SAME STYLE AS SAVINGS)
+  ========================================================= -->
 
-    👤 Select a member
-
-  </div>
-
-  <!-- TABLE -->
   <div class="table-card">
 
     <table class="table-modern">
@@ -341,53 +317,17 @@
 
         <tr>
 
-          <th>
-            Member
-          </th>
-
-          <th>
-            Phone
-          </th>
-
-          <th>
-            Principal
-          </th>
-
-          <th>
-            Interest
-          </th>
-
-          <th>
-            Total
-          </th>
-
-          <th>
-            Remaining
-          </th>
-
-          <th>
-            Type
-          </th>
-
-          <th>
-            Duration
-          </th>
-
-          <th>
-            Status
-          </th>
-
-          <th>
-            Created Date
-          </th>
-
-          <th>
-            Created By
-          </th>
-
-          <th>
-            Actions
-          </th>
+          <th data-i18n="name">Name</th>
+          <th data-i18n="phone">Phone</th>
+          <th data-i18n="principal">Principal</th>
+          <th data-i18n="interest">Interest</th>
+          <th data-i18n="total">Total</th>
+          <th data-i18n="remaining">Remaining</th>
+          <th data-i18n="type">Type</th>
+          <th data-i18n="duration">Duration</th>
+          <th data-i18n="status">Status</th>
+          <th data-i18n="createdDate">Created Date</th>
+          <th data-i18n="createdBy">Created By</th>
 
         </tr>
 
@@ -402,26 +342,21 @@
 </main>
 
 <!-- =========================================================
-     MODAL
+     MODAL (SAME STYLE AS SAVINGS)
 ========================================================= -->
 
-<div
-  class="modal"
-  id="loanModal"
->
+<div class="modal" id="loanModal">
 
   <div class="modal-box">
 
+    <!-- HEADER -->
     <div class="modal-header">
 
-      <h3>
-        🏦 Add Loan
-      </h3>
+      <h2 data-i18n="add_loan">
+        Add Loan
+      </h2>
 
-      <button
-        class="modal-close-icon"
-        id="closeModalBtn"
-      >
+      <button class="modal-close-icon" id="closeModalBtn">
         ✖
       </button>
 
@@ -430,62 +365,29 @@
     <!-- FORM -->
     <form id="loanForm">
 
-      <input
-        type="number"
-        id="principal"
-        placeholder="Loan Amount"
-        required
-      />
+      <input type="number" id="principal" placeholder="Principal amount" required />
 
-      <input
-        type="number"
-        id="rate"
-        placeholder="Interest Rate %"
-        required
-      />
+      <input type="number" id="rate" placeholder="Interest rate %" required />
 
-      <input
-        type="number"
-        id="time"
-        placeholder="Duration"
-        required
-      />
+      <input type="number" id="time" placeholder="Duration" required />
 
       <select id="timeType">
 
-        <option value="months">
-          Months
-        </option>
-
-        <option value="years">
-          Years
-        </option>
+        <option value="months">Months</option>
+        <option value="years">Years</option>
 
       </select>
 
       <select id="interestType">
 
-        <option value="simple">
-          Simple Interest
-        </option>
-
-        <option value="compound">
-          Compound Interest
-        </option>
-
-        <option value="flat">
-          Flat Rate
-        </option>
+        <option value="simple">Simple</option>
+        <option value="compound">Compound</option>
+        <option value="flat">Flat</option>
 
       </select>
 
-      <button
-        type="submit"
-        class="save-btn"
-      >
-
-        Create Loan
-
+      <button type="submit" class="save-btn">
+        <span data-i18n="save">Save</span>
       </button>
 
     </form>
@@ -494,18 +396,13 @@
 
 </div>
 
-<!-- JS -->
-<script
-  type="module"
-  src="js/layout.js"
-></script>
+<!-- =========================================================
+     SCRIPTS
+========================================================= -->
 
+<script type="module" src="js/layout.js"></script>
 <script src="js/i18n.js"></script>
-
-<script
-  type="module"
-  src="js/loans.js"
-></script>
+<script type="module" src="js/loans.js"></script>
 
 </body>
 </html>

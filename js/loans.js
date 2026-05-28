@@ -7,16 +7,15 @@ import {
   query,
   where,
   serverTimestamp,
-  orderBy
+  orderBy,
+  updateDoc,
+  deleteDoc,
+  doc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-import { initLanguage, translations } from "./i18n.js";
-
-initLanguage();
-
-/* ================================
+/* =========================
    ELEMENTS
-================================ */
+========================= */
 
 const loanForm = document.getElementById("loanForm");
 const loansTable = document.getElementById("loansTable");
@@ -25,89 +24,73 @@ const modal = document.getElementById("loanModal");
 const openBtn = document.getElementById("openModalBtn");
 const closeBtn = document.getElementById("closeModalBtn");
 
+/* CONFIRM MODAL */
+const confirmModal = document.getElementById("confirmModal");
+const cancelDeleteBtn = document.getElementById("cancelDeleteBtn");
+const confirmDeleteBtn = document.getElementById("confirmDeleteBtn");
+
+/* SEARCH */
 const searchInput = document.getElementById("searchMember");
 const searchResults = document.getElementById("searchResults");
 const selectedBox = document.getElementById("selectedMember");
 
-/* ================================
+/* =========================
    STATE
-================================ */
+========================= */
 
 let selectedMember = null;
+let editingId = null;
+let deleteId = null;
 
-/* ================================
+/* =========================
    MODAL OPEN / CLOSE
-================================ */
+========================= */
 
-openBtn?.addEventListener("click", () => {
-  modal.classList.add("active");
-});
+openBtn.onclick = () => modal.classList.add("active");
+closeBtn.onclick = () => modal.classList.remove("active");
 
-closeBtn?.addEventListener("click", () => {
-  modal.classList.remove("active");
-});
-
-/* close outside */
-window.addEventListener("click", (e) => {
-  if (e.target === modal) {
-    modal.classList.remove("active");
-  }
-});
-
-/* ================================
+/* =========================
    SEARCH MEMBER
-================================ */
+========================= */
 
 searchInput?.addEventListener("input", async (e) => {
-  const value = e.target.value.trim();
 
-  if (!value) {
-    searchResults.innerHTML = "";
-    return;
-  }
+  const value = e.target.value.toLowerCase();
 
   const snap = await getDocs(collection(db, "members"));
 
-  const results = [];
+  let results = [];
 
-  snap.forEach(doc => {
-    const m = doc.data();
+  snap.forEach(d => {
+    const m = d.data();
 
     if (
-      m.name.toLowerCase().includes(value.toLowerCase()) ||
+      m.name.toLowerCase().includes(value) ||
       m.phone.includes(value)
     ) {
-      results.push({ id: doc.id, ...m });
+      results.push({ id: d.id, ...m });
     }
   });
 
   searchResults.innerHTML = results.map(m => `
     <div class="search-item" data-id="${m.id}">
-      👤 ${m.name} - ${m.phone}
+      ${m.name} - ${m.phone}
     </div>
   `).join("");
 
   document.querySelectorAll(".search-item").forEach(el => {
-    el.addEventListener("click", () => {
-
-      const id = el.dataset.id;
-
-      selectedMember = results.find(r => r.id === id);
-
-      selectedBox.innerHTML = `
-        👤 ${selectedMember.name} (${selectedMember.phone})
-      `;
-
+    el.onclick = () => {
+      selectedMember = results.find(r => r.id === el.dataset.id);
+      selectedBox.innerHTML = `👤 ${selectedMember.name}`;
       searchResults.innerHTML = "";
-      searchInput.value = "";
-
-    });
+    };
   });
+
 });
 
-/* ================================
+/* =========================
    LOAD LOANS
-================================ */
+========================= */
 
 async function loadLoans() {
 
@@ -117,9 +100,9 @@ async function loadLoans() {
 
   loansTable.innerHTML = "";
 
-  snap.forEach(doc => {
+  snap.forEach(d => {
 
-    const l = doc.data();
+    const l = d.data();
 
     loansTable.innerHTML += `
       <tr>
@@ -130,91 +113,116 @@ async function loadLoans() {
         <td>${l.total}</td>
         <td>${l.remaining}</td>
         <td>${l.type}</td>
-        <td>${l.duration}</td>
-        <td>${l.status}</td>
-        <td>${l.createdAt?.toDate?.().toLocaleString() || "-"}</td>
-        <td>${l.createdBy || "-"}</td>
+        <td>${l.time}</td>
         <td>
-          <button class="delete-btn" data-id="${doc.id}">
-            ❌
-          </button>
+          <button onclick="editLoan('${d.id}')">✏️</button>
+          <button onclick="openDelete('${d.id}')">🗑️</button>
         </td>
       </tr>
     `;
   });
-
-  /* DELETE */
-  document.querySelectorAll(".delete-btn").forEach(btn => {
-    btn.addEventListener("click", async () => {
-
-      const id = btn.dataset.id;
-
-      await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js")
-        .then(async ({ deleteDoc, doc }) => {
-
-          await deleteDoc(doc(db, "loans", id));
-
-          loadLoans();
-
-        });
-
-    });
-  });
 }
 
-/* ================================
-   ADD LOAN
-================================ */
+/* =========================
+   ADD / EDIT LOAN
+========================= */
 
-loanForm?.addEventListener("submit", async (e) => {
+loanForm.onsubmit = async (e) => {
   e.preventDefault();
-
-  if (!selectedMember) {
-    alert("Please select a member");
-    return;
-  }
 
   const principal = Number(document.getElementById("principal").value);
   const rate = Number(document.getElementById("rate").value);
   const time = Number(document.getElementById("time").value);
-  const timeType = document.getElementById("timeType").value;
-  const interestType = document.getElementById("interestType").value;
+  const type = document.getElementById("interestType").value;
 
-  /* SIMPLE INTEREST */
-  let interest = (principal * rate * time) / 100;
-  let total = principal + interest;
+  const interest = (principal * rate * time) / 100;
+  const total = principal + interest;
 
-  const remaining = total;
-
-  await addDoc(collection(db, "loans"), {
+  const data = {
     memberId: selectedMember.id,
     name: selectedMember.name,
     phone: selectedMember.phone,
-
     principal,
     rate,
     time,
-    timeType,
-    type: interestType,
-
+    type,
     interest,
     total,
-    remaining,
-
-    status: "Active",
-
+    remaining: total,
     createdAt: serverTimestamp(),
-    createdBy: localStorage.getItem("name") || "Admin"
-  });
+    createdBy: "Admin"
+  };
+
+  if (editingId) {
+    await updateDoc(doc(db, "loans", editingId), data);
+    editingId = null;
+  } else {
+    await addDoc(collection(db, "loans"), data);
+  }
 
   loanForm.reset();
   modal.classList.remove("active");
 
   loadLoans();
-});
+};
 
-/* ================================
+/* =========================
+   EDIT
+========================= */
+
+window.editLoan = async (id) => {
+
+  const snap = await getDocs(collection(db, "loans"));
+
+  snap.forEach(d => {
+    if (d.id === id) {
+
+      const l = d.data();
+
+      document.getElementById("principal").value = l.principal;
+      document.getElementById("rate").value = l.rate;
+      document.getElementById("time").value = l.time;
+
+      selectedMember = {
+        id: l.memberId,
+        name: l.name,
+        phone: l.phone
+      };
+
+      selectedBox.innerHTML = `✏️ Editing ${l.name}`;
+
+      editingId = id;
+
+      modal.classList.add("active");
+    }
+  });
+};
+
+/* =========================
+   DELETE CONFIRM MODAL
+========================= */
+
+window.openDelete = (id) => {
+  deleteId = id;
+  confirmModal.classList.add("active");
+};
+
+cancelDeleteBtn.onclick = () => {
+  confirmModal.classList.remove("active");
+  deleteId = null;
+};
+
+confirmDeleteBtn.onclick = async () => {
+  await deleteDoc(doc(db, "loans", deleteId));
+
+  deleteId = null;
+  confirmModal.classList.remove("active");
+
+  loadLoans();
+};
+
+/* =========================
    INIT
-================================ */
+========================= */
 
 loadLoans();

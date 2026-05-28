@@ -1,451 +1,220 @@
-import { db, auth }
-from "./firebase.js";
+import { db, auth } from "./firebase.js";
 
 import {
-
   collection,
   addDoc,
   getDocs,
-  deleteDoc,
-  doc,
-  serverTimestamp
+  query,
+  where,
+  serverTimestamp,
+  orderBy
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-}
-from
-"https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { initLanguage, translations } from "./i18n.js";
 
-/* =========================================================
+initLanguage();
+
+/* ================================
    ELEMENTS
-========================================================= */
+================================ */
 
-const loansTable =
-  document.getElementById("loansTable");
+const loanForm = document.getElementById("loanForm");
+const loansTable = document.getElementById("loansTable");
 
-const loanForm =
-  document.getElementById("loanForm");
+const modal = document.getElementById("loanModal");
+const openBtn = document.getElementById("openModalBtn");
+const closeBtn = document.getElementById("closeModalBtn");
 
-const modal =
-  document.getElementById("loanModal");
+const searchInput = document.getElementById("searchMember");
+const searchResults = document.getElementById("searchResults");
+const selectedBox = document.getElementById("selectedMember");
 
-const openModalBtn =
-  document.getElementById("openModalBtn");
+/* ================================
+   STATE
+================================ */
 
-const closeModalBtn =
-  document.getElementById("closeModalBtn");
+let selectedMember = null;
 
-const searchInput =
-  document.getElementById("searchMember");
+/* ================================
+   MODAL OPEN / CLOSE
+================================ */
 
-const searchResults =
-  document.getElementById("searchResults");
+openBtn?.addEventListener("click", () => {
+  modal.classList.add("active");
+});
 
-const selectedMember =
-  document.getElementById("selectedMember");
+closeBtn?.addEventListener("click", () => {
+  modal.classList.remove("active");
+});
 
-/* =========================================================
-   MODAL
-========================================================= */
+/* close outside */
+window.addEventListener("click", (e) => {
+  if (e.target === modal) {
+    modal.classList.remove("active");
+  }
+});
 
-openModalBtn.onclick = () => {
-
-  modal.style.display = "flex";
-
-};
-
-closeModalBtn.onclick = () => {
-
-  modal.style.display = "none";
-
-};
-
-/* =========================================================
-   SELECTED MEMBER
-========================================================= */
-
-let selected = null;
-
-/* =========================================================
+/* ================================
    SEARCH MEMBER
-========================================================= */
+================================ */
 
-searchInput.addEventListener(
-  "input",
-  async () => {
+searchInput?.addEventListener("input", async (e) => {
+  const value = e.target.value.trim();
 
-    const value =
-      searchInput.value.toLowerCase();
-
+  if (!value) {
     searchResults.innerHTML = "";
+    return;
+  }
 
-    if (!value) return;
+  const snap = await getDocs(collection(db, "members"));
 
-    const snap =
-      await getDocs(
-        collection(db, "members")
-      );
+  const results = [];
 
-    snap.forEach((memberDoc) => {
+  snap.forEach(doc => {
+    const m = doc.data();
 
-      const m =
-        memberDoc.data();
+    if (
+      m.name.toLowerCase().includes(value.toLowerCase()) ||
+      m.phone.includes(value)
+    ) {
+      results.push({ id: doc.id, ...m });
+    }
+  });
 
-      if (
+  searchResults.innerHTML = results.map(m => `
+    <div class="search-item" data-id="${m.id}">
+      👤 ${m.name} - ${m.phone}
+    </div>
+  `).join("");
 
-        m.name?.toLowerCase().includes(value) ||
+  document.querySelectorAll(".search-item").forEach(el => {
+    el.addEventListener("click", () => {
 
-        m.phone?.includes(value) ||
+      const id = el.dataset.id;
 
-        m.nid?.includes(value)
+      selectedMember = results.find(r => r.id === id);
 
-      ) {
+      selectedBox.innerHTML = `
+        👤 ${selectedMember.name} (${selectedMember.phone})
+      `;
 
-        const div =
-          document.createElement("div");
-
-        div.className =
-          "search-item";
-
-        div.innerHTML = `
-          <strong>${m.name}</strong><br>
-          <small>${m.phone}</small>
-        `;
-
-        div.onclick = () => {
-
-          selected = {
-
-            id: memberDoc.id,
-            ...m
-
-          };
-
-          selectedMember.innerHTML = `
-            👤 ${m.name}<br>
-            📱 ${m.phone}
-          `;
-
-          searchResults.innerHTML = "";
-
-        };
-
-        searchResults.appendChild(div);
-
-      }
+      searchResults.innerHTML = "";
+      searchInput.value = "";
 
     });
+  });
+});
 
-  }
-);
-
-/* =========================================================
-   SAVE LOAN
-========================================================= */
-
-loanForm.addEventListener(
-  "submit",
-  async (e) => {
-
-    e.preventDefault();
-
-    try {
-
-      if (!selected) {
-
-        alert(
-          "Select member first"
-        );
-
-        return;
-
-      }
-
-      const principal =
-        Number(
-          document.getElementById(
-            "principal"
-          ).value
-        );
-
-      const rate =
-        Number(
-          document.getElementById(
-            "rate"
-          ).value
-        );
-
-      const time =
-        Number(
-          document.getElementById(
-            "time"
-          ).value
-        );
-
-      const timeType =
-        document.getElementById(
-          "timeType"
-        ).value;
-
-      const interestType =
-        document.getElementById(
-          "interestType"
-        ).value;
-
-      let interest = 0;
-
-      /* SIMPLE */
-
-      if (
-        interestType === "simple"
-      ) {
-
-        interest =
-          principal *
-          (rate / 100) *
-          time;
-
-      }
-
-      /* COMPOUND */
-
-      else if (
-        interestType === "compound"
-      ) {
-
-        interest =
-
-          principal *
-
-          Math.pow(
-            1 + rate / 100,
-            time
-          ) -
-
-          principal;
-
-      }
-
-      /* FLAT */
-
-      else {
-
-        interest =
-          principal *
-          (rate / 100);
-
-      }
-
-      const total =
-        principal + interest;
-
-      const currentUserName =
-
-        localStorage.getItem(
-          "name"
-        ) ||
-
-        auth.currentUser
-          ?.displayName ||
-
-        "Admin";
-
-      await addDoc(
-        collection(db, "loans"),
-        {
-
-          memberId:
-            selected.id,
-
-          memberName:
-            selected.name,
-
-          memberPhone:
-            selected.phone,
-
-          principal,
-
-          interest:
-            Math.round(
-              interest
-            ),
-
-          total:
-            Math.round(
-              total
-            ),
-
-          remaining:
-            Math.round(
-              total
-            ),
-
-          rate,
-
-          time,
-
-          timeType,
-
-          interestType,
-
-          status:
-            "Active",
-
-          createdAt:
-            serverTimestamp(),
-
-          createdBy:
-            currentUserName
-
-        }
-      );
-
-      alert(
-        "Loan created successfully"
-      );
-
-      loanForm.reset();
-
-      modal.style.display =
-        "none";
-
-      loadLoans();
-
-    }
-
-    catch (err) {
-
-      console.error(err);
-
-      alert(err.message);
-
-    }
-
-  }
-);
-
-/* =========================================================
+/* ================================
    LOAD LOANS
-========================================================= */
+================================ */
 
 async function loadLoans() {
 
+  const snap = await getDocs(
+    query(collection(db, "loans"), orderBy("createdAt", "desc"))
+  );
+
   loansTable.innerHTML = "";
 
-  const snap =
-    await getDocs(
-      collection(db, "loans")
-    );
+  snap.forEach(doc => {
 
-  snap.forEach((loanDoc) => {
+    const l = doc.data();
 
-    const loan =
-      loanDoc.data();
-
-    const createdDate =
-      loan.createdAt
-        ? new Date(
-            loan.createdAt.seconds *
-            1000
-          ).toLocaleString()
-        : "-";
-
-    const row = `
-
+    loansTable.innerHTML += `
       <tr>
-
-        <td>${loan.memberName}</td>
-
-        <td>${loan.memberPhone}</td>
-
+        <td>${l.name}</td>
+        <td>${l.phone}</td>
+        <td>${l.principal}</td>
+        <td>${l.interest}</td>
+        <td>${l.total}</td>
+        <td>${l.remaining}</td>
+        <td>${l.type}</td>
+        <td>${l.duration}</td>
+        <td>${l.status}</td>
+        <td>${l.createdAt?.toDate?.().toLocaleString() || "-"}</td>
+        <td>${l.createdBy || "-"}</td>
         <td>
-          ${Number(
-            loan.principal
-          ).toLocaleString()} ETB
-        </td>
-
-        <td>
-          ${Number(
-            loan.interest
-          ).toLocaleString()} ETB
-        </td>
-
-        <td>
-          ${Number(
-            loan.total
-          ).toLocaleString()} ETB
-        </td>
-
-        <td>
-          ${Number(
-            loan.remaining
-          ).toLocaleString()} ETB
-        </td>
-
-        <td>
-          ${loan.interestType}
-        </td>
-
-        <td>
-          ${loan.time}
-          ${loan.timeType}
-        </td>
-
-        <td>
-          ${loan.status}
-        </td>
-
-        <td>
-          ${createdDate}
-        </td>
-
-        <td>
-          ${loan.createdBy}
-        </td>
-
-        <td>
-
-          <button
-            onclick="deleteLoan('${loanDoc.id}')"
-            class="delete-btn"
-          >
-            Delete
+          <button class="delete-btn" data-id="${doc.id}">
+            ❌
           </button>
-
         </td>
-
       </tr>
-
     `;
-
-    loansTable.innerHTML += row;
-
   });
 
+  /* DELETE */
+  document.querySelectorAll(".delete-btn").forEach(btn => {
+    btn.addEventListener("click", async () => {
+
+      const id = btn.dataset.id;
+
+      await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js")
+        .then(async ({ deleteDoc, doc }) => {
+
+          await deleteDoc(doc(db, "loans", id));
+
+          loadLoans();
+
+        });
+
+    });
+  });
 }
 
-/* =========================================================
-   DELETE
-========================================================= */
+/* ================================
+   ADD LOAN
+================================ */
 
-window.deleteLoan =
-  async function(id) {
+loanForm?.addEventListener("submit", async (e) => {
+  e.preventDefault();
 
-    const ok =
-      confirm(
-        "Delete this loan?"
-      );
+  if (!selectedMember) {
+    alert("Please select a member");
+    return;
+  }
 
-    if (!ok) return;
+  const principal = Number(document.getElementById("principal").value);
+  const rate = Number(document.getElementById("rate").value);
+  const time = Number(document.getElementById("time").value);
+  const timeType = document.getElementById("timeType").value;
+  const interestType = document.getElementById("interestType").value;
 
-    await deleteDoc(
-      doc(db, "loans", id)
-    );
+  /* SIMPLE INTEREST */
+  let interest = (principal * rate * time) / 100;
+  let total = principal + interest;
 
-    loadLoans();
+  const remaining = total;
 
-  };
+  await addDoc(collection(db, "loans"), {
+    memberId: selectedMember.id,
+    name: selectedMember.name,
+    phone: selectedMember.phone,
 
-/* =========================================================
-   START
-========================================================= */
+    principal,
+    rate,
+    time,
+    timeType,
+    type: interestType,
+
+    interest,
+    total,
+    remaining,
+
+    status: "Active",
+
+    createdAt: serverTimestamp(),
+    createdBy: localStorage.getItem("name") || "Admin"
+  });
+
+  loanForm.reset();
+  modal.classList.remove("active");
+
+  loadLoans();
+});
+
+/* ================================
+   INIT
+================================ */
 
 loadLoans();

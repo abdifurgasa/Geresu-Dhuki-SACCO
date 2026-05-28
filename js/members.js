@@ -6,27 +6,22 @@ import {
   getDocs,
   query,
   where,
-  serverTimestamp
+  serverTimestamp,
+  orderBy,
+  limit,
+  startAfter
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-/* =========================================================
-   GLOBAL STATE
-========================================================= */
-
-let members = [];
-let currentMemberId = null;
 
 /* =========================================================
    ELEMENTS
 ========================================================= */
 
 const membersTable = document.getElementById("membersTable");
+const memberForm = document.getElementById("memberForm");
 
-const memberModal = document.getElementById("memberModal");
+const modal = document.getElementById("memberModal");
 const openModalBtn = document.getElementById("openModalBtn");
 const closeModalBtn = document.getElementById("closeModalBtn");
-
-const memberForm = document.getElementById("memberForm");
 
 /* PROFILE */
 const profileModal = document.getElementById("profileModal");
@@ -35,15 +30,30 @@ const historyTable = document.getElementById("historyTable");
 const historyContainer = document.getElementById("historyContainer");
 
 /* =========================================================
-   OPEN / CLOSE MODAL
+   GLOBAL STATE
+========================================================= */
+
+let members = [];
+let lastVisible = null;
+let isLoadingMembers = false;
+
+/* transactions */
+let transactionPageSize = 20;
+let lastTransactionDoc = null;
+let currentMemberId = null;
+let loadingTransactions = false;
+let hasMoreTransactions = true;
+
+/* =========================================================
+   MODALS
 ========================================================= */
 
 openModalBtn?.addEventListener("click", () => {
-  memberModal.style.display = "flex";
+  modal.style.display = "flex";
 });
 
 closeModalBtn?.addEventListener("click", () => {
-  memberModal.style.display = "none";
+  modal.style.display = "none";
 });
 
 closeProfileBtn?.addEventListener("click", () => {
@@ -51,221 +61,233 @@ closeProfileBtn?.addEventListener("click", () => {
 });
 
 /* =========================================================
-   ADD MEMBER (WITH VALIDATION + DUPLICATE CHECK)
+   VALIDATION HELPERS
+========================================================= */
+
+function validatePhone(phone) {
+  return /^[0-9]{9}$/.test(phone);
+}
+
+function validateNID(nid) {
+  return /^[0-9]{16}$/.test(nid);
+}
+
+/* =========================================================
+   DUPLICATE CHECK
+========================================================= */
+
+async function checkDuplicate(phone, nid) {
+  const phoneQ = query(collection(db, "members"), where("phone", "==", phone));
+  const nidQ = query(collection(db, "members"), where("nid", "==", nid));
+
+  const [phoneSnap, nidSnap] = await Promise.all([
+    getDocs(phoneQ),
+    getDocs(nidQ)
+  ]);
+
+  return !phoneSnap.empty || !nidSnap.empty;
+}
+
+/* =========================================================
+   ADD MEMBER
 ========================================================= */
 
 memberForm?.addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  try {
+  const name = document.getElementById("name").value.trim();
+  const phone = document.getElementById("phone").value.trim();
+  const nid = document.getElementById("nid").value.trim();
 
-    const name = document.getElementById("name").value.trim();
-    const phone = document.getElementById("phone").value.trim();
-    const nid = document.getElementById("nid").value.trim();
-
-    /* =========================
-       VALIDATION
-    ========================= */
-
-    if (!name) {
-      return alert("Name is required");
-    }
-
-    if (!/^\d{9}$/.test(phone)) {
-      return alert("Phone number must be EXACTLY 9 digits");
-    }
-
-    if (!/^\d{16}$/.test(nid)) {
-      return alert("National ID must be EXACTLY 16 digits");
-    }
-
-    /* =========================
-       DUPLICATE CHECK (SAFE)
-    ========================= */
-
-    const phoneSnap = await getDocs(
-      query(collection(db, "members"), where("phone", "==", phone))
-    );
-
-    if (!phoneSnap.empty) {
-      return alert("Phone number already exists");
-    }
-
-    const nidSnap = await getDocs(
-      query(collection(db, "members"), where("nid", "==", nid))
-    );
-
-    if (!nidSnap.empty) {
-      return alert("NID already exists");
-    }
-
-    /* =========================
-       SAVE MEMBER
-    ========================= */
-
-    await addDoc(collection(db, "members"), {
-      name,
-      phone,
-      nid,
-      status: "Active",
-      createdAt: serverTimestamp(),
-      createdBy:
-        localStorage.getItem("name") ||
-        auth.currentUser?.displayName ||
-        "Admin"
-    });
-
-    memberForm.reset();
-    memberModal.style.display = "none";
-
-    loadMembers();
-
-  } catch (err) {
-    alert(err.message);
+  if (!validatePhone(phone)) {
+    alert("Phone must be exactly 9 digits");
+    return;
   }
+
+  if (!validateNID(nid)) {
+    alert("NID must be exactly 16 digits");
+    return;
+  }
+
+  const isDuplicate = await checkDuplicate(phone, nid);
+
+  if (isDuplicate) {
+    alert("Duplicate Phone or NID detected!");
+    return;
+  }
+
+  await addDoc(collection(db, "members"), {
+    name,
+    phone,
+    nid,
+    status: "Active",
+    createdAt: serverTimestamp(),
+    createdBy:
+      localStorage.getItem("name") ||
+      auth.currentUser?.displayName ||
+      "Admin"
+  });
+
+  alert("Member Added Successfully");
+
+  memberForm.reset();
+  modal.style.display = "none";
+
+  loadMembers(true);
 });
 
 /* =========================================================
-   LOAD MEMBERS
+   LOAD MEMBERS (CURSOR PAGINATION)
 ========================================================= */
 
-async function loadMembers() {
+async function loadMembers(reset = false) {
+  if (isLoadingMembers) return;
+  isLoadingMembers = true;
 
-  members = [];
-  membersTable.innerHTML = "";
+  if (reset) {
+    members = [];
+    lastVisible = null;
+    membersTable.innerHTML = "";
+  }
 
-  const snap = await getDocs(collection(db, "members"));
+  let q = query(
+    collection(db, "members"),
+    orderBy("createdAt", "desc"),
+    limit(20)
+  );
+
+  if (lastVisible) {
+    q = query(
+      collection(db, "members"),
+      orderBy("createdAt", "desc"),
+      startAfter(lastVisible),
+      limit(20)
+    );
+  }
+
+  const snap = await getDocs(q);
+
+  if (snap.empty) {
+    isLoadingMembers = false;
+    return;
+  }
+
+  lastVisible = snap.docs[snap.docs.length - 1];
 
   for (const docSnap of snap.docs) {
-
     const m = docSnap.data();
     const id = docSnap.id;
 
-    // SAVINGS
-    const sSnap = await getDocs(
-      query(collection(db, "savings"), where("memberId", "==", id))
-    );
+    const [sSnap, lSnap, rSnap] = await Promise.all([
+      getDocs(query(collection(db, "savings"), where("memberId", "==", id))),
+      getDocs(query(collection(db, "loans"), where("memberId", "==", id))),
+      getDocs(query(collection(db, "repayments"), where("memberId", "==", id)))
+    ]);
 
     let totalSavings = 0;
-    sSnap.forEach(d => totalSavings += Number(d.data().amount || 0));
-
-    // LOANS
-    const lSnap = await getDocs(
-      query(collection(db, "loans"), where("memberId", "==", id))
-    );
-
     let totalLoans = 0;
-    lSnap.forEach(d => totalLoans += Number(d.data().amount || 0));
-
-    // REPAYMENTS
-    const rSnap = await getDocs(
-      query(collection(db, "repayments"), where("memberId", "==", id))
-    );
-
     let totalRepayments = 0;
+
+    sSnap.forEach(d => totalSavings += Number(d.data().amount || 0));
+    lSnap.forEach(d => totalLoans += Number(d.data().amount || 0));
     rSnap.forEach(d => totalRepayments += Number(d.data().amount || 0));
 
-    members.push({
+    const member = {
       id,
       ...m,
       totalSavings,
       totalLoans,
       remainingLoan: totalLoans - totalRepayments
-    });
-  }
+    };
 
-  renderMembers();
-}
-
-/* =========================================================
-   RENDER TABLE
-========================================================= */
-
-function renderMembers() {
-
-  membersTable.innerHTML = "";
-
-  members.forEach(member => {
+    members.push(member);
 
     const row = document.createElement("tr");
-
-    row.className = "member-row";
-
-    row.onclick = () => openProfile(member.id);
 
     row.innerHTML = `
       <td><strong>${member.name}</strong></td>
       <td>${member.phone}</td>
       <td>${member.nid}</td>
-      <td>${member.totalSavings} ETB</td>
-      <td>${member.totalLoans} ETB</td>
-      <td>${member.remainingLoan} ETB</td>
+      <td>${member.totalSavings}</td>
+      <td>${member.totalLoans}</td>
+      <td>${member.remainingLoan}</td>
       <td>${member.status}</td>
-      <td>${
-        member.createdAt
-          ? new Date(member.createdAt.seconds * 1000).toLocaleString()
-          : "-"
-      }</td>
+      <td>${member.createdAt?.toDate?.().toLocaleString() || "-"}</td>
       <td>${member.createdBy || "-"}</td>
     `;
 
+    row.style.cursor = "pointer";
+
+    row.onclick = () => openProfile(member.id);
+
     membersTable.appendChild(row);
-  });
+  }
+
+  isLoadingMembers = false;
 }
 
 /* =========================================================
-   OPEN PROFILE (ONLY ON CLICK)
+   OPEN PROFILE
 ========================================================= */
 
-async function openProfile(memberId) {
-
+function openProfile(memberId) {
   currentMemberId = memberId;
+
+  const member = members.find(m => m.id === memberId);
+  if (!member) return;
 
   profileModal.classList.add("active");
 
+  document.getElementById("profileTitle").innerText = member.name;
+  document.getElementById("profileSavings").innerText = member.totalSavings;
+  document.getElementById("profileLoans").innerText = member.totalLoans;
+  document.getElementById("profileRemaining").innerText = member.remainingLoan;
+
   historyTable.innerHTML = "";
+  lastTransactionDoc = null;
+  hasMoreTransactions = true;
 
-  const member = members.find(m => m.id === memberId);
-
-  if (!member) return;
-
-  document.getElementById("profileTitle").innerText =
-    "👤 " + member.name;
-
-  document.getElementById("profileSavings").innerText =
-    "ETB " + member.totalSavings;
-
-  document.getElementById("profileLoans").innerText =
-    "ETB " + member.totalLoans;
-
-  document.getElementById("profileRemaining").innerText =
-    "ETB " + member.remainingLoan;
-
-  await loadTransactions();
+  loadTransactions();
 }
 
 /* =========================================================
-   LOAD TRANSACTIONS (DEMO)
+   TRANSACTIONS (REAL FIRESTORE PAGINATION)
 ========================================================= */
 
 async function loadTransactions() {
+  if (loadingTransactions || !hasMoreTransactions) return;
 
-  const data = [];
+  loadingTransactions = true;
 
-  for (let i = 0; i < 20; i++) {
+  let q = query(
+    collection(db, "transactions"),
+    where("memberId", "==", currentMemberId),
+    orderBy("createdAt", "desc"),
+    limit(transactionPageSize)
+  );
 
-    data.push({
-      type: i % 2 === 0 ? "Saving" : "Loan",
-      amount: 5000 + i * 100,
-      previous: 45000 + i * 100,
-      total: 50000 + i * 100,
-      status: "Completed",
-      createdDate: "2026-05-28",
-      createdBy: "Admin"
-    });
+  if (lastTransactionDoc) {
+    q = query(
+      collection(db, "transactions"),
+      where("memberId", "==", currentMemberId),
+      orderBy("createdAt", "desc"),
+      startAfter(lastTransactionDoc),
+      limit(transactionPageSize)
+    );
   }
 
-  data.forEach(tx => {
+  const snap = await getDocs(q);
+
+  if (snap.empty) {
+    hasMoreTransactions = false;
+    loadingTransactions = false;
+    return;
+  }
+
+  lastTransactionDoc = snap.docs[snap.docs.length - 1];
+
+  snap.forEach(doc => {
+    const tx = doc.data();
 
     historyTable.innerHTML += `
       <tr>
@@ -274,15 +296,24 @@ async function loadTransactions() {
         <td>${tx.previous}</td>
         <td>${tx.total}</td>
         <td>${tx.status}</td>
-        <td>${tx.createdDate}</td>
+        <td>${tx.createdAt?.toDate?.().toLocaleString() || "-"}</td>
         <td>${tx.createdBy}</td>
       </tr>
     `;
   });
 
-  document.getElementById("profileTransactions").innerText =
-    historyTable.children.length;
+  loadingTransactions = false;
 }
+
+/* =========================================================
+   INFINITE SCROLL (UPWARD LOAD)
+========================================================= */
+
+historyContainer?.addEventListener("scroll", () => {
+  if (historyContainer.scrollTop <= 50) {
+    loadTransactions();
+  }
+});
 
 /* =========================================================
    INIT

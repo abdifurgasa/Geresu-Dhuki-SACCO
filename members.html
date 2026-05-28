@@ -557,7 +557,8 @@
 
 </div>
 
- <!-- =========================================================
+ ```html
+<!-- =========================================================
      MEMBER PROFILE MODAL
 ========================================================= -->
 
@@ -568,9 +569,17 @@
     <!-- HEADER -->
     <div class="profile-header">
 
-      <h2 id="profileTitle">
-        Member Profile
-      </h2>
+      <div>
+
+        <h2 id="profileTitle">
+          👤 Member Profile
+        </h2>
+
+        <p class="profile-subtitle">
+          Member financial overview and transaction history
+        </p>
+
+      </div>
 
       <button
         class="profile-close"
@@ -581,42 +590,138 @@
 
     </div>
 
-    <!-- CONTENT -->
-    <div class="profile-content">
+    <!-- SUMMARY CARDS -->
+    <div class="summary-cards">
 
-      <!-- TABLE -->
-      <div class="history-container">
+      <!-- SAVINGS -->
+      <div class="summary-card">
 
-        <table class="table-modern">
+        <div class="summary-icon">
+          💰
+        </div>
 
-          <thead>
+        <div>
 
-            <tr>
+          <p class="summary-label">
+            Total Savings
+          </p>
 
-              <th>Type</th>
-              <th>Amount</th>
-              <th>Previous</th>
-              <th>Total</th>
-              <th>Description</th>
-              <th>Status</th>
-              <th>Created Date</th>
-              <th>Created By</th>
+          <h3 id="profileSavings">
+            ETB 0
+          </h3>
 
-            </tr>
-
-          </thead>
-
-          <tbody id="historyTable"></tbody>
-
-        </table>
+        </div>
 
       </div>
+
+      <!-- LOANS -->
+      <div class="summary-card">
+
+        <div class="summary-icon">
+          🏦
+        </div>
+
+        <div>
+
+          <p class="summary-label">
+            Total Loans
+          </p>
+
+          <h3 id="profileLoans">
+            ETB 0
+          </h3>
+
+        </div>
+
+      </div>
+
+      <!-- REMAINING -->
+      <div class="summary-card">
+
+        <div class="summary-icon">
+          📉
+        </div>
+
+        <div>
+
+          <p class="summary-label">
+            Remaining Loan
+          </p>
+
+          <h3 id="profileRemaining">
+            ETB 0
+          </h3>
+
+        </div>
+
+      </div>
+
+      <!-- TRANSACTIONS -->
+      <div class="summary-card">
+
+        <div class="summary-icon">
+          📄
+        </div>
+
+        <div>
+
+          <p class="summary-label">
+            Transactions
+          </p>
+
+          <h3 id="profileTransactions">
+            0
+          </h3>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- TRANSACTION HISTORY -->
+    <div
+      class="history-container"
+      id="historyContainer"
+    >
+
+      <!-- LOADING -->
+      <div
+        id="loadingTransactions"
+        class="loading-box"
+      >
+        Loading transactions...
+      </div>
+
+      <!-- TABLE -->
+      <table class="table-modern">
+
+        <thead>
+
+          <tr>
+
+            <th>Type</th>
+            <th>Amount</th>
+            <th>Previous</th>
+            <th>Total</th>
+            <th>Status</th>
+            <th>Created Date</th>
+            <th>Created By</th>
+
+          </tr>
+
+        </thead>
+
+        <tbody id="historyTable"></tbody>
+
+      </table>
 
     </div>
 
   </div>
 
 </div>
+
 <!-- =========================================================
      SCRIPTS
 ========================================================= -->

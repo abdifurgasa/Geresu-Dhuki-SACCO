@@ -30,26 +30,15 @@ initLanguage();
    ELEMENTS
 ========================================================= */
 
-const membersTable =
-  document.getElementById("membersTable");
+const membersTable = document.getElementById("membersTable");
+const memberForm = document.getElementById("memberForm");
 
-const memberForm =
-  document.getElementById("memberForm");
+const modal = document.getElementById("memberModal");
+const openModalBtn = document.getElementById("openModalBtn");
+const closeModalBtn = document.getElementById("closeModalBtn");
 
-const modal =
-  document.getElementById("memberModal");
-
-const openModalBtn =
-  document.getElementById("openModalBtn");
-
-const closeModalBtn =
-  document.getElementById("closeModalBtn");
-
-const profileModal =
-  document.getElementById("profileModal");
-
-const closeProfileBtn =
-  document.getElementById("closeProfileBtn");
+const profileModal = document.getElementById("profileModal");
+const closeProfileBtn = document.getElementById("closeProfileBtn");
 
 /* =========================================================
    STATE
@@ -71,20 +60,39 @@ function getLang() {
 }
 
 /* =========================================================
-   MODALS
+   🔥 MODAL FIX (MAIN ISSUE FIXED HERE)
 ========================================================= */
 
-openModalBtn?.addEventListener("click", () => {
+function openModal() {
+  if (!modal) return;
   modal.classList.add("active");
-});
+}
 
-closeModalBtn?.addEventListener("click", () => {
+function closeModal() {
+  if (!modal) return;
   modal.classList.remove("active");
   resetForm();
+}
+
+/* OPEN MODAL */
+openModalBtn?.addEventListener("click", () => {
+  console.log("Add button clicked");
+  openModal();
 });
 
+/* CLOSE MODAL */
+closeModalBtn?.addEventListener("click", () => {
+  closeModal();
+});
+
+/* CLOSE PROFILE */
+closeProfileBtn?.addEventListener("click", () => {
+  profileModal?.classList.remove("active");
+});
+
+/* CLICK OUTSIDE MODAL */
 window.addEventListener("click", (e) => {
-  if (e.target === modal) modal.classList.remove("active");
+  if (e.target === modal) closeModal();
   if (e.target === profileModal) profileModal.classList.remove("active");
 });
 
@@ -120,7 +128,7 @@ async function checkDuplicate(phone, nid, ignoreId = null) {
 }
 
 /* =========================================================
-   SUBMIT (ADD + EDIT)
+   ADD / EDIT MEMBER
 ========================================================= */
 
 memberForm?.addEventListener("submit", async (e) => {
@@ -129,29 +137,18 @@ memberForm?.addEventListener("submit", async (e) => {
   const lang = getLang();
   const t = translations[lang];
 
-  const name =
-    document.getElementById("name").value.trim();
-
-  const phone =
-    document.getElementById("phone").value.trim();
-
-  const nid =
-    document.getElementById("nid").value.trim();
+  const name = document.getElementById("name").value.trim();
+  const phone = document.getElementById("phone").value.trim();
+  const nid = document.getElementById("nid").value.trim();
 
   if (!validatePhone(phone)) return alert(t.phoneError);
   if (!validateNID(nid)) return alert(t.nidError);
 
-  const isDuplicate =
-    await checkDuplicate(phone, nid, editId);
-
+  const isDuplicate = await checkDuplicate(phone, nid, editId);
   if (isDuplicate) return alert(t.duplicateError);
 
-  /* EDIT MODE */
   if (editMode) {
-
-    const ref = doc(db, "members", editId);
-
-    await updateDoc(ref, {
+    await updateDoc(doc(db, "members", editId), {
       name,
       phone,
       nid
@@ -161,24 +158,18 @@ memberForm?.addEventListener("submit", async (e) => {
     editId = null;
 
   } else {
-
-    /* ADD MODE */
     await addDoc(collection(db, "members"), {
       name,
       phone,
       nid,
       status: t.active,
       createdAt: serverTimestamp(),
-      createdBy:
-        localStorage.getItem("name") ||
-        auth.currentUser?.displayName ||
-        "Admin"
+      createdBy: localStorage.getItem("name") || "Admin"
     });
   }
 
   memberForm.reset();
-  modal.classList.remove("active");
-
+  closeModal();
   loadMembers(true);
 });
 
@@ -187,7 +178,6 @@ memberForm?.addEventListener("submit", async (e) => {
 ========================================================= */
 
 async function loadMembers(reset = false) {
-
   if (isLoading) return;
   isLoading = true;
 
@@ -219,18 +209,15 @@ async function loadMembers(reset = false) {
     return;
   }
 
-  lastVisible =
-    snap.docs[snap.docs.length - 1];
+  lastVisible = snap.docs[snap.docs.length - 1];
 
   snap.forEach(docSnap => {
-
     const m = docSnap.data();
     const id = docSnap.id;
 
     members.push({ id, ...m });
 
-    const row =
-      document.createElement("tr");
+    const row = document.createElement("tr");
 
     row.innerHTML = `
       <td>${m.name}</td>
@@ -238,11 +225,10 @@ async function loadMembers(reset = false) {
       <td>${m.nid}</td>
       <td>${m.status}</td>
       <td>${m.createdAt?.toDate?.().toLocaleString() || "-"}</td>
-      <td>${m.createdBy || "-"}</td>
 
       <td>
-        <button onclick="editMember('${id}')" class="edit-btn">✏️</button>
-        <button onclick="deleteMember('${id}')" class="delete-btn">🗑️</button>
+        <button onclick="editMember('${id}')">✏️</button>
+        <button onclick="deleteMember('${id}')">🗑️</button>
       </td>
     `;
 
@@ -257,10 +243,7 @@ async function loadMembers(reset = false) {
 ========================================================= */
 
 window.editMember = (id) => {
-
-  const m =
-    members.find(x => x.id === id);
-
+  const m = members.find(x => x.id === id);
   if (!m) return;
 
   editMode = true;
@@ -270,7 +253,7 @@ window.editMember = (id) => {
   document.getElementById("phone").value = m.phone;
   document.getElementById("nid").value = m.nid;
 
-  modal.classList.add("active");
+  openModal();
 };
 
 /* =========================================================
@@ -278,16 +261,12 @@ window.editMember = (id) => {
 ========================================================= */
 
 window.deleteMember = async (id) => {
-
-  const lang = getLang();
-  const t = translations[lang];
-
-  if (!confirm(t.deleteConfirm || "Delete this member?")) return;
+  const confirmDelete = confirm("Delete this member?");
+  if (!confirmDelete) return;
 
   await deleteDoc(doc(db, "members", id));
 
   members = members.filter(m => m.id !== id);
-
   loadMembers(true);
 };
 
@@ -298,7 +277,7 @@ window.deleteMember = async (id) => {
 function resetForm() {
   editMode = false;
   editId = null;
-  memberForm.reset();
+  memberForm?.reset();
 }
 
 /* =========================================================

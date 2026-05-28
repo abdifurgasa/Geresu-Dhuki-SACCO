@@ -223,6 +223,7 @@ h1{
   box-shadow:0 5px 15px rgba(0,0,0,0.05);
 }
 ```css id="5mz8rf"
+```css id="w9p2ce"
 /* =========================================================
    GLOBAL MODERN TABLE SYSTEM
 ========================================================= */
@@ -249,7 +250,10 @@ h1{
   overflow-x: auto;
 }
 
-/* HEADER */
+/* =========================================================
+   GREEN TABLE HEADER
+========================================================= */
+
 .table-modern thead {
   position: sticky;
   top: 0;
@@ -259,8 +263,8 @@ h1{
 .table-modern thead tr {
   background: linear-gradient(
     90deg,
-    #0f172a,
-    #1e293b
+    #047857,
+    #059669
   );
 }
 
@@ -271,10 +275,13 @@ h1{
   font-size: 14px;
   font-weight: 600;
   white-space: nowrap;
-  border-bottom: 1px solid #334155;
+  border-bottom: 1px solid #065f46;
 }
 
-/* BODY */
+/* =========================================================
+   TABLE BODY
+========================================================= */
+
 .table-modern tbody tr {
   transition: 0.2s ease;
   border-bottom: 1px solid #f1f5f9;
@@ -282,7 +289,7 @@ h1{
 }
 
 .table-modern tbody tr:hover {
-  background: #f8fafc;
+  background: #f0fdf4;
   transform: scale(1.001);
 }
 
@@ -300,7 +307,10 @@ h1{
   font-weight: 600;
 }
 
-/* STATUS BADGES */
+/* =========================================================
+   STATUS BADGES
+========================================================= */
+
 .status-active {
   background: #dcfce7;
   color: #166534;
@@ -328,7 +338,10 @@ h1{
   font-weight: 600;
 }
 
-/* AMOUNTS */
+/* =========================================================
+   AMOUNTS
+========================================================= */
+
 .amount-positive {
   color: #16a34a;
   font-weight: 600;
@@ -339,12 +352,18 @@ h1{
   font-weight: 600;
 }
 
-/* ZEBRA STRIPES */
+/* =========================================================
+   ZEBRA STRIPES
+========================================================= */
+
 .table-modern tbody tr:nth-child(even) {
   background: #fcfcfd;
 }
 
-/* ACTION BUTTONS */
+/* =========================================================
+   ACTION BUTTONS
+========================================================= */
+
 .table-actions {
   display: flex;
   gap: 8px;
@@ -378,7 +397,10 @@ h1{
   transform: translateY(-2px);
 }
 
-/* MOBILE */
+/* =========================================================
+   MOBILE
+========================================================= */
+
 @media (max-width: 768px) {
 
   .table-card {
@@ -393,7 +415,10 @@ h1{
 
 }
 
-/* EMPTY TABLE */
+/* =========================================================
+   EMPTY TABLE
+========================================================= */
+
 .empty-table {
   padding: 40px;
   text-align: center;
@@ -401,7 +426,10 @@ h1{
   font-size: 15px;
 }
 
-/* LOADING */
+/* =========================================================
+   LOADING
+========================================================= */
+
 .loading-table {
   padding: 30px;
   text-align: center;
@@ -409,6 +437,7 @@ h1{
   font-size: 14px;
 }
 ```
+
 
 /* =========================================================
    TABLE

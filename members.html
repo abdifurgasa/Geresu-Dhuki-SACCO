@@ -84,60 +84,41 @@
 <!-- =========================================================
      MAIN
 ========================================================= -->
-<main class="main">
+main class="main">
 
   <!-- TOPBAR -->
   <div class="topbar">
 
-    <h2 data-i18n="membersManagement">👥 Members Management</h2>
+    <h2>👥 Members Management</h2>
 
-    <div style="display:flex;gap:15px;align-items:center;">
-
-      <select id="languageSelect" onchange="changeLanguage(this.value)">
-        <option value="en">English</option>
-        <option value="am">አማርኛ</option>
-        <option value="om">Afaan Oromoo</option>
-      </select>
-
-      <button class="add-btn" id="openModalBtn">
-        <i class="fa fa-plus"></i>
-        <span data-i18n="addMember">Add Member</span>
-      </button>
-
-    </div>
+    <button class="add-btn" id="openModalBtn">
+      <i class="fa fa-plus"></i> Add Member
+    </button>
 
   </div>
 
   <!-- SEARCH -->
   <div class="search-container">
-    <input type="text" id="searchMember"
-      placeholder="Search by name, phone or NID..."
-      data-i18n-placeholder="searchMember" />
+    <input type="text" id="searchMember" class="search-input"
+      placeholder="Search by name, phone or NID..." />
   </div>
 
-  <!-- SELECTED -->
-  <div id="selectedMember" class="selected-box">
-    👤 Select a member
-  </div>
-
-  <!-- =========================================================
-       TABLE (ONLY ONE - FIXED)
-  ========================================================= -->
+  <!-- MEMBERS TABLE -->
   <div class="table-card">
 
     <table class="table-modern">
 
       <thead>
         <tr>
-          <th data-i18n="name">Name</th>
-          <th data-i18n="phone">Phone</th>
-          <th data-i18n="nid">NID</th>
-          <th data-i18n="totalSavings">Savings</th>
-          <th data-i18n="totalLoans">Loan Total</th>
-          <th data-i18n="remainingLoan">Remaining</th>
-          <th data-i18n="status">Status</th>
-          <th data-i18n="createdDate">Created Date</th>
-          <th data-i18n="createdBy">Created By</th>
+          <th>Name</th>
+          <th>Phone</th>
+          <th>NID</th>
+          <th>Savings</th>
+          <th>Total Loans</th>
+          <th>Remaining Loan</th>
+          <th>Status</th>
+          <th>Created Date</th>
+          <th>Created By</th>
         </tr>
       </thead>
 
@@ -152,23 +133,26 @@
 <!-- =========================================================
      ADD MEMBER MODAL
 ========================================================= -->
+
 <div class="modal" id="memberModal">
 
   <div class="modal-box">
 
     <div class="modal-header">
-      <h2 data-i18n="addMember">Add Member</h2>
+
+      <h2>Add Member</h2>
 
       <button id="closeModalBtn">✕</button>
+
     </div>
 
     <form id="memberForm">
 
-      <input id="name" placeholder="Full Name" required />
-      <input id="phone" placeholder="Phone" required />
-      <input id="nid" placeholder="NID" required />
+      <input type="text" id="name" placeholder="Full Name" required />
+      <input type="text" id="phone" placeholder="9 Digit Phone" maxlength="9" required />
+      <input type="text" id="nid" placeholder="16 Digit NID" maxlength="16" required />
 
-      <button type="submit">Save</button>
+      <button type="submit" class="save-btn">Save</button>
 
     </form>
 
@@ -179,15 +163,17 @@
 <!-- =========================================================
      PROFILE MODAL
 ========================================================= -->
+
 <div class="profile-modal" id="profileModal">
 
   <div class="profile-box">
 
+    <!-- HEADER -->
     <div class="profile-header">
 
       <h2 id="profileTitle">Member Profile</h2>
 
-      <button id="closeProfileBtn">✕</button>
+      <button id="closeProfileBtn" class="profile-close">✕</button>
 
     </div>
 
@@ -195,43 +181,21 @@
     <div class="summary-cards">
 
       <div class="summary-card">
-        <div>💰</div>
-        <div>
-          <p>Total Savings</p>
-          <h3 id="profileSavings">0</h3>
-        </div>
+        💰 Savings: <span id="profileSavings">0</span>
       </div>
 
       <div class="summary-card">
-        <div>🏦</div>
-        <div>
-          <p>Total Loans</p>
-          <h3 id="profileLoans">0</h3>
-        </div>
+        🏦 Loans: <span id="profileLoans">0</span>
       </div>
 
       <div class="summary-card">
-        <div>📉</div>
-        <div>
-          <p>Remaining Loan</p>
-          <h3 id="profileRemaining">0</h3>
-        </div>
-      </div>
-
-      <div class="summary-card">
-        <div>📄</div>
-        <div>
-          <p>Transactions</p>
-          <h3 id="profileTransactions">0</h3>
-        </div>
+        📉 Remaining: <span id="profileRemaining">0</span>
       </div>
 
     </div>
 
     <!-- TRANSACTIONS -->
     <div class="history-container" id="historyContainer">
-
-      <div id="loadingTransactions">Loading...</div>
 
       <table class="table-modern">
 
@@ -256,7 +220,7 @@
   </div>
 
 </div>
-
+  
 <!-- =========================================================
      SCRIPTS
 ========================================================= -->

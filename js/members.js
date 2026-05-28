@@ -161,240 +161,290 @@ async function loadMembers() {
   });
 }
 
-/* =========================================================
-   PROFILE VIEW (FIXED - WORKING VERSION)
-========================================================= */
-async function openMemberProfile(member) {
+```javascript
+// =========================================================
+// PROFILE MODAL
+// =========================================================
 
-  profileModal.style.display = "flex";
+const profileModal =
+  document.getElementById("profileModal");
 
-  document.getElementById("profileName").innerHTML =
-    `👤 ${member.name}`;
+const closeProfileBtn =
+  document.getElementById("closeProfileBtn");
+
+const historyContainer =
+  document.getElementById("historyContainer");
+
+const historyTable =
+  document.getElementById("historyTable");
+
+let transactionPage = 1;
+
+let loadingTransactions = false;
+
+let hasMoreTransactions = true;
+
+let currentMemberId = null;
+
+// =========================================================
+// OPEN PROFILE MODAL
+// =========================================================
+
+async function openProfileModal(memberId) {
+
+  currentMemberId = memberId;
+
+  profileModal.classList.add("active");
 
   historyTable.innerHTML = "";
 
-  let totalSavings = 0;
-  let totalLoans = 0;
-  let totalRepayments = 0;
-  let totalWithdrawals = 0;
+  transactionPage = 1;
 
-  const all = [];
+  hasMoreTransactions = true;
 
-  /* =====================================================
-     LOAD SAVINGS
-  ===================================================== */
-
-  const savingsSnap = await getDocs(
-    collection(db, "savings")
+  // FIND MEMBER
+  const member = members.find(
+    m => m.id === memberId
   );
 
-  savingsSnap.forEach(doc => {
+  // PROFILE TITLE
+  document.getElementById(
+    "profileTitle"
+  ).innerHTML =
+    `👤 ${member.name}`;
 
-    const d = doc.data();
+  // SUMMARY CARDS
+  document.getElementById(
+    "profileSavings"
+  ).innerHTML =
+    `ETB ${member.totalSavings}`;
 
-    if (d.memberId === member.id) {
+  document.getElementById(
+    "profileLoans"
+  ).innerHTML =
+    `ETB ${member.totalLoans}`;
 
-      totalSavings += Number(d.amount || 0);
+  document.getElementById(
+    "profileRemaining"
+  ).innerHTML =
+    `ETB ${member.remainingLoan}`;
 
-      all.push({
-        type: "Savings",
-        amount: d.amount || 0,
-        action: "Deposit",
-        description: "Saving Deposit",
-        createdAt: d.createdAt || null,
-        createdBy: d.createdBy || member.name
-      });
+  // LOAD FIRST TRANSACTIONS
+  await loadTransactions();
+}
 
-    }
+// =========================================================
+// CLOSE PROFILE
+// =========================================================
 
-  });
+closeProfileBtn.onclick = () => {
 
-  /* =====================================================
-     LOAD LOANS
-  ===================================================== */
+  profileModal.classList.remove("active");
 
-  const loansSnap = await getDocs(
-    collection(db, "loans")
-  );
+};
 
-  loansSnap.forEach(doc => {
+// =========================================================
+// LOAD TRANSACTIONS
+// =========================================================
 
-    const d = doc.data();
+async function loadTransactions() {
 
-    if (d.memberId === member.id) {
+  if (
+    loadingTransactions ||
+    !hasMoreTransactions
+  ) return;
 
-      totalLoans += Number(d.amount || 0);
+  loadingTransactions = true;
 
-      all.push({
-        type: "Loan",
-        amount: d.amount || 0,
-        action: "Loan",
-        description: "Loan Created",
-        createdAt: d.createdAt || null,
-        createdBy: d.createdBy || member.name
-      });
+  document.getElementById(
+    "loadingTransactions"
+  ).style.display = "block";
 
-    }
+  // =====================================================
+  // API REQUEST EXAMPLE
+  // =====================================================
 
-  });
+  // const response = await fetch(
+  //   `/api/members/${currentMemberId}/transactions?page=${transactionPage}`
+  // );
 
-  /* =====================================================
-     LOAD REPAYMENTS
-  ===================================================== */
+  // const data = await response.json();
 
-  const repaySnap = await getDocs(
-    collection(db, "repayments")
-  );
+  // =====================================================
+  // DEMO DATA
+  // =====================================================
 
-  repaySnap.forEach(doc => {
+  const data = [];
 
-    const d = doc.data();
+  for (let i = 0; i < 20; i++) {
 
-    if (d.memberId === member.id) {
+    data.push({
 
-      totalRepayments += Number(d.amount || 0);
+      type:
+        i % 2 === 0
+          ? "Saving Deposit"
+          : "Loan Payment",
 
-      all.push({
-        type: "Repayment",
-        amount: d.amount || 0,
-        action: "Repayment",
-        description: "Loan Repayment",
-        createdAt: d.createdAt || null,
-        createdBy: d.createdBy || member.name
-      });
+      amount: 5000 + i * 100,
 
-    }
+      previous: 45000 + i * 100,
 
-  });
+      total: 50000 + i * 100,
 
-  /* =====================================================
-     LOAD WITHDRAWALS
-  ===================================================== */
+      status: "Completed",
 
-  const withdrawSnap = await getDocs(
-    collection(db, "withdrawals")
-  );
+      createdDate: "2026-05-28",
 
-  withdrawSnap.forEach(doc => {
+      createdBy: "Admin"
 
-    const d = doc.data();
+    });
 
-    if (d.memberId === member.id) {
-
-      totalWithdrawals += Number(d.amount || 0);
-
-      all.push({
-        type: "Withdrawal",
-        amount: d.amount || 0,
-        action: "Withdrawal",
-        description: "Money Withdrawal",
-        createdAt: d.createdAt || null,
-        createdBy: d.createdBy || member.name
-      });
-
-    }
-
-  });
-
-  /* =====================================================
-     DISPLAY TOTALS
-  ===================================================== */
-
-  document.getElementById("profileSavings").innerHTML =
-    totalSavings.toLocaleString() + " ETB";
-
-  document.getElementById("profileLoans").innerHTML =
-    totalLoans.toLocaleString() + " ETB";
-
-  document.getElementById("profileRepayments").innerHTML =
-    totalRepayments.toLocaleString() + " ETB";
-
-  document.getElementById("profileWithdrawals").innerHTML =
-    totalWithdrawals.toLocaleString() + " ETB";
-
-  /* =====================================================
-     SORT LATEST FIRST
-  ===================================================== */
-
-  all.sort((a, b) => {
-
-    const aTime = a.createdAt?.seconds || 0;
-    const bTime = b.createdAt?.seconds || 0;
-
-    return bTime - aTime;
-
-  });
-
-  /* =====================================================
-     NO DATA
-  ===================================================== */
-
-  if (all.length === 0) {
-
-    historyTable.innerHTML = `
-      <tr>
-        <td colspan="6"
-          style="
-            text-align:center;
-            padding:30px;
-            font-weight:bold;
-            color:gray;
-          ">
-          No Transaction History
-        </td>
-      </tr>
-    `;
-
-    return;
   }
 
-  /* =====================================================
-     DISPLAY HISTORY
-  ===================================================== */
+  // =====================================================
+  // APPEND ROWS
+  // =====================================================
 
-  all.forEach(item => {
+  data.forEach(tx => {
 
-    const row = document.createElement("tr");
+    historyTable.innerHTML += `
 
-    row.innerHTML = `
+      <tr>
 
-      <td class="type-${item.type.toLowerCase()}">
-        ${item.type}
-      </td>
+        <td>${tx.type}</td>
 
-      <td>
-        ${Number(item.amount).toLocaleString()} ETB
-      </td>
+        <td>
+          ETB ${tx.amount}
+        </td>
 
-      <td>
-        ${item.action}
-      </td>
+        <td>
+          ETB ${tx.previous}
+        </td>
 
-      <td>
-        ${item.description}
-      </td>
+        <td>
+          ETB ${tx.total}
+        </td>
 
-      <td>
-        ${
-          item.createdAt
-            ? new Date(
-                item.createdAt.seconds * 1000
-              ).toLocaleString()
-            : "-"
-        }
-      </td>
+        <td>
+          ${tx.status}
+        </td>
 
-      <td>
-        ${item.createdBy}
-      </td>
+        <td>
+          ${tx.createdDate}
+        </td>
+
+        <td>
+          ${tx.createdBy}
+        </td>
+
+      </tr>
 
     `;
 
-    historyTable.appendChild(row);
+  });
+
+  // UPDATE TRANSACTION COUNT
+  document.getElementById(
+    "profileTransactions"
+  ).innerHTML =
+    historyTable.children.length;
+
+  transactionPage++;
+
+  // STOP AFTER MANY PAGES
+  if (transactionPage > 10) {
+
+    hasMoreTransactions = false;
+
+  }
+
+  loadingTransactions = false;
+
+  document.getElementById(
+    "loadingTransactions"
+  ).style.display = "none";
+}
+
+// =========================================================
+// INFINITE SCROLL UPWARD
+// =========================================================
+
+historyContainer.addEventListener(
+  "scroll",
+  async () => {
+
+    if (
+      historyContainer.scrollTop <= 50
+    ) {
+
+      await loadTransactions();
+
+    }
+
+  }
+);
+
+// =========================================================
+// CLICKABLE MEMBER ROWS
+// =========================================================
+
+function renderMembersTable() {
+
+  const table =
+    document.getElementById(
+      "membersTable"
+    );
+
+  table.innerHTML = "";
+
+  members.forEach(member => {
+
+    table.innerHTML += `
+
+      <tr
+        class="member-row"
+        onclick="openProfileModal(${member.id})"
+      >
+
+        <td>${member.name}</td>
+
+        <td>${member.phone}</td>
+
+        <td>${member.nid}</td>
+
+        <td>
+          ETB ${member.totalSavings}
+        </td>
+
+        <td>
+          ETB ${member.totalLoans}
+        </td>
+
+        <td>
+          ETB ${member.remainingLoan}
+        </td>
+
+        <td>
+          ${member.status}
+        </td>
+
+        <td>
+          ${member.createdDate}
+        </td>
+
+        <td>
+          ${member.createdBy}
+        </td>
+
+      </tr>
+
+    `;
 
   });
 
 }
+```
+
 /* =========================================================
    START
 ========================================================= */

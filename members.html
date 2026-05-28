@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 
@@ -20,326 +21,347 @@
 </head>
 
 <body>
-     
-<!-- =========================================================
-     SIDEBAR
-========================================================= -->
-
-<aside
-  class="sidebar"
-  id="sidebar"
->
-
-  <!-- TOGGLE -->
-  <button
-    class="toggle-btn"
-    onclick="toggleSidebar()"
-  >
-    ☰
-  </button>
-
-  <!-- LOGO -->
-  <h2 class="logo">
-    🏦 SACCO
-  </h2>
-
-  <!-- NAVIGATION -->
-  <nav class="nav">
-
-    <!-- DASHBOARD -->
-    <a
-      href="dashboard.html"
-      class="nav-item"
-    >
-
-      <span class="icon">
-        📊
-      </span>
-
-      <span
-        class="text"
-        data-i18n="dashboard"
-      >
-        Dashboard
-      </span>
-
-    </a>
-
-    <!-- MEMBERS -->
-    <a
-      href="members.html"
-      class="nav-item admin-only"
-    >
-
-      <span class="icon">
-        👥
-      </span>
-
-      <span
-        class="text"
-        data-i18n="members"
-      >
-        Members
-      </span>
-
-    </a>
-
-    <!-- SAVINGS -->
-    <a
-      href="savings.html"
-      class="nav-item active"
-    >
-
-      <span class="icon">
-        💰
-      </span>
-
-      <span
-        class="text"
-        data-i18n="savings"
-      >
-        Savings
-      </span>
-
-    </a>
-
-    <!-- LOANS -->
-    <a
-      href="loans.html"
-      class="nav-item"
-    >
-
-      <span class="icon">
-        🏦
-      </span>
-
-      <span
-        class="text"
-        data-i18n="loans"
-      >
-        Loans
-      </span>
-
-    </a>
-
-    <!-- REPAYMENTS -->
-    <a
-      href="repayments.html"
-      class="nav-item"
-    >
-
-      <span class="icon">
-        💵
-      </span>
-
-      <span
-        class="text"
-        data-i18n="repayments"
-      >
-        Repayments
-      </span>
-
-    </a>
-
-    <!-- WITHDRAWALS -->
-    <a
-      href="withdrawals.html"
-      class="nav-item admin-only"
-    >
-
-      <span class="icon">
-        💸
-      </span>
-
-      <span
-        class="text"
-        data-i18n="withdrawals"
-      >
-        Withdrawals
-      </span>
-
-    </a>
-
-    <!-- REPORTS -->
-    <a
-      href="reports.html"
-      class="nav-item admin-only"
-    >
-
-      <span class="icon">
-        📄
-      </span>
-
-      <span
-        class="text"
-        data-i18n="reports"
-      >
-        Reports
-      </span>
-
-    </a>
-
-    <!-- USERS -->
-    <a
-      href="users.html"
-      class="nav-item admin-only"
-    >
-
-      <span class="icon">
-        👤
-      </span>
-
-      <span
-        class="text"
-        data-i18n="users"
-      >
-        Users
-      </span>
-
-    </a>
-
-    <!-- SETTINGS -->
-    <a
-      href="settings.html"
-      class="nav-item"
-    >
-
-      <span class="icon">
-        ⚙️
-      </span>
-
-      <span
-        class="text"
-        data-i18n="settings"
-      >
-        Settings
-      </span>
-
-    </a>
-
-    <!-- LOGOUT -->
-    <a
-      href="#"
-      class="nav-item logout"
-      id="logoutBtn"
-    >
-
-      <span class="icon">
-        🚪
-      </span>
-
-      <span
-        class="text"
-        data-i18n="logout"
-      >
-        Logout
-      </span>
-
-    </a>
-
-  </nav>
-
-</aside>
 
   <!-- =========================================================
-       TOPBAR
+       SIDEBAR
   ========================================================= -->
 
-  <div class="topbar">
+  <aside
+    class="sidebar"
+    id="sidebar"
+  >
 
-    <h1 data-i18n="members">
-      Members
-    </h1>
+    <!-- TOGGLE -->
 
-    <div class="top-actions">
+    <button
+      class="toggle-btn"
+      onclick="toggleSidebar()"
+    >
+      ☰
+    </button>
 
-      <!-- LANGUAGE -->
+    <!-- LOGO -->
 
-      <select id="languageSwitcher">
+    <h2 class="logo">
+      🏦 SACCO
+    </h2>
 
-        <option value="en">
-          English
-        </option>
+    <!-- NAVIGATION -->
 
-        <option value="om">
-          Afaan Oromo
-        </option>
+    <nav class="nav">
 
-        <option value="am">
-          አማርኛ
-        </option>
+      <!-- DASHBOARD -->
 
-      </select>
-
-      <!-- ADD MEMBER -->
-
-      <button
-        id="openModalBtn"
-        class="add-btn"
-        data-i18n="addMember"
+      <a
+        href="dashboard.html"
+        class="nav-item"
       >
-        Add Member
-      </button>
+
+        <span class="icon">
+          📊
+        </span>
+
+        <span
+          class="text"
+          data-i18n="dashboard"
+        >
+          Dashboard
+        </span>
+
+      </a>
+
+      <!-- MEMBERS -->
+
+      <a
+        href="members.html"
+        class="nav-item active admin-only"
+      >
+
+        <span class="icon">
+          👥
+        </span>
+
+        <span
+          class="text"
+          data-i18n="members"
+        >
+          Members
+        </span>
+
+      </a>
+
+      <!-- SAVINGS -->
+
+      <a
+        href="savings.html"
+        class="nav-item"
+      >
+
+        <span class="icon">
+          💰
+        </span>
+
+        <span
+          class="text"
+          data-i18n="savings"
+        >
+          Savings
+        </span>
+
+      </a>
+
+      <!-- LOANS -->
+
+      <a
+        href="loans.html"
+        class="nav-item"
+      >
+
+        <span class="icon">
+          🏦
+        </span>
+
+        <span
+          class="text"
+          data-i18n="loans"
+        >
+          Loans
+        </span>
+
+      </a>
+
+      <!-- REPAYMENTS -->
+
+      <a
+        href="repayments.html"
+        class="nav-item"
+      >
+
+        <span class="icon">
+          💵
+        </span>
+
+        <span
+          class="text"
+          data-i18n="repayments"
+        >
+          Repayments
+        </span>
+
+      </a>
+
+      <!-- WITHDRAWALS -->
+
+      <a
+        href="withdrawals.html"
+        class="nav-item admin-only"
+      >
+
+        <span class="icon">
+          💸
+        </span>
+
+        <span
+          class="text"
+          data-i18n="withdrawals"
+        >
+          Withdrawals
+        </span>
+
+      </a>
+
+      <!-- REPORTS -->
+
+      <a
+        href="reports.html"
+        class="nav-item admin-only"
+      >
+
+        <span class="icon">
+          📄
+        </span>
+
+        <span
+          class="text"
+          data-i18n="reports"
+        >
+          Reports
+        </span>
+
+      </a>
+
+      <!-- USERS -->
+
+      <a
+        href="users.html"
+        class="nav-item admin-only"
+      >
+
+        <span class="icon">
+          👤
+        </span>
+
+        <span
+          class="text"
+          data-i18n="users"
+        >
+          Users
+        </span>
+
+      </a>
+
+      <!-- SETTINGS -->
+
+      <a
+        href="settings.html"
+        class="nav-item"
+      >
+
+        <span class="icon">
+          ⚙️
+        </span>
+
+        <span
+          class="text"
+          data-i18n="settings"
+        >
+          Settings
+        </span>
+
+      </a>
+
+      <!-- LOGOUT -->
+
+      <a
+        href="#"
+        class="nav-item logout"
+        id="logoutBtn"
+      >
+
+        <span class="icon">
+          🚪
+        </span>
+
+        <span
+          class="text"
+          data-i18n="logout"
+        >
+          Logout
+        </span>
+
+      </a>
+
+    </nav>
+
+  </aside>
+
+  <!-- =========================================================
+       MAIN CONTENT
+  ========================================================= -->
+
+  <div class="main-content">
+
+    <!-- =========================================================
+         TOPBAR
+    ========================================================= -->
+
+    <div class="topbar">
+
+      <h1 data-i18n="members">
+        Members
+      </h1>
+
+      <div class="top-actions">
+
+        <!-- LANGUAGE -->
+
+        <select id="languageSwitcher">
+
+          <option value="en">
+            English
+          </option>
+
+          <option value="om">
+            Afaan Oromo
+          </option>
+
+          <option value="am">
+            አማርኛ
+          </option>
+
+        </select>
+
+        <!-- ADD MEMBER -->
+
+        <button
+          id="openModalBtn"
+          class="add-btn"
+          data-i18n="addMember"
+        >
+          Add Member
+        </button>
+
+      </div>
 
     </div>
 
-  </div>
+    <!-- =========================================================
+         MEMBERS TABLE
+    ========================================================= -->
 
-  <!-- =========================================================
-       MEMBERS TABLE
-  ========================================================= -->
+    <div class="table-wrapper">
 
-  <div class="table-wrapper">
+      <table class="members-table">
 
-    <table class="members-table">
+        <thead>
 
-      <thead>
+          <tr>
 
-        <tr>
+            <th data-i18n="fullName">
+              Full Name
+            </th>
 
-          <th data-i18n="fullName">
-            Full Name
-          </th>
+            <th data-i18n="phone">
+              Phone
+            </th>
 
-          <th data-i18n="phone">
-            Phone
-          </th>
+            <th data-i18n="nid">
+              NID
+            </th>
 
-          <th data-i18n="nid">
-            NID
-          </th>
+            <th data-i18n="savings">
+              Savings
+            </th>
 
-          <th data-i18n="savings">
-            Savings
-          </th>
+            <th data-i18n="loans">
+              Loans
+            </th>
 
-          <th data-i18n="loans">
-            Loans
-          </th>
+            <th data-i18n="remaining">
+              Remaining
+            </th>
 
-          <th data-i18n="remaining">
-            Remaining
-          </th>
+            <th data-i18n="status">
+              Status
+            </th>
 
-          <th data-i18n="status">
-            Status
-          </th>
+            <th>
+              Created At
+            </th>
 
-          <th>
-            Created At
-          </th>
+            <th>
+              Created By
+            </th>
 
-          <th>
-            Created By
-          </th>
+          </tr>
 
-        </tr>
+        </thead>
 
-      </thead>
+        <tbody id="membersTable"></tbody>
 
-      <tbody id="membersTable"></tbody>
+      </table>
 
-    </table>
+    </div>
 
   </div>
 
@@ -591,33 +613,13 @@
 
               <tr>
 
-                <th>
-                  Type
-                </th>
-
-                <th>
-                  Amount
-                </th>
-
-                <th>
-                  Previous
-                </th>
-
-                <th>
-                  Total
-                </th>
-
-                <th>
-                  Status
-                </th>
-
-                <th>
-                  Date
-                </th>
-
-                <th>
-                  Created By
-                </th>
+                <th>Type</th>
+                <th>Amount</th>
+                <th>Previous</th>
+                <th>Total</th>
+                <th>Status</th>
+                <th>Date</th>
+                <th>Created By</th>
 
               </tr>
 
@@ -634,6 +636,35 @@
     </div>
 
   </div>
+
+  <!-- =========================================================
+       SIDEBAR SCRIPT
+  ========================================================= -->
+
+  <script>
+
+    function toggleSidebar(){
+
+      const sidebar =
+        document.getElementById("sidebar");
+
+      if(window.innerWidth <= 768){
+
+        sidebar.classList.toggle("mobile-open");
+
+      }else{
+
+        sidebar.classList.toggle("collapsed");
+
+      }
+
+    }
+
+  </script>
+
+  <!-- =========================================================
+       MEMBERS JS
+  ========================================================= -->
 
   <script
     type="module"

@@ -14,7 +14,10 @@ import {
   serverTimestamp,
   orderBy,
   limit,
-  startAfter
+  startAfter,
+  doc,
+  deleteDoc,
+  updateDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 /* =========================================================
@@ -56,8 +59,11 @@ let members = [];
 let lastVisible = null;
 let isLoading = false;
 
+let editMode = false;
+let editId = null;
+
 /* =========================================================
-   GET LANGUAGE
+   LANGUAGE
 ========================================================= */
 
 function getLang() {
@@ -65,7 +71,7 @@ function getLang() {
 }
 
 /* =========================================================
-   MODAL CONTROL
+   MODALS
 ========================================================= */
 
 openModalBtn?.addEventListener("click", () => {
@@ -74,6 +80,7 @@ openModalBtn?.addEventListener("click", () => {
 
 closeModalBtn?.addEventListener("click", () => {
   modal.classList.remove("active");
+  resetForm();
 });
 
 window.addEventListener("click", (e) => {
@@ -97,7 +104,7 @@ function validateNID(nid) {
    DUPLICATE CHECK
 ========================================================= */
 
-async function checkDuplicate(phone, nid) {
+async function checkDuplicate(phone, nid, ignoreId = null) {
   const phoneQ = query(collection(db, "members"), where("phone", "==", phone));
   const nidQ = query(collection(db, "members"), where("nid", "==", nid));
 
@@ -106,11 +113,14 @@ async function checkDuplicate(phone, nid) {
     getDocs(nidQ)
   ]);
 
-  return !pSnap.empty || !nSnap.empty;
+  const phoneExists = pSnap.docs.some(d => d.id !== ignoreId);
+  const nidExists = nSnap.docs.some(d => d.id !== ignoreId);
+
+  return phoneExists || nidExists;
 }
 
 /* =========================================================
-   ADD MEMBER (FULL I18N)
+   SUBMIT (ADD + EDIT)
 ========================================================= */
 
 memberForm?.addEventListener("submit", async (e) => {
@@ -128,39 +138,43 @@ memberForm?.addEventListener("submit", async (e) => {
   const nid =
     document.getElementById("nid").value.trim();
 
-  /* VALIDATION */
-
-  if (!validatePhone(phone)) {
-    alert(t.phoneError);
-    return;
-  }
-
-  if (!validateNID(nid)) {
-    alert(t.nidError);
-    return;
-  }
+  if (!validatePhone(phone)) return alert(t.phoneError);
+  if (!validateNID(nid)) return alert(t.nidError);
 
   const isDuplicate =
-    await checkDuplicate(phone, nid);
+    await checkDuplicate(phone, nid, editId);
 
-  if (isDuplicate) {
-    alert(t.duplicateError);
-    return;
+  if (isDuplicate) return alert(t.duplicateError);
+
+  /* EDIT MODE */
+  if (editMode) {
+
+    const ref = doc(db, "members", editId);
+
+    await updateDoc(ref, {
+      name,
+      phone,
+      nid
+    });
+
+    editMode = false;
+    editId = null;
+
+  } else {
+
+    /* ADD MODE */
+    await addDoc(collection(db, "members"), {
+      name,
+      phone,
+      nid,
+      status: t.active,
+      createdAt: serverTimestamp(),
+      createdBy:
+        localStorage.getItem("name") ||
+        auth.currentUser?.displayName ||
+        "Admin"
+    });
   }
-
-  /* SAVE */
-
-  await addDoc(collection(db, "members"), {
-    name,
-    phone,
-    nid,
-    status: t.active,
-    createdAt: serverTimestamp(),
-    createdBy:
-      localStorage.getItem("name") ||
-      auth.currentUser?.displayName ||
-      "Admin"
-  });
 
   memberForm.reset();
   modal.classList.remove("active");
@@ -169,7 +183,7 @@ memberForm?.addEventListener("submit", async (e) => {
 });
 
 /* =========================================================
-   LOAD MEMBERS (FAST)
+   LOAD MEMBERS
 ========================================================= */
 
 async function loadMembers(reset = false) {
@@ -218,54 +232,73 @@ async function loadMembers(reset = false) {
     const row =
       document.createElement("tr");
 
-    row.style.cursor = "pointer";
-
     row.innerHTML = `
-      <td><strong>${m.name}</strong></td>
+      <td>${m.name}</td>
       <td>${m.phone}</td>
       <td>${m.nid}</td>
-      <td>-</td>
-      <td>-</td>
-      <td>-</td>
       <td>${m.status}</td>
       <td>${m.createdAt?.toDate?.().toLocaleString() || "-"}</td>
       <td>${m.createdBy || "-"}</td>
+
+      <td>
+        <button onclick="editMember('${id}')" class="edit-btn">✏️</button>
+        <button onclick="deleteMember('${id}')" class="delete-btn">🗑️</button>
+      </td>
     `;
 
-    row.onclick = () =>
-      openProfile(id);
-
     membersTable.appendChild(row);
-
   });
 
   isLoading = false;
 }
 
 /* =========================================================
-   PROFILE
+   EDIT MEMBER
 ========================================================= */
 
-function openProfile(id) {
+window.editMember = (id) => {
 
   const m =
     members.find(x => x.id === id);
 
   if (!m) return;
 
-  profileModal.classList.add("active");
+  editMode = true;
+  editId = id;
 
-  document.getElementById("profileTitle").innerText =
-    m.name;
+  document.getElementById("name").value = m.name;
+  document.getElementById("phone").value = m.phone;
+  document.getElementById("nid").value = m.nid;
 
-  document.getElementById("profilePhone").innerText =
-    m.phone;
+  modal.classList.add("active");
+};
 
-  document.getElementById("profileNid").innerText =
-    m.nid;
+/* =========================================================
+   DELETE MEMBER
+========================================================= */
 
-  document.getElementById("profileStatus").innerText =
-    m.status;
+window.deleteMember = async (id) => {
+
+  const lang = getLang();
+  const t = translations[lang];
+
+  if (!confirm(t.deleteConfirm || "Delete this member?")) return;
+
+  await deleteDoc(doc(db, "members", id));
+
+  members = members.filter(m => m.id !== id);
+
+  loadMembers(true);
+};
+
+/* =========================================================
+   RESET FORM
+========================================================= */
+
+function resetForm() {
+  editMode = false;
+  editId = null;
+  memberForm.reset();
 }
 
 /* =========================================================

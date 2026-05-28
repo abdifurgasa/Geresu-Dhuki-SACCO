@@ -1,124 +1,344 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
-  <title data-i18n="members">Members</title>
+  <title>Members System</title>
 
-  <!-- CSS -->
-  <link rel="stylesheet" href="css/style.css" />
+  <style>
 
-  <!-- FONT AWESOME -->
-  <link rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+      font-family:Arial, sans-serif;
+    }
+
+    body{
+      background:#f5f7fb;
+      padding:20px;
+    }
+
+    /* =========================================================
+       HEADER
+    ========================================================= */
+
+    .topbar{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:20px;
+      gap:15px;
+      flex-wrap:wrap;
+    }
+
+    .topbar h1{
+      font-size:28px;
+      color:#222;
+    }
+
+    .top-actions{
+      display:flex;
+      gap:10px;
+      align-items:center;
+    }
+
+    select{
+      padding:10px;
+      border-radius:8px;
+      border:1px solid #ccc;
+      background:white;
+    }
+
+    button{
+      border:none;
+      cursor:pointer;
+    }
+
+    .add-btn{
+      background:#2563eb;
+      color:white;
+      padding:12px 18px;
+      border-radius:10px;
+      font-size:14px;
+      font-weight:bold;
+    }
+
+    .add-btn:hover{
+      background:#1d4ed8;
+    }
+
+    /* =========================================================
+       TABLE
+    ========================================================= */
+
+    .table-wrapper{
+      background:white;
+      border-radius:14px;
+      overflow:auto;
+      box-shadow:0 4px 10px rgba(0,0,0,0.05);
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      min-width:1000px;
+    }
+
+    thead{
+      background:#eff3ff;
+    }
+
+    th{
+      padding:15px;
+      text-align:left;
+      font-size:14px;
+      color:#333;
+    }
+
+    td{
+      padding:14px 15px;
+      border-top:1px solid #eee;
+      font-size:14px;
+    }
+
+    tr:hover{
+      background:#f9fbff;
+    }
+
+    /* =========================================================
+       MODAL
+    ========================================================= */
+
+    .modal,
+    .profile-modal{
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,0.5);
+      display:none;
+      justify-content:center;
+      align-items:center;
+      padding:20px;
+      z-index:999;
+    }
+
+    .modal.active,
+    .profile-modal.active{
+      display:flex;
+    }
+
+    .modal-content,
+    .profile-content{
+      background:white;
+      width:100%;
+      max-width:1000px;
+      border-radius:18px;
+      overflow:hidden;
+      max-height:95vh;
+      overflow-y:auto;
+    }
+
+    .modal-header,
+    .profile-header{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      padding:20px;
+      border-bottom:1px solid #eee;
+    }
+
+    .close-btn{
+      width:40px;
+      height:40px;
+      border-radius:50%;
+      background:#f3f4f6;
+      font-size:22px;
+    }
+
+    /* =========================================================
+       FORM
+    ========================================================= */
+
+    form{
+      padding:20px;
+    }
+
+    .form-group{
+      margin-bottom:18px;
+    }
+
+    .form-group label{
+      display:block;
+      margin-bottom:8px;
+      font-size:14px;
+      color:#333;
+      font-weight:bold;
+    }
+
+    .form-group input{
+      width:100%;
+      padding:12px;
+      border-radius:10px;
+      border:1px solid #ccc;
+      font-size:14px;
+    }
+
+    .submit-btn{
+      width:100%;
+      background:#16a34a;
+      color:white;
+      padding:14px;
+      border-radius:10px;
+      font-size:15px;
+      font-weight:bold;
+    }
+
+    /* =========================================================
+       PROFILE
+    ========================================================= */
+
+    .profile-user{
+      display:flex;
+      align-items:center;
+      gap:15px;
+    }
+
+    .profile-avatar{
+      width:65px;
+      height:65px;
+      border-radius:50%;
+      background:#2563eb;
+      color:white;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      font-size:28px;
+      font-weight:bold;
+    }
+
+    .member-status{
+      color:#16a34a;
+      margin-top:5px;
+    }
+
+    .member-details-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+      gap:15px;
+      padding:20px;
+    }
+
+    .detail-card{
+      background:#f9fafb;
+      padding:18px;
+      border-radius:14px;
+    }
+
+    .detail-label{
+      font-size:13px;
+      color:#777;
+    }
+
+    .detail-card h4{
+      margin-top:8px;
+      color:#111;
+    }
+
+    .profile-stats{
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+      gap:15px;
+      padding:0 20px 20px;
+    }
+
+    .stat-card{
+      padding:20px;
+      border-radius:16px;
+      color:white;
+    }
+
+    .savings-card{
+      background:#16a34a;
+    }
+
+    .loans-card{
+      background:#dc2626;
+    }
+
+    .remaining-card{
+      background:#2563eb;
+    }
+
+    .stat-card span{
+      font-size:14px;
+    }
+
+    .stat-card h2{
+      margin-top:10px;
+      font-size:30px;
+    }
+
+    .history-section{
+      padding:20px;
+    }
+
+    .history-container{
+      overflow:auto;
+      max-height:400px;
+      border:1px solid #eee;
+      border-radius:12px;
+      margin-top:15px;
+    }
+
+  </style>
 </head>
 
 <body>
 
-<!-- =========================================================
-     SIDEBAR
-========================================================= -->
-<aside class="sidebar" id="sidebar">
+  <!-- =========================================================
+       TOPBAR
+  ========================================================= -->
 
-  <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
-
-  <h2 class="logo">🏦 SACCO</h2>
-
-  <nav class="nav">
-
-    <a href="dashboard.html" class="nav-item active">
-      <span class="icon">📊</span>
-      <span class="text" data-i18n="dashboard">Dashboard</span>
-    </a>
-
-    <a href="members.html" class="nav-item admin-only">
-      <span class="icon">👥</span>
-      <span class="text" data-i18n="members">Members</span>
-    </a>
-
-    <a href="savings.html" class="nav-item">
-      <span class="icon">💰</span>
-      <span class="text" data-i18n="savings">Savings</span>
-    </a>
-
-    <a href="loans.html" class="nav-item">
-      <span class="icon">🏦</span>
-      <span class="text" data-i18n="loans">Loans</span>
-    </a>
-
-    <a href="repayments.html" class="nav-item">
-      <span class="icon">💵</span>
-      <span class="text" data-i18n="repayments">Repayments</span>
-    </a>
-
-    <a href="withdrawals.html" class="nav-item admin-only">
-      <span class="icon">💸</span>
-      <span class="text" data-i18n="withdrawals">Withdrawals</span>
-    </a>
-
-    <a href="reports.html" class="nav-item admin-only">
-      <span class="icon">📄</span>
-      <span class="text" data-i18n="reports">Reports</span>
-    </a>
-
-    <a href="users.html" class="nav-item admin-only">
-      <span class="icon">👤</span>
-      <span class="text" data-i18n="users">Users</span>
-    </a>
-
-    <a href="settings.html" class="nav-item">
-      <span class="icon">⚙️</span>
-      <span class="text" data-i18n="settings">Settings</span>
-    </a>
-
-    <a href="#" class="nav-item logout" id="logoutBtn">
-      <span class="icon">🚪</span>
-      <span class="text" data-i18n="logout">Logout</span>
-    </a>
-
-  </nav>
-</aside>
-
-<!-- =========================================================
-     MAIN
-========================================================= -->
-main class="main">
-
-  <!-- TOPBAR -->
   <div class="topbar">
 
-    <h2>👥 Members Management</h2>
+    <h1 data-i18n="members">
+      Members
+    </h1>
 
-    <button class="add-btn" id="openModalBtn">
-      <i class="fa fa-plus"></i> Add Member
-    </button>
+    <div class="top-actions">
+
+      <select id="languageSwitcher">
+        <option value="en">English</option>
+        <option value="om">Afaan Oromo</option>
+        <option value="am">አማርኛ</option>
+      </select>
+
+      <button id="openModalBtn" class="add-btn" data-i18n="addMember">
+        Add Member
+      </button>
+
+    </div>
 
   </div>
 
-  <!-- SEARCH -->
-  <div class="search-container">
-    <input type="text" id="searchMember" class="search-input"
-      placeholder="Search by name, phone or NID..." />
-  </div>
+  <!-- =========================================================
+       TABLE
+  ========================================================= -->
 
-  <!-- MEMBERS TABLE -->
-  <div class="table-card">
+  <div class="table-wrapper">
 
-    <table class="table-modern">
+    <table>
 
       <thead>
         <tr>
-          <th>Name</th>
-          <th>Phone</th>
-          <th>NID</th>
-          <th>Savings</th>
-          <th>Total Loans</th>
-          <th>Remaining Loan</th>
-          <th>Status</th>
-          <th>Created Date</th>
-          <th>Created By</th>
+          <th data-i18n="name">Name</th>
+          <th data-i18n="phone">Phone</th>
+          <th data-i18n="nid">NID</th>
+          <th data-i18n="savings">Savings</th>
+          <th data-i18n="loans">Loans</th>
+          <th data-i18n="remaining">Remaining</th>
+          <th data-i18n="status">Status</th>
         </tr>
       </thead>
 
@@ -128,105 +348,490 @@ main class="main">
 
   </div>
 
-</main>
+  <!-- =========================================================
+       ADD MEMBER MODAL
+  ========================================================= -->
 
-<!-- =========================================================
-     ADD MEMBER MODAL
-========================================================= -->
+  <div class="modal" id="memberModal">
 
-<div class="modal" id="memberModal">
+    <div class="modal-content">
 
-  <div class="modal-box">
+      <div class="modal-header">
 
-    <div class="modal-header">
+        <h2 data-i18n="addMember">
+          Add Member
+        </h2>
 
-      <h2>Add Member</h2>
+        <button class="close-btn" id="closeModalBtn">
+          ×
+        </button>
 
-      <button id="closeModalBtn">✕</button>
+      </div>
+
+      <form id="memberForm">
+
+        <div class="form-group">
+
+          <label data-i18n="fullName">
+            Full Name
+          </label>
+
+          <input
+            type="text"
+            id="name"
+            data-placeholder="fullNamePlaceholder"
+            placeholder="Enter full name"
+            required
+          />
+
+        </div>
+
+        <div class="form-group">
+
+          <label data-i18n="phone">
+            Phone
+          </label>
+
+          <input
+            type="text"
+            id="phone"
+            placeholder="7XXXXXXXX"
+            required
+          />
+
+        </div>
+
+        <div class="form-group">
+
+          <label data-i18n="nid">
+            NID
+          </label>
+
+          <input
+            type="text"
+            id="nid"
+            placeholder="16 digit NID"
+            required
+          />
+
+        </div>
+
+        <button type="submit" class="submit-btn" data-i18n="saveMember">
+          Save Member
+        </button>
+
+      </form>
 
     </div>
-
-    <form id="memberForm">
-
-      <input type="text" id="name" placeholder="Full Name" required />
-      <input type="text" id="phone" placeholder="9 Digit Phone" maxlength="9" required />
-      <input type="text" id="nid" placeholder="16 Digit NID" maxlength="16" required />
-
-      <button type="submit" class="save-btn">Save</button>
-
-    </form>
 
   </div>
 
-</div>
+  <!-- =========================================================
+       PROFILE MODAL
+  ========================================================= -->
 
-<!-- =========================================================
-     PROFILE MODAL
-========================================================= -->
+  <div class="profile-modal" id="profileModal">
 
-<div class="profile-modal" id="profileModal">
+    <div class="profile-content">
 
-  <div class="profile-box">
+      <div class="profile-header">
 
-    <!-- HEADER -->
-    <div class="profile-header">
+        <div class="profile-user">
 
-      <h2 id="profileTitle">Member Profile</h2>
+          <div class="profile-avatar" id="profileInitial">
+            M
+          </div>
 
-      <button id="closeProfileBtn" class="profile-close">✕</button>
+          <div>
+
+            <h2 id="profileTitle">
+              Member
+            </h2>
+
+            <p class="member-status" id="profileStatus">
+              Active
+            </p>
+
+          </div>
+
+        </div>
+
+        <button class="close-btn" id="closeProfileBtn">
+          ×
+        </button>
+
+      </div>
+
+      <!-- DETAILS -->
+
+      <div class="member-details-grid">
+
+        <div class="detail-card">
+          <span class="detail-label" data-i18n="phone">
+            Phone
+          </span>
+          <h4 id="profilePhone">-</h4>
+        </div>
+
+        <div class="detail-card">
+          <span class="detail-label" data-i18n="nid">
+            NID
+          </span>
+          <h4 id="profileNid">-</h4>
+        </div>
+
+      </div>
+
+      <!-- STATS -->
+
+      <div class="profile-stats">
+
+        <div class="stat-card savings-card">
+          <span data-i18n="savings">
+            Savings
+          </span>
+          <h2 id="profileSavings">0</h2>
+        </div>
+
+        <div class="stat-card loans-card">
+          <span data-i18n="loans">
+            Loans
+          </span>
+          <h2 id="profileLoans">0</h2>
+        </div>
+
+        <div class="stat-card remaining-card">
+          <span data-i18n="remaining">
+            Remaining
+          </span>
+          <h2 id="profileRemaining">0</h2>
+        </div>
+
+      </div>
+
+      <!-- HISTORY -->
+
+      <div class="history-section">
+
+        <h2 style="margin-bottom:15px;" data-i18n="transactions">
+          Transactions
+        </h2>
+
+        <div class="history-container">
+
+          <table>
+
+            <thead>
+              <tr>
+                <th>Type</th>
+                <th>Amount</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+
+            <tbody id="historyTable"></tbody>
+
+          </table>
+
+        </div>
+
+      </div>
 
     </div>
 
-    <!-- SUMMARY -->
-    <div class="summary-cards">
+  </div>
 
-      <div class="summary-card">
-        💰 Savings: <span id="profileSavings">0</span>
-      </div>
+  <script>
 
-      <div class="summary-card">
-        🏦 Loans: <span id="profileLoans">0</span>
-      </div>
+    /* =========================================================
+       TRANSLATIONS
+    ========================================================= */
 
-      <div class="summary-card">
-        📉 Remaining: <span id="profileRemaining">0</span>
-      </div>
+    const translations = {
 
-    </div>
+      en: {
+        members: "Members",
+        addMember: "Add Member",
+        name: "Name",
+        phone: "Phone",
+        nid: "NID",
+        savings: "Savings",
+        loans: "Loans",
+        remaining: "Remaining",
+        status: "Status",
+        saveMember: "Save Member",
+        fullName: "Full Name",
+        fullNamePlaceholder: "Enter full name",
+        transactions: "Transactions"
+      },
 
-    <!-- TRANSACTIONS -->
-    <div class="history-container" id="historyContainer">
+      om: {
+        members: "Miseensota",
+        addMember: "Miseensa Dabali",
+        name: "Maqaa",
+        phone: "Bilbila",
+        nid: "Lakkoofsa NID",
+        savings: "Qusannaa",
+        loans: "Liqii",
+        remaining: "Hafe",
+        status: "Haala",
+        saveMember: "Kuusi Miseensa",
+        fullName: "Maqaa Guutuu",
+        fullNamePlaceholder: "Maqaa guutuu galchi",
+        transactions: "Galmee Sochii"
+      },
 
-      <table class="table-modern">
+      am: {
+        members: "አባላት",
+        addMember: "አባል ጨምር",
+        name: "ስም",
+        phone: "ስልክ",
+        nid: "መታወቂያ",
+        savings: "ቁጠባ",
+        loans: "ብድር",
+        remaining: "ቀሪ",
+        status: "ሁኔታ",
+        saveMember: "አባል አስቀምጥ",
+        fullName: "ሙሉ ስም",
+        fullNamePlaceholder: "ሙሉ ስም ያስገቡ",
+        transactions: "ግብይቶች"
+      }
 
-        <thead>
+    };
+
+    /* =========================================================
+       LANGUAGE
+    ========================================================= */
+
+    const languageSwitcher =
+      document.getElementById("languageSwitcher");
+
+    function setLanguage(lang){
+
+      localStorage.setItem("language", lang);
+
+      document.querySelectorAll("[data-i18n]")
+      .forEach(el => {
+
+        const key = el.dataset.i18n;
+
+        if(translations[lang][key]){
+          el.innerText = translations[lang][key];
+        }
+
+      });
+
+      document.querySelectorAll("[data-placeholder]")
+      .forEach(el => {
+
+        const key = el.dataset.placeholder;
+
+        if(translations[lang][key]){
+          el.placeholder = translations[lang][key];
+        }
+
+      });
+
+    }
+
+    const savedLang =
+      localStorage.getItem("language") || "en";
+
+    languageSwitcher.value = savedLang;
+
+    setLanguage(savedLang);
+
+    languageSwitcher.addEventListener("change", (e)=>{
+      setLanguage(e.target.value);
+    });
+
+    /* =========================================================
+       MODALS
+    ========================================================= */
+
+    const memberModal =
+      document.getElementById("memberModal");
+
+    const profileModal =
+      document.getElementById("profileModal");
+
+    document.getElementById("openModalBtn")
+    .onclick = () => {
+      memberModal.classList.add("active");
+    };
+
+    document.getElementById("closeModalBtn")
+    .onclick = () => {
+      memberModal.classList.remove("active");
+    };
+
+    document.getElementById("closeProfileBtn")
+    .onclick = () => {
+      profileModal.classList.remove("active");
+    };
+
+    window.onclick = (e)=>{
+
+      if(e.target === memberModal){
+        memberModal.classList.remove("active");
+      }
+
+      if(e.target === profileModal){
+        profileModal.classList.remove("active");
+      }
+
+    };
+
+    /* =========================================================
+       MEMBERS DATA
+    ========================================================= */
+
+    const members = [];
+
+    const transactions = [
+      {
+        type:"Saving",
+        amount:5000,
+        date:"2026-05-28"
+      },
+      {
+        type:"Loan",
+        amount:12000,
+        date:"2026-05-20"
+      }
+    ];
+
+    /* =========================================================
+       ADD MEMBER
+    ========================================================= */
+
+    document.getElementById("memberForm")
+    .addEventListener("submit", (e)=>{
+
+      e.preventDefault();
+
+      const member = {
+
+        name:
+          document.getElementById("name").value,
+
+        phone:
+          document.getElementById("phone").value,
+
+        nid:
+          document.getElementById("nid").value,
+
+        savings:0,
+        loans:0,
+        remaining:0,
+        status:"Active"
+
+      };
+
+      members.push(member);
+
+      renderMembers();
+
+      e.target.reset();
+
+      memberModal.classList.remove("active");
+
+    });
+
+    /* =========================================================
+       RENDER MEMBERS
+    ========================================================= */
+
+    function renderMembers(){
+
+      const table =
+        document.getElementById("membersTable");
+
+      table.innerHTML = "";
+
+      members.forEach((member,index)=>{
+
+        const row =
+          document.createElement("tr");
+
+        row.innerHTML = `
+          <td>${member.name}</td>
+          <td>${member.phone}</td>
+          <td>${member.nid}</td>
+          <td>${member.savings}</td>
+          <td>${member.loans}</td>
+          <td>${member.remaining}</td>
+          <td>${member.status}</td>
+        `;
+
+        row.style.cursor = "pointer";
+
+        row.onclick = ()=>openProfile(index);
+
+        table.appendChild(row);
+
+      });
+
+    }
+
+    /* =========================================================
+       OPEN PROFILE
+    ========================================================= */
+
+    function openProfile(index){
+
+      const member = members[index];
+
+      document.getElementById("profileInitial")
+      .innerText =
+        member.name.charAt(0).toUpperCase();
+
+      document.getElementById("profileTitle")
+      .innerText =
+        member.name;
+
+      document.getElementById("profilePhone")
+      .innerText =
+        member.phone;
+
+      document.getElementById("profileNid")
+      .innerText =
+        member.nid;
+
+      document.getElementById("profileSavings")
+      .innerText =
+        member.savings;
+
+      document.getElementById("profileLoans")
+      .innerText =
+        member.loans;
+
+      document.getElementById("profileRemaining")
+      .innerText =
+        member.remaining;
+
+      const historyTable =
+        document.getElementById("historyTable");
+
+      historyTable.innerHTML = "";
+
+      transactions.forEach(tx=>{
+
+        historyTable.innerHTML += `
           <tr>
-            <th>Type</th>
-            <th>Amount</th>
-            <th>Previous</th>
-            <th>Total</th>
-            <th>Status</th>
-            <th>Date</th>
-            <th>By</th>
+            <td>${tx.type}</td>
+            <td>${tx.amount}</td>
+            <td>${tx.date}</td>
           </tr>
-        </thead>
+        `;
 
-        <tbody id="historyTable"></tbody>
+      });
 
-      </table>
+      profileModal.classList.add("active");
 
-    </div>
+    }
 
-  </div>
-
-</div>
-  
-<!-- =========================================================
-     SCRIPTS
-========================================================= -->
-<script type="module" src="js/layout.js"></script>
-<script type="module" src="js/members.js"></script>
-<script src="js/i18n.js"></script>
+  </script>
 
 </body>
 </html>

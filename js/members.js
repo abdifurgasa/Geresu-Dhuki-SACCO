@@ -1,7 +1,7 @@
 import { db, auth } from "./firebase.js";
+
 import {
   translations,
-  setLanguage,
   initLanguage
 } from "./i18n.js";
 
@@ -100,7 +100,9 @@ closeProfileBtn?.addEventListener("click", () => {
 
 });
 
-/* CLOSE OUTSIDE */
+/* =========================================================
+   CLOSE OUTSIDE
+========================================================= */
 
 window.addEventListener("click", (e) => {
 
@@ -302,87 +304,79 @@ async function loadMembers(reset = false) {
     const fragment =
       document.createDocumentFragment();
 
-    const memberPromises =
-      snap.docs.map(async (docSnap) => {
+    for (const docSnap of snap.docs) {
 
-        const m = docSnap.data();
+      const m = docSnap.data();
 
-        const id = docSnap.id;
+      const id = docSnap.id;
 
-        const [sSnap, lSnap, rSnap] =
-          await Promise.all([
+      const [sSnap, lSnap, rSnap] =
+        await Promise.all([
 
-            getDocs(
-              query(
-                collection(db, "savings"),
-                where("memberId", "==", id)
-              )
-            ),
-
-            getDocs(
-              query(
-                collection(db, "loans"),
-                where("memberId", "==", id)
-              )
-            ),
-
-            getDocs(
-              query(
-                collection(db, "repayments"),
-                where("memberId", "==", id)
-              )
+          getDocs(
+            query(
+              collection(db, "savings"),
+              where("memberId", "==", id)
             )
+          ),
 
-          ]);
+          getDocs(
+            query(
+              collection(db, "loans"),
+              where("memberId", "==", id)
+            )
+          ),
 
-        let totalSavings = 0;
+          getDocs(
+            query(
+              collection(db, "repayments"),
+              where("memberId", "==", id)
+            )
+          )
 
-        let totalLoans = 0;
+        ]);
 
-        let totalRepayments = 0;
+      let totalSavings = 0;
 
-        sSnap.forEach(d => {
+      let totalLoans = 0;
 
-          totalSavings +=
-            Number(d.data().amount || 0);
+      let totalRepayments = 0;
 
-        });
+      sSnap.forEach(d => {
 
-        lSnap.forEach(d => {
-
-          totalLoans +=
-            Number(d.data().amount || 0);
-
-        });
-
-        rSnap.forEach(d => {
-
-          totalRepayments +=
-            Number(d.data().amount || 0);
-
-        });
-
-        return {
-
-          id,
-
-          ...m,
-
-          totalSavings,
-
-          totalLoans,
-
-          remainingLoan:
-            totalLoans - totalRepayments
-
-        };
+        totalSavings +=
+          Number(d.data().amount || 0);
 
       });
 
-    const loadedMembers =
-      await Promise.all(memberPromises);
+      lSnap.forEach(d => {
 
-    loadedMembers.forEach(member => {
+        totalLoans +=
+          Number(d.data().amount || 0);
+
+      });
+
+      rSnap.forEach(d => {
+
+        totalRepayments +=
+          Number(d.data().amount || 0);
+
+      });
+
+      const member = {
+
+        id,
+
+        ...m,
+
+        totalSavings,
+
+        totalLoans,
+
+        remainingLoan:
+          totalLoans - totalRepayments
+
+      };
 
       members.push(member);
 
@@ -416,7 +410,7 @@ async function loadMembers(reset = false) {
 
       fragment.appendChild(row);
 
-    });
+    }
 
     membersTable.appendChild(fragment);
 

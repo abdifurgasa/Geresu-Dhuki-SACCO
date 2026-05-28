@@ -6,147 +6,87 @@ import {
   getDocs,
   query,
   where,
-  serverTimestamp
+  serverTimestamp,
+  orderBy,
+  limit,
+  startAfter
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+/* =========================================================
+   GLOBAL STATE
+========================================================= */
+
+let members = [];
+let currentMemberId = null;
+
+let transactionPage = 1;
+let lastTransactionDoc = null;
+let loadingTransactions = false;
+let hasMoreTransactions = true;
 
 /* =========================================================
    ELEMENTS
 ========================================================= */
 
-const membersTable =
-  document.getElementById("membersTable");
+const membersTable = document.getElementById("membersTable");
 
-const memberForm =
-  document.getElementById("memberForm");
+const memberModal = document.getElementById("memberModal");
+const openModalBtn = document.getElementById("openModalBtn");
+const closeModalBtn = document.getElementById("closeModalBtn");
 
-const modal =
-  document.getElementById("memberModal");
+const memberForm = document.getElementById("memberForm");
 
-const openModalBtn =
-  document.getElementById("openModalBtn");
-
-const closeModalBtn =
-  document.getElementById("closeModalBtn");
-
-/* PROFILE MODAL */
-const profileModal =
-  document.getElementById("profileModal");
-
-const closeProfileBtn =
-  document.getElementById("closeProfileBtn");
-
-const historyContainer =
-  document.getElementById("historyContainer");
-
-const historyTable =
-  document.getElementById("historyTable");
+/* PROFILE */
+const profileModal = document.getElementById("profileModal");
+const closeProfileBtn = document.getElementById("closeProfileBtn");
+const historyTable = document.getElementById("historyTable");
+const historyContainer = document.getElementById("historyContainer");
 
 /* =========================================================
-   GLOBAL MEMBERS
+   OPEN / CLOSE MEMBER MODAL
 ========================================================= */
 
-let members = [];
+openModalBtn?.addEventListener("click", () => {
+  memberModal.style.display = "flex";
+});
 
-/* =========================================================
-   TRANSACTION PAGINATION
-========================================================= */
-
-let transactionPage = 1;
-
-let loadingTransactions = false;
-
-let hasMoreTransactions = true;
-
-let currentMemberId = null;
-
-/* =========================================================
-   OPEN / CLOSE MODAL
-========================================================= */
-
-openModalBtn?.addEventListener(
-  "click",
-  () => {
-
-    modal.style.display = "flex";
-
-  }
-);
-
-closeModalBtn?.addEventListener(
-  "click",
-  () => {
-
-    modal.style.display = "none";
-
-  }
-);
-
-closeProfileBtn?.addEventListener(
-  "click",
-  () => {
-
-    profileModal.classList.remove("active");
-
-  }
-);
+closeModalBtn?.addEventListener("click", () => {
+  memberModal.style.display = "none";
+});
 
 /* =========================================================
    ADD MEMBER
 ========================================================= */
 
-memberForm?.addEventListener(
-  "submit",
-  async (e) => {
+memberForm?.addEventListener("submit", async (e) => {
+  e.preventDefault();
 
-    e.preventDefault();
+  try {
+    const name = document.getElementById("name").value;
+    const phone = document.getElementById("phone").value;
+    const nid = document.getElementById("nid").value;
 
-    try {
+    await addDoc(collection(db, "members"), {
+      name,
+      phone,
+      nid,
+      status: "Active",
+      createdAt: serverTimestamp(),
+      createdBy:
+        localStorage.getItem("name") ||
+        auth.currentUser?.displayName ||
+        "Admin"
+    });
 
-      const name =
-        document.getElementById("name").value;
+    memberForm.reset();
+    memberModal.style.display = "none";
 
-      const phone =
-        document.getElementById("phone").value;
+    loadMembers();
 
-      const nid =
-        document.getElementById("nid").value;
-
-      await addDoc(
-        collection(db, "members"),
-        {
-
-          name,
-          phone,
-          nid,
-
-          status: "Active",
-
-          createdAt: serverTimestamp(),
-
-          createdBy:
-            localStorage.getItem("name") ||
-            auth.currentUser?.displayName ||
-            "Admin"
-
-        }
-      );
-
-      alert("Member Added Successfully");
-
-      memberForm.reset();
-
-      modal.style.display = "none";
-
-      loadMembers();
-
-    } catch (err) {
-
-      alert(err.message);
-
-    }
-
+  } catch (err) {
+    alert(err.message);
   }
-);
+});
 
 /* =========================================================
    LOAD MEMBERS
@@ -154,173 +94,84 @@ memberForm?.addEventListener(
 
 async function loadMembers() {
 
+  members = [];
   membersTable.innerHTML = "";
 
-  members = [];
-
-  const snap =
-    await getDocs(
-      collection(db, "members")
-    );
+  const snap = await getDocs(collection(db, "members"));
 
   for (const docSnap of snap.docs) {
 
     const m = docSnap.data();
-
     const id = docSnap.id;
 
-    /* SAVINGS */
-    const sSnap = await getDocs(
-      query(
-        collection(db, "savings"),
-        where("memberId", "==", id)
-      )
-    );
-
+    // SAVINGS
+    const sSnap = await getDocs(query(collection(db, "savings"), where("memberId", "==", id)));
     let totalSavings = 0;
+    sSnap.forEach(d => totalSavings += Number(d.data().amount || 0));
 
-    sSnap.forEach(d => {
-
-      totalSavings +=
-        Number(d.data().amount || 0);
-
-    });
-
-    /* LOANS */
-    const lSnap = await getDocs(
-      query(
-        collection(db, "loans"),
-        where("memberId", "==", id)
-      )
-    );
-
+    // LOANS
+    const lSnap = await getDocs(query(collection(db, "loans"), where("memberId", "==", id)));
     let totalLoans = 0;
+    lSnap.forEach(d => totalLoans += Number(d.data().amount || 0));
 
-    lSnap.forEach(d => {
-
-      totalLoans +=
-        Number(d.data().amount || 0);
-
-    });
-
-    /* REPAYMENTS */
-    const rSnap = await getDocs(
-      query(
-        collection(db, "repayments"),
-        where("memberId", "==", id)
-      )
-    );
-
+    // REPAYMENTS
+    const rSnap = await getDocs(query(collection(db, "repayments"), where("memberId", "==", id)));
     let totalRepayments = 0;
-
-    rSnap.forEach(d => {
-
-      totalRepayments +=
-        Number(d.data().amount || 0);
-
-    });
+    rSnap.forEach(d => totalRepayments += Number(d.data().amount || 0));
 
     members.push({
-
       id,
-
       ...m,
-
       totalSavings,
-
       totalLoans,
-
-      remainingLoan:
-        totalLoans - totalRepayments
-
+      remainingLoan: totalLoans - totalRepayments
     });
-
   }
 
-  /* SORT LATEST */
-  members.sort(
-    (a, b) =>
-      (b.createdAt?.seconds || 0) -
-      (a.createdAt?.seconds || 0)
-  );
-
-  renderMembersTable();
+  renderMembers();
 }
 
 /* =========================================================
-   RENDER MEMBERS TABLE
+   RENDER TABLE
 ========================================================= */
 
-function renderMembersTable() {
+function renderMembers() {
 
   membersTable.innerHTML = "";
 
   members.forEach(member => {
 
-    const row =
-      document.createElement("tr");
+    const row = document.createElement("tr");
 
-    row.classList.add("member-row");
+    row.className = "member-row";
 
-    row.style.cursor = "pointer";
-
-    row.onclick = () =>
-      openProfileModal(member.id);
+    row.onclick = () => openProfile(member.id);
 
     row.innerHTML = `
-
-      <td>
-        <strong>${member.name}</strong>
-      </td>
-
+      <td><strong>${member.name}</strong></td>
       <td>${member.phone}</td>
-
       <td>${member.nid}</td>
-
-      <td>
-        ${member.totalSavings} ETB
-      </td>
-
-      <td>
-        ${member.totalLoans} ETB
-      </td>
-
-      <td>
-        ${member.remainingLoan} ETB
-      </td>
-
-      <td>
-        ${member.status}
-      </td>
-
-      <td>
-        ${
-          member.createdAt
-            ? new Date(
-                member.createdAt.seconds
-                * 1000
-              ).toLocaleString()
-            : "-"
-        }
-      </td>
-
-      <td>
-        ${member.createdBy || "-"}
-      </td>
-
+      <td>${member.totalSavings} ETB</td>
+      <td>${member.totalLoans} ETB</td>
+      <td>${member.remainingLoan} ETB</td>
+      <td>${member.status}</td>
+      <td>${
+        member.createdAt
+          ? new Date(member.createdAt.seconds * 1000).toLocaleString()
+          : "-"
+      }</td>
+      <td>${member.createdBy || "-"}</td>
     `;
 
     membersTable.appendChild(row);
-
   });
-
 }
 
 /* =========================================================
-   OPEN PROFILE MODAL
+   OPEN PROFILE
 ========================================================= */
 
-async function openProfileModal(memberId) {
+async function openProfile(memberId) {
 
   currentMemberId = memberId;
 
@@ -329,161 +180,102 @@ async function openProfileModal(memberId) {
   historyTable.innerHTML = "";
 
   transactionPage = 1;
-
   hasMoreTransactions = true;
+  lastTransactionDoc = null;
 
-  const member =
-    members.find(
-      m => m.id === memberId
-    );
+  const member = members.find(m => m.id === memberId);
 
   if (!member) return;
 
-  document.getElementById(
-    "profileTitle"
-  ).innerHTML =
-    `👤 ${member.name}`;
+  document.getElementById("profileTitle").innerText =
+    "👤 " + member.name;
 
-  document.getElementById(
-    "profileSavings"
-  ).innerHTML =
-    `ETB ${member.totalSavings}`;
+  document.getElementById("profileSavings").innerText =
+    "ETB " + member.totalSavings;
 
-  document.getElementById(
-    "profileLoans"
-  ).innerHTML =
-    `ETB ${member.totalLoans}`;
+  document.getElementById("profileLoans").innerText =
+    "ETB " + member.totalLoans;
 
-  document.getElementById(
-    "profileRemaining"
-  ).innerHTML =
-    `ETB ${member.remainingLoan}`;
+  document.getElementById("profileRemaining").innerText =
+    "ETB " + member.remainingLoan;
 
   await loadTransactions();
 }
 
 /* =========================================================
-   LOAD TRANSACTIONS
+   CLOSE PROFILE
+========================================================= */
+
+closeProfileBtn?.addEventListener("click", () => {
+  profileModal.classList.remove("active");
+});
+
+/* =========================================================
+   LOAD TRANSACTIONS (PAGINATION READY)
 ========================================================= */
 
 async function loadTransactions() {
 
-  if (
-    loadingTransactions ||
-    !hasMoreTransactions
-  ) return;
+  if (loadingTransactions || !hasMoreTransactions) return;
 
   loadingTransactions = true;
 
-  document.getElementById(
-    "loadingTransactions"
-  ).style.display = "block";
+  document.getElementById("loadingTransactions").style.display = "block";
 
-  /* =====================================================
-     DEMO TRANSACTIONS
-  ===================================================== */
-
+  // DEMO DATA (replace later with Firestore)
   const data = [];
 
   for (let i = 0; i < 20; i++) {
-
     data.push({
-
-      type:
-        i % 2 === 0
-          ? "Saving Deposit"
-          : "Loan Payment",
-
+      type: i % 2 === 0 ? "Saving" : "Loan",
       amount: 5000 + i * 100,
-
       previous: 45000 + i * 100,
-
       total: 50000 + i * 100,
-
       status: "Completed",
-
       createdDate: "2026-05-28",
-
       createdBy: "Admin"
-
     });
-
   }
 
   data.forEach(tx => {
-
     historyTable.innerHTML += `
-
       <tr>
-
         <td>${tx.type}</td>
-
-        <td>
-          ETB ${tx.amount}
-        </td>
-
-        <td>
-          ETB ${tx.previous}
-        </td>
-
-        <td>
-          ETB ${tx.total}
-        </td>
-
+        <td>${tx.amount}</td>
+        <td>${tx.previous}</td>
+        <td>${tx.total}</td>
         <td>${tx.status}</td>
-
         <td>${tx.createdDate}</td>
-
         <td>${tx.createdBy}</td>
-
       </tr>
-
     `;
-
   });
 
-  document.getElementById(
-    "profileTransactions"
-  ).innerHTML =
+  document.getElementById("profileTransactions").innerText =
     historyTable.children.length;
 
   transactionPage++;
 
   if (transactionPage > 10) {
-
     hasMoreTransactions = false;
-
   }
 
   loadingTransactions = false;
-
-  document.getElementById(
-    "loadingTransactions"
-  ).style.display = "none";
+  document.getElementById("loadingTransactions").style.display = "none";
 }
 
 /* =========================================================
-   INFINITE UPWARD SCROLL
+   INFINITE SCROLL UPWARD
 ========================================================= */
 
-historyContainer?.addEventListener(
-  "scroll",
-  async () => {
-
-    if (
-      historyContainer.scrollTop <= 50
-    ) {
-
-      await loadTransactions();
-
-    }
-
+historyContainer?.addEventListener("scroll", async () => {
+  if (historyContainer.scrollTop <= 50) {
+    await loadTransactions();
   }
-);
+});
 
 /* =========================================================
-   START
+   INIT
 ========================================================= */
 
 loadMembers();
-```

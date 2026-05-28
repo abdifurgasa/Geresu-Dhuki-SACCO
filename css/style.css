@@ -497,7 +497,24 @@ form{
   margin-top:10px;
   font-size:28px;
 }
+.edit-btn,
+.delete-btn {
+  border: none;
+  padding: 6px 10px;
+  margin: 2px;
+  border-radius: 6px;
+  cursor: pointer;
+}
 
+.edit-btn {
+  background: #f1c40f;
+  color: black;
+}
+
+.delete-btn {
+  background: #e74c3c;
+  color: white;
+}
 /* =========================================================
    🎴 CARDS
 ========================================================= */

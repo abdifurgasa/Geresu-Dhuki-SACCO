@@ -1,38 +1,19 @@
 import { db, auth } from "./firebase.js";
 
 import {
-  translations,
-  initLanguage
-} from "./i18n.js";
-
-import {
   collection,
   addDoc,
   getDocs,
   query,
   where,
-  serverTimestamp,
-  orderBy,
-  limit
+  serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-/* =========================================================
-   LANGUAGE
-========================================================= */
-
-initLanguage();
 
 /* =========================================================
    ELEMENTS
 ========================================================= */
 
-const membersTable =
-  document.getElementById("membersTable");
-
-const memberForm =
-  document.getElementById("memberForm");
-
-const modal =
+const memberModal =
   document.getElementById("memberModal");
 
 const openModalBtn =
@@ -41,23 +22,11 @@ const openModalBtn =
 const closeModalBtn =
   document.getElementById("closeModalBtn");
 
-const profileModal =
-  document.getElementById("profileModal");
+const memberForm =
+  document.getElementById("memberForm");
 
-const closeProfileBtn =
-  document.getElementById("closeProfileBtn");
-
-const historyTable =
-  document.getElementById("historyTable");
-
-const searchInput =
-  document.getElementById("searchInput");
-
-/* =========================================================
-   GLOBAL
-========================================================= */
-
-let members = [];
+const membersTable =
+  document.getElementById("membersTable");
 
 /* =========================================================
    OPEN MODAL
@@ -65,7 +34,7 @@ let members = [];
 
 openModalBtn?.addEventListener("click", () => {
 
-  modal.style.display = "flex";
+  memberModal.classList.add("active");
 
 });
 
@@ -75,17 +44,7 @@ openModalBtn?.addEventListener("click", () => {
 
 closeModalBtn?.addEventListener("click", () => {
 
-  modal.style.display = "none";
-
-});
-
-/* =========================================================
-   CLOSE PROFILE
-========================================================= */
-
-closeProfileBtn?.addEventListener("click", () => {
-
-  profileModal.style.display = "none";
+  memberModal.classList.remove("active");
 
 });
 
@@ -95,15 +54,9 @@ closeProfileBtn?.addEventListener("click", () => {
 
 window.addEventListener("click", (e) => {
 
-  if (e.target === modal) {
+  if (e.target === memberModal) {
 
-    modal.style.display = "none";
-
-  }
-
-  if (e.target === profileModal) {
-
-    profileModal.style.display = "none";
+    memberModal.classList.remove("active");
 
   }
 
@@ -113,13 +66,13 @@ window.addEventListener("click", (e) => {
    VALIDATION
 ========================================================= */
 
-function validatePhone(phone) {
+function validatePhone(phone){
 
   return /^[0-9]{9}$/.test(phone);
 
 }
 
-function validateNID(nid) {
+function validateNID(nid){
 
   return /^[0-9]{16}$/.test(nid);
 
@@ -129,7 +82,7 @@ function validateNID(nid) {
    DUPLICATE CHECK
 ========================================================= */
 
-async function checkDuplicate(phone, nid) {
+async function checkDuplicate(phone, nid){
 
   const phoneQuery = query(
     collection(db, "members"),
@@ -141,16 +94,12 @@ async function checkDuplicate(phone, nid) {
     where("nid", "==", nid)
   );
 
-  const [phoneSnap, nidSnap] =
-    await Promise.all([
-      getDocs(phoneQuery),
-      getDocs(nidQuery)
-    ]);
+  const [phoneSnap, nidSnap] = await Promise.all([
+    getDocs(phoneQuery),
+    getDocs(nidQuery)
+  ]);
 
-  return (
-    !phoneSnap.empty ||
-    !nidSnap.empty
-  );
+  return !phoneSnap.empty || !nidSnap.empty;
 
 }
 
@@ -162,10 +111,7 @@ memberForm?.addEventListener("submit", async (e) => {
 
   e.preventDefault();
 
-  try {
-
-    const lang =
-      localStorage.getItem("language") || "en";
+  try{
 
     const name =
       document.getElementById("name")
@@ -182,25 +128,23 @@ memberForm?.addEventListener("submit", async (e) => {
       .value
       .trim();
 
-    /* PHONE */
+    /* PHONE VALIDATION */
 
-    if (!validatePhone(phone)) {
+    if(!validatePhone(phone)){
 
       alert(
-        translations[lang]?.phoneError ||
-        "Phone must be exactly 9 digits"
+        "Phone number must be exactly 9 digits"
       );
 
       return;
 
     }
 
-    /* NID */
+    /* NID VALIDATION */
 
-    if (!validateNID(nid)) {
+    if(!validateNID(nid)){
 
       alert(
-        translations[lang]?.nidError ||
         "NID must be exactly 16 digits"
       );
 
@@ -208,16 +152,15 @@ memberForm?.addEventListener("submit", async (e) => {
 
     }
 
-    /* DUPLICATE */
+    /* DUPLICATE CHECK */
 
-    const duplicate =
+    const exists =
       await checkDuplicate(phone, nid);
 
-    if (duplicate) {
+    if(exists){
 
       alert(
-        translations[lang]?.duplicateError ||
-        "Duplicate phone or NID"
+        "Duplicate phone or NID detected"
       );
 
       return;
@@ -229,10 +172,12 @@ memberForm?.addEventListener("submit", async (e) => {
     await addDoc(
       collection(db, "members"),
       {
+
         name,
         phone,
         nid,
-        status: "Active",
+
+        status:"Active",
 
         createdAt:
           serverTimestamp(),
@@ -241,18 +186,19 @@ memberForm?.addEventListener("submit", async (e) => {
           localStorage.getItem("name") ||
           auth.currentUser?.displayName ||
           "Admin"
+
       }
     );
 
+    alert("Member added successfully");
+
     memberForm.reset();
 
-    modal.style.display = "none";
+    memberModal.classList.remove("active");
 
-    loadMembers(true);
+    loadMembers();
 
-  }
-
-  catch (err) {
+  }catch(err){
 
     console.error(err);
 
@@ -266,289 +212,47 @@ memberForm?.addEventListener("submit", async (e) => {
    LOAD MEMBERS
 ========================================================= */
 
-async function loadMembers(reset = false) {
+async function loadMembers(){
 
-  try {
-
-    if (reset) {
-
-      members = [];
-
-      membersTable.innerHTML = "";
-
-    }
-
-    const q = query(
-      collection(db, "members"),
-      orderBy("createdAt", "desc"),
-      limit(100)
-    );
-
-    const snap =
-      await getDocs(q);
+  try{
 
     membersTable.innerHTML = "";
 
-    members = [];
+    const q = query(
+      collection(db, "members")
+    );
 
-    for (const docSnap of snap.docs) {
+    const snap = await getDocs(q);
 
-      const m =
-        docSnap.data();
+    snap.forEach((docSnap) => {
 
-      const id =
-        docSnap.id;
+      const member = docSnap.data();
 
-      /* SAVINGS */
-
-      const savingsSnap =
-        await getDocs(
-          query(
-            collection(db, "savings"),
-            where("memberId", "==", id)
-          )
-        );
-
-      let totalSavings = 0;
-
-      savingsSnap.forEach(d => {
-
-        totalSavings +=
-          Number(d.data().amount || 0);
-
-      });
-
-      /* LOANS */
-
-      const loansSnap =
-        await getDocs(
-          query(
-            collection(db, "loans"),
-            where("memberId", "==", id)
-          )
-        );
-
-      let totalLoans = 0;
-
-      loansSnap.forEach(d => {
-
-        totalLoans +=
-          Number(d.data().total || 0);
-
-      });
-
-      /* REPAYMENTS */
-
-      const repaymentsSnap =
-        await getDocs(
-          query(
-            collection(db, "repayments"),
-            where("memberId", "==", id)
-          )
-        );
-
-      let totalRepayments = 0;
-
-      repaymentsSnap.forEach(d => {
-
-        totalRepayments +=
-          Number(d.data().amount || 0);
-
-      });
-
-      const member = {
-
-        id,
-
-        ...m,
-
-        totalSavings,
-
-        totalLoans,
-
-        remaining:
-          totalLoans -
-          totalRepayments
-
-      };
-
-      members.push(member);
-
-      const tr =
-        document.createElement("tr");
-
-      tr.innerHTML = `
-        <td>
-          <strong>${member.name}</strong>
-        </td>
-
-        <td>${member.phone}</td>
-
-        <td>${member.nid}</td>
-
-        <td>${member.totalSavings}</td>
-
-        <td>${member.totalLoans}</td>
-
-        <td>${member.remaining}</td>
-
-        <td>${member.status}</td>
-
-        <td>
-          ${
-            member.createdAt?.toDate?.()
-            ?.toLocaleString() || "-"
-          }
-        </td>
-
-        <td>
-          ${member.createdBy || "-"}
-        </td>
+      membersTable.innerHTML += `
+        <tr>
+          <td>${member.name}</td>
+          <td>${member.phone}</td>
+          <td>${member.nid}</td>
+          <td>${member.status}</td>
+          <td>
+            ${
+              member.createdAt?.toDate?.()
+              ?.toLocaleString() || "-"
+            }
+          </td>
+          <td>${member.createdBy || "-"}</td>
+        </tr>
       `;
 
-      tr.style.cursor = "pointer";
+    });
 
-      tr.addEventListener("click", () => {
-
-        openProfile(member);
-
-      });
-
-      membersTable.appendChild(tr);
-
-    }
-
-  }
-
-  catch (err) {
+  }catch(err){
 
     console.error(err);
 
   }
 
 }
-
-/* =========================================================
-   OPEN PROFILE
-========================================================= */
-
-async function openProfile(member) {
-
-  profileModal.style.display = "flex";
-
-  document.getElementById("profileTitle")
-  .innerText =
-    member.name;
-
-  document.getElementById("profilePhone")
-  .innerText =
-    member.phone;
-
-  document.getElementById("profileNid")
-  .innerText =
-    member.nid;
-
-  document.getElementById("profileSavings")
-  .innerText =
-    member.totalSavings;
-
-  document.getElementById("profileLoans")
-  .innerText =
-    member.totalLoans;
-
-  document.getElementById("profileRemaining")
-  .innerText =
-    member.remaining;
-
-  document.getElementById("profileInitial")
-  .innerText =
-    member.name
-    .charAt(0)
-    .toUpperCase();
-
-  document.getElementById("profileStatus")
-  .innerText =
-    member.status;
-
-  historyTable.innerHTML = "";
-
-  const txQuery = query(
-    collection(db, "transactions"),
-    where("memberId", "==", member.id),
-    orderBy("createdAt", "desc")
-  );
-
-  const txSnap =
-    await getDocs(txQuery);
-
-  txSnap.forEach(doc => {
-
-    const tx =
-      doc.data();
-
-    historyTable.innerHTML += `
-      <tr>
-
-        <td>${tx.type || "-"}</td>
-
-        <td>${tx.amount || 0}</td>
-
-        <td>${tx.previous || 0}</td>
-
-        <td>${tx.total || 0}</td>
-
-        <td>${tx.status || "-"}</td>
-
-        <td>
-          ${
-            tx.createdAt?.toDate?.()
-            ?.toLocaleString() || "-"
-          }
-        </td>
-
-        <td>${tx.createdBy || "-"}</td>
-
-      </tr>
-    `;
-
-  });
-
-}
-
-/* =========================================================
-   SEARCH
-========================================================= */
-
-searchInput?.addEventListener("keyup", () => {
-
-  const value =
-    searchInput.value
-    .toLowerCase();
-
-  const rows =
-    membersTable.querySelectorAll("tr");
-
-  rows.forEach(row => {
-
-    if (
-      row.innerText
-      .toLowerCase()
-      .includes(value)
-    ) {
-
-      row.style.display = "";
-
-    }
-
-    else {
-
-      row.style.display = "none";
-
-    }
-
-  });
-
-});
 
 /* =========================================================
    INIT

@@ -1,4 +1,3 @@
-```javascript
 import { db, auth } from "./firebase.js";
 
 import {
@@ -556,4 +555,3 @@ searchInput?.addEventListener("keyup", () => {
 ========================================================= */
 
 loadMembers();
-```

@@ -29,6 +29,18 @@ const totalMembers =
 const searchInput =
   document.getElementById("searchInput");
 
+const exportBtn =
+  document.getElementById("exportBtn");
+
+const logoutBtn =
+  document.getElementById("logoutBtn");
+
+const profileModal =
+  document.getElementById("profileModal");
+
+const closeProfileBtn =
+  document.getElementById("closeProfileBtn");
+
 /* =========================================================
    GLOBAL
 ========================================================= */
@@ -36,6 +48,53 @@ const searchInput =
 let members = [];
 
 let editingId = null;
+
+/* =========================================================
+   SIDEBAR TOGGLE
+========================================================= */
+
+window.toggleSidebar = function () {
+
+  const sidebar =
+    document.getElementById("sidebar");
+
+  sidebar.classList.toggle("collapsed");
+
+};
+
+/* =========================================================
+   LOGOUT
+========================================================= */
+
+if (logoutBtn) {
+
+  logoutBtn.addEventListener(
+    "click",
+    async (e) => {
+
+      e.preventDefault();
+
+      try {
+
+        await auth.signOut();
+
+        localStorage.clear();
+
+        window.location.href =
+          "index.html";
+
+      } catch (error) {
+
+        console.error(error);
+
+        alert(error.message);
+
+      }
+
+    }
+  );
+
+}
 
 /* =========================================================
    LOAD MEMBERS
@@ -58,11 +117,10 @@ async function loadMembers() {
       orderBy("createdAt", "desc")
     );
 
-    const snap = await getDocs(q);
+    const snap =
+      await getDocs(q);
 
     members = [];
-
-    membersTable.innerHTML = "";
 
     if (snap.empty) {
 
@@ -82,11 +140,9 @@ async function loadMembers() {
 
     snap.forEach((docSnap) => {
 
-      const data = docSnap.data();
-
       members.push({
         id: docSnap.id,
-        ...data
+        ...docSnap.data()
       });
 
     });
@@ -97,7 +153,13 @@ async function loadMembers() {
 
     console.error(error);
 
-    alert(error.message);
+    membersTable.innerHTML = `
+      <tr>
+        <td colspan="9">
+          Error loading members
+        </td>
+      </tr>
+    `;
 
   }
 
@@ -111,22 +173,36 @@ function renderMembers(data) {
 
   membersTable.innerHTML = "";
 
-  totalMembers.innerText = data.length;
+  totalMembers.innerText =
+    data.length;
 
   data.forEach((member) => {
 
-    const tr = document.createElement("tr");
+    const tr =
+      document.createElement("tr");
 
     tr.innerHTML = `
-      <td>${member.fullName || "-"}</td>
-      
-      <td>${member.gender || "-"}</td>
-     
-      <td>${member.memberId || "-"}</td>
+      <td>
+        <strong>
+          ${member.fullName || "-"}
+        </strong>
+      </td>
 
-      <td>${member.phone || "-"}</td>
+      <td>
+        ${member.gender || "-"}
+      </td>
 
-      <td>${member.address || "-"}</td>
+      <td>
+        ${member.memberId || "-"}
+      </td>
+
+      <td>
+        ${member.phone || "-"}
+      </td>
+
+      <td>
+        ${member.address || "-"}
+      </td>
 
       <td>
         <span class="status active">
@@ -134,13 +210,17 @@ function renderMembers(data) {
         </span>
       </td>
 
-      <td>${member.createdBy || "-"}</td>
+      <td>
+        ${member.createdBy || "-"}
+      </td>
 
       <td>
         ${
           member.createdAt?.toDate
-          ? member.createdAt.toDate().toLocaleString()
-          : "-"
+            ? member.createdAt
+                .toDate()
+                .toLocaleDateString()
+            : "-"
         }
       </td>
 
@@ -162,6 +242,23 @@ function renderMembers(data) {
 
       </td>
     `;
+
+    tr.addEventListener(
+      "click",
+      (e) => {
+
+        if (
+          e.target.closest(".edit-btn")
+          ||
+          e.target.closest(".delete-btn")
+        ) {
+          return;
+        }
+
+        openProfile(member);
+
+      }
+    );
 
     membersTable.appendChild(tr);
 
@@ -186,7 +283,7 @@ function validateNID(nid) {
 }
 
 /* =========================================================
-   CHECK DUPLICATE
+   DUPLICATE CHECK
 ========================================================= */
 
 async function checkDuplicate(
@@ -216,7 +313,9 @@ async function checkDuplicate(
   nidSnap.forEach((docSnap) => {
 
     if (docSnap.id !== currentId) {
+
       duplicate = true;
+
     }
 
   });
@@ -224,7 +323,9 @@ async function checkDuplicate(
   phoneSnap.forEach((docSnap) => {
 
     if (docSnap.id !== currentId) {
+
       duplicate = true;
+
     }
 
   });
@@ -247,34 +348,34 @@ memberForm.addEventListener(
 
       const memberId =
         document
-        .getElementById("memberId")
-        .value
-        .trim();
+          .getElementById("memberId")
+          .value
+          .trim();
 
       const fullName =
         document
-        .getElementById("fullName")
-        .value
-        .trim();
+          .getElementById("fullName")
+          .value
+          .trim();
 
       const gender =
         document
-        .getElementById("gender")
-        .value;
+          .getElementById("gender")
+          .value;
 
       const phone =
         document
-        .getElementById("phone")
-        .value
-        .trim();
+          .getElementById("phone")
+          .value
+          .trim();
 
       const address =
         document
-        .getElementById("address")
-        .value
-        .trim();
+          .getElementById("address")
+          .value
+          .trim();
 
-      /* VALIDATION */
+      /* VALIDATE */
 
       if (!validateNID(memberId)) {
 
@@ -296,7 +397,7 @@ memberForm.addEventListener(
 
       }
 
-      /* DUPLICATE CHECK */
+      /* CHECK DUPLICATE */
 
       const duplicate =
         await checkDuplicate(
@@ -315,8 +416,6 @@ memberForm.addEventListener(
 
       }
 
-      /* DATA */
-
       const payload = {
 
         memberId,
@@ -328,8 +427,10 @@ memberForm.addEventListener(
         status: "Active",
 
         createdBy:
-          localStorage.getItem("name") ||
-          auth.currentUser?.displayName ||
+          localStorage.getItem("name")
+          ||
+          auth.currentUser?.displayName
+          ||
           "Admin"
 
       };
@@ -339,13 +440,26 @@ memberForm.addEventListener(
       if (editingId) {
 
         await updateDoc(
-          doc(db, "members", editingId),
+          doc(
+            db,
+            "members",
+            editingId
+          ),
           payload
         );
 
-        alert("Member updated");
+        alert(
+          "Member updated successfully"
+        );
 
         editingId = null;
+
+        memberForm.querySelector(
+          "button"
+        ).innerHTML = `
+          <i class="fa fa-plus"></i>
+          Add Member
+        `;
 
       }
 
@@ -361,7 +475,9 @@ memberForm.addEventListener(
           payload
         );
 
-        alert("Member added");
+        alert(
+          "Member added successfully"
+        );
 
       }
 
@@ -384,34 +500,47 @@ memberForm.addEventListener(
    EDIT MEMBER
 ========================================================= */
 
-window.editMember = function(id) {
+window.editMember = function (id) {
 
   const member =
-    members.find((m) => m.id === id);
+    members.find(
+      (m) => m.id === id
+    );
 
   if (!member) return;
 
   editingId = id;
 
-  document.getElementById("memberId")
-  .value =
-    member.memberId || "";
-
-  document.getElementById("fullName")
-  .value =
+  document.getElementById(
+    "fullName"
+  ).value =
     member.fullName || "";
 
-  document.getElementById("gender")
-  .value =
+  document.getElementById(
+    "gender"
+  ).value =
     member.gender || "Male";
 
-  document.getElementById("phone")
-  .value =
+  document.getElementById(
+    "memberId"
+  ).value =
+    member.memberId || "";
+
+  document.getElementById(
+    "phone"
+  ).value =
     member.phone || "";
 
-  document.getElementById("address")
-  .value =
+  document.getElementById(
+    "address"
+  ).value =
     member.address || "";
+
+  memberForm.querySelector(
+    "button"
+  ).innerHTML = `
+    ✏️ Update Member
+  `;
 
   window.scrollTo({
     top: 0,
@@ -425,7 +554,7 @@ window.editMember = function(id) {
 ========================================================= */
 
 window.deleteMember =
-  async function(id) {
+  async function (id) {
 
     const confirmDelete =
       confirm(
@@ -456,82 +585,168 @@ window.deleteMember =
    SEARCH
 ========================================================= */
 
-window.searchMembers = function() {
+if (searchInput) {
 
-  const value =
-    searchInput.value
-    .toLowerCase()
-    .trim();
+  searchInput.addEventListener(
+    "keyup",
+    () => {
 
-  const filtered =
-    members.filter((member) => {
+      const value =
+        searchInput.value
+          .toLowerCase()
+          .trim();
 
-      return (
+      const filtered =
+        members.filter((member) => {
 
-        member.fullName
-        ?.toLowerCase()
-        .includes(value)
+          return (
 
-        ||
+            member.fullName
+              ?.toLowerCase()
+              .includes(value)
 
-        member.phone
-        ?.includes(value)
+            ||
 
-        ||
+            member.phone
+              ?.includes(value)
 
-        member.memberId
-        ?.includes(value)
+            ||
 
-      );
+            member.memberId
+              ?.includes(value)
 
-    });
+          );
 
-  renderMembers(filtered);
+        });
 
-};
+      renderMembers(filtered);
+
+    }
+  );
+
+}
 
 /* =========================================================
    EXPORT CSV
 ========================================================= */
 
-window.exportMembersCSV =
-  function() {
+if (exportBtn) {
 
-    let csv =
-      "NID,Full Name,Gender,Phone,Address,Status\n";
+  exportBtn.addEventListener(
+    "click",
+    () => {
 
-    members.forEach((member) => {
+      let csv =
+        "Full Name,Gender,NID,Phone,Address,Status\n";
 
-      csv += `
-${member.memberId},
-${member.fullName},
+      members.forEach((member) => {
+
+        csv +=
+`${member.fullName},
 ${member.gender},
+${member.memberId},
 ${member.phone},
 ${member.address},
-${member.status}
-`;
+${member.status}\n`;
 
-    });
-
-    const blob =
-      new Blob([csv], {
-        type: "text/csv"
       });
 
-    const url =
-      URL.createObjectURL(blob);
+      const blob =
+        new Blob([csv], {
+          type: "text/csv"
+        });
 
-    const a =
-      document.createElement("a");
+      const url =
+        URL.createObjectURL(blob);
 
-    a.href = url;
+      const a =
+        document.createElement("a");
 
-    a.download =
-      "members.csv";
+      a.href = url;
 
-    a.click();
+      a.download =
+        "members.csv";
 
-  };
+      a.click();
+
+    }
+  );
+
+}
+
+/* =========================================================
+   PROFILE MODAL
+========================================================= */
+
+function openProfile(member) {
+
+  profileModal.classList.add(
+    "active"
+  );
+
+  document.getElementById(
+    "profileName"
+  ).innerText =
+    member.fullName || "-";
+
+  document.getElementById(
+    "profileNid"
+  ).innerText =
+    member.memberId || "-";
+
+  document.getElementById(
+    "profilePhone"
+  ).innerText =
+    member.phone || "-";
+
+  document.getElementById(
+    "profileGender"
+  ).innerText =
+    member.gender || "-";
+
+  document.getElementById(
+    "profileAddress"
+  ).innerText =
+    member.address || "-";
+
+  document.getElementById(
+    "profileStatus"
+  ).innerText =
+    member.status || "Active";
+
+}
+
+/* CLOSE PROFILE */
+
+if (closeProfileBtn) {
+
+  closeProfileBtn.addEventListener(
+    "click",
+    () => {
+
+      profileModal.classList.remove(
+        "active"
+      );
+
+    }
+  );
+
+}
+
+window.addEventListener(
+  "click",
+  (e) => {
+
+    if (e.target === profileModal) {
+
+      profileModal.classList.remove(
+        "active"
+      );
+
+    }
+
+  }
+);
 
 /* =========================================================
    LOAD

@@ -10,17 +10,15 @@
     content="width=device-width, initial-scale=1.0"
   />
 
-  <title>
+  <title data-i18n="loans">
     Loans
   </title>
 
-  <!-- CSS -->
   <link
     rel="stylesheet"
     href="css/style.css"
   />
 
-  <!-- FONT AWESOME -->
   <link
     rel="stylesheet"
     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
@@ -39,7 +37,6 @@
   id="sidebar"
 >
 
-  <!-- TOGGLE -->
   <button
     class="toggle-btn"
     onclick="toggleSidebar()"
@@ -47,345 +44,376 @@
     ☰
   </button>
 
-  <!-- LOGO -->
   <h2 class="logo">
     🏦 SACCO
   </h2>
 
-  <!-- NAVIGATION -->
   <nav class="nav">
 
-    <!-- DASHBOARD -->
     <a
       href="dashboard.html"
-      class="nav-item active"
+      class="nav-item"
     >
-
-      <span class="icon">
-        📊
-      </span>
-
+      <span class="icon">📊</span>
       <span
         class="text"
         data-i18n="dashboard"
       >
         Dashboard
       </span>
-
     </a>
 
-    <!-- MEMBERS -->
     <a
       href="members.html"
-      class="nav-item admin-only"
+      class="nav-item"
     >
-
-      <span class="icon">
-        👥
-      </span>
-
+      <span class="icon">👥</span>
       <span
         class="text"
         data-i18n="members"
       >
         Members
       </span>
-
     </a>
 
-    <!-- SAVINGS -->
     <a
       href="savings.html"
       class="nav-item"
     >
-
-      <span class="icon">
-        💰
-      </span>
-
+      <span class="icon">💰</span>
       <span
         class="text"
         data-i18n="savings"
       >
         Savings
       </span>
-
     </a>
 
-    <!-- LOANS -->
     <a
       href="loans.html"
-      class="nav-item"
+      class="nav-item active"
     >
-
-      <span class="icon">
-        🏦
-      </span>
-
+      <span class="icon">🏦</span>
       <span
         class="text"
         data-i18n="loans"
       >
         Loans
       </span>
-
-    </a>
-
-    <!-- REPAYMENTS -->
-    <a
-      href="repayments.html"
-      class="nav-item"
-    >
-
-      <span class="icon">
-        💵
-      </span>
-
-      <span
-        class="text"
-        data-i18n="repayments"
-      >
-        Repayments
-      </span>
-
-    </a>
-
-    <!-- WITHDRAWALS -->
-    <a
-      href="withdrawals.html"
-      class="nav-item admin-only"
-    >
-
-      <span class="icon">
-        💸
-      </span>
-
-      <span
-        class="text"
-        data-i18n="withdrawals"
-      >
-        Withdrawals
-      </span>
-
-    </a>
-
-    <!-- REPORTS -->
-    <a
-      href="reports.html"
-      class="nav-item admin-only"
-    >
-
-      <span class="icon">
-        📄
-      </span>
-
-      <span
-        class="text"
-        data-i18n="reports"
-      >
-        Reports
-      </span>
-
-    </a>
-
-    <!-- USERS -->
-    <a
-      href="users.html"
-      class="nav-item admin-only"
-    >
-
-      <span class="icon">
-        👤
-      </span>
-
-      <span
-        class="text"
-        data-i18n="users"
-      >
-        Users
-      </span>
-
-    </a>
-
-    <!-- SETTINGS -->
-    <a
-      href="settings.html"
-      class="nav-item"
-    >
-
-      <span class="icon">
-        ⚙️
-      </span>
-
-      <span
-        class="text"
-        data-i18n="settings"
-      >
-        Settings
-      </span>
-
-    </a>
-
-    <!-- LOGOUT -->
-    <a
-      href="#"
-      class="nav-item logout"
-      id="logoutBtn"
-    >
-
-      <span class="icon">
-        🚪
-      </span>
-
-      <span
-        class="text"
-        data-i18n="logout"
-      >
-        Logout
-      </span>
-
     </a>
 
   </nav>
 
 </aside>
-  
+
+<!-- =========================================================
+     MAIN
+========================================================= -->
 
 <main class="main">
 
   <!-- TOPBAR -->
+
   <div class="topbar">
 
-    <h2 data-i18n="loan_management">
-      🏦 Loan Management
+    <h2 data-i18n="loans_management">
+      🏦 Loans Management
     </h2>
 
-    <!-- LANGUAGE -->
-    <select id="languageSelect" onchange="changeLanguage(this.value)">
+    <div
+      style="
+        display:flex;
+        gap:10px;
+        align-items:center;
+      "
+    >
 
-      <option value="en">English</option>
-      <option value="am">አማርኛ</option>
-      <option value="om">Afaan Oromoo</option>
+      <select
+        id="languageSelect"
+        onchange="changeLanguage(this.value)"
+      >
 
-    </select>
+        <option value="en">
+          English
+        </option>
 
-  </div>
+        <option value="am">
+          አማርኛ
+        </option>
 
-  <!-- MAIN -->
-<main class="main">
+        <option value="om">
+          Afaan Oromoo
+        </option>
 
-  <div class="topbar">
-    <h2 data-i18n="loans">🏦 Loans Management</h2>
+      </select>
 
-    <select id="languageSelect">
-      <option value="en">English</option>
-      <option value="am">አማርኛ</option>
-      <option value="om">Afaan Oromoo</option>
-    </select>
+    </div>
+
   </div>
 
   <!-- SEARCH -->
+
   <div class="search-container">
-    <input id="searchMember" placeholder="Search member..." />
-    <div id="searchResults" class="search-dropdown"></div>
+
+    <input
+      type="text"
+      id="searchMember"
+      class="search-input"
+      data-i18n-placeholder="search_member"
+      placeholder="Search member"
+    />
+
+    <div
+      id="searchResults"
+      class="search-dropdown"
+    ></div>
+
   </div>
 
-  <div id="selectedMember" class="selected-box">
+  
+  <!-- SELECTED -->
+  
+
+  <div
+    id="selectedMember"
+    class="selected-box"
+    data-i18n="select_member"
+  >
     👤 Select a member
   </div>
 
-  <!-- BUTTON -->
-  <button class="add-btn" id="openModalBtn">
-    <i class="fa fa-plus"></i> Add Loan
-  </button>
+<button
+        class="add-btn"
+        id="openModalBtn"
+      >
 
+        <i class="fa fa-plus"></i>
+
+        <span data-i18n="add_loan">
+          Add Loan
+        </span>
+
+      </button>
+  
   <!-- TABLE -->
+
   <div class="table-card">
+
     <table class="table-modern">
 
       <thead>
+
         <tr>
-          <th>Member</th>
-          <th>Phone</th>
-          <th>Principal</th>
-          <th>Interest</th>
-          <th>Total</th>
-          <th>Remaining</th>
-          <th>Type</th>
-          <th>Duration</th>
-          <th>Actions</th>
+
+          <th data-i18n="name">
+            Name
+          </th>
+
+          <th data-i18n="phone">
+            Phone
+          </th>
+
+          <th data-i18n="principal">
+            Principal
+          </th>
+
+          <th data-i18n="interest">
+            Interest
+          </th>
+
+          <th data-i18n="total">
+            Total
+          </th>
+
+          <th data-i18n="remaining">
+            Remaining
+          </th>
+
+          <th data-i18n="type">
+            Type
+          </th>
+
+          <th data-i18n="duration">
+            Duration
+          </th>
+
+          <th data-i18n="status">
+            Status
+          </th>
+
+          <th data-i18n="createdDate">
+            Created Date
+          </th>
+
+          <th data-i18n="createdBy">
+            Created By
+          </th>
+
+          <th data-i18n="actions">
+            Actions
+          </th>
+
         </tr>
+
       </thead>
 
       <tbody id="loansTable"></tbody>
 
     </table>
+
   </div>
 
 </main>
 
-<!-- =========================
-     LOAN MODAL
-========================= -->
+<!-- =========================================================
+     MODAL
+========================================================= -->
 
-<div class="modal" id="loanModal">
+<div
+  class="modal"
+  id="loanModal"
+>
+
   <div class="modal-box">
 
     <div class="modal-header">
-      <h3>🏦 Loan</h3>
-      <button id="closeModalBtn">✖</button>
+
+      <h3 data-i18n="add_loan">
+        Add Loan
+      </h3>
+
+      <button
+        class="modal-close-icon"
+        id="closeModalBtn"
+      >
+        ✖
+      </button>
+
     </div>
 
     <form id="loanForm">
 
-      <input type="number" id="principal" placeholder="Principal" required />
-      <input type="number" id="rate" placeholder="Rate %" required />
-      <input type="number" id="time" placeholder="Duration" required />
+      <input
+        type="number"
+        id="principal"
+        data-i18n-placeholder="loan_amount"
+        placeholder="Loan Amount"
+        required
+      />
 
-      <select id="timeType">
-        <option value="months">Months</option>
-        <option value="years">Years</option>
-      </select>
+      <input
+        type="number"
+        id="rate"
+        data-i18n-placeholder="interest_rate"
+        placeholder="Interest Rate"
+        required
+      />
+
+      <input
+        type="number"
+        id="time"
+        data-i18n-placeholder="duration"
+        placeholder="Duration"
+        required
+      />
 
       <select id="interestType">
-        <option value="simple">Simple</option>
-        <option value="compound">Compound</option>
+
+        <option value="Simple">
+          Simple
+        </option>
+
+        <option value="Compound">
+          Compound
+        </option>
+
+        <option value="Flat">
+          Flat
+        </option>
+
       </select>
 
-      <button type="submit" class="save-btn">Save</button>
+      <button
+        type="submit"
+        class="save-btn"
+      >
+
+        <span data-i18n="save">
+          Save
+        </span>
+
+      </button>
 
     </form>
 
   </div>
+
 </div>
 
-<!-- =========================
-     CONFIRM DELETE MODAL
-========================= -->
+<!-- =========================================================
+     DELETE MODAL
+========================================================= -->
 
-<div class="modal" id="confirmModal">
+<div
+  class="modal"
+  id="deleteModal"
+>
 
-  <div class="modal-box" style="max-width:400px;text-align:center;">
+  <div class="modal-box">
 
-    <h3>🗑️ Confirm Delete</h3>
-    <p>Are you sure you want to delete this loan?</p>
+    <h3 data-i18n="delete_loan">
+      Delete Loan
+    </h3>
 
-    <div style="display:flex;gap:10px;justify-content:center;margin-top:20px;">
-      <button id="cancelDeleteBtn" class="save-btn" style="background:#aaa;">Cancel</button>
-      <button id="confirmDeleteBtn" class="save-btn" style="background:#e74c3c;">Delete</button>
+    <p
+      style="margin-top:10px;"
+      data-i18n="delete_confirm"
+    >
+      Are you sure?
+    </p>
+
+    <div
+      style="
+        display:flex;
+        gap:10px;
+        margin-top:20px;
+      "
+    >
+
+      <button
+        id="confirmDeleteBtn"
+        class="delete-btn"
+      >
+
+        <span data-i18n="yes_delete">
+          Yes Delete
+        </span>
+
+      </button>
+
+      <button
+        id="cancelDeleteBtn"
+        class="cancel-btn"
+      >
+
+        <span data-i18n="cancel">
+          Cancel
+        </span>
+
+      </button>
+
     </div>
 
   </div>
 
 </div>
-  
-<!-- =========================================================
-     SCRIPTS
-========================================================= -->
-
-<script type="module" src="js/layout.js"></script>
+<script src="js/layout.js"></script>
 <script src="js/i18n.js"></script>
-<script type="module" src="js/loans.js"></script>
+
+<script
+  type="module"
+  src="js/loans.js"
+></script>
 
 </body>
 </html>

@@ -4,8 +4,12 @@ import {
   collection,
   addDoc,
   getDocs,
+  deleteDoc,
+  updateDoc,
+  doc,
   query,
   where,
+  orderBy,
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
@@ -13,249 +17,524 @@ import {
    ELEMENTS
 ========================================================= */
 
-const memberModal =
-  document.getElementById("memberModal");
-
-const openModalBtn =
-  document.getElementById("openModalBtn");
-
-const closeModalBtn =
-  document.getElementById("closeModalBtn");
-
 const memberForm =
   document.getElementById("memberForm");
 
 const membersTable =
   document.getElementById("membersTable");
 
-/* =========================================================
-   OPEN MODAL
-========================================================= */
+const totalMembers =
+  document.getElementById("totalMembers");
 
-openModalBtn?.addEventListener("click", () => {
-
-  memberModal.classList.add("active");
-
-});
+const searchInput =
+  document.getElementById("searchInput");
 
 /* =========================================================
-   CLOSE MODAL
+   GLOBAL
 ========================================================= */
 
-closeModalBtn?.addEventListener("click", () => {
+let members = [];
 
-  memberModal.classList.remove("active");
-
-});
+let editingId = null;
 
 /* =========================================================
-   CLOSE OUTSIDE
+   LOAD MEMBERS
 ========================================================= */
 
-window.addEventListener("click", (e) => {
+async function loadMembers() {
 
-  if (e.target === memberModal) {
+  try {
 
-    memberModal.classList.remove("active");
+    membersTable.innerHTML = `
+      <tr>
+        <td colspan="9">
+          Loading...
+        </td>
+      </tr>
+    `;
+
+    const q = query(
+      collection(db, "members"),
+      orderBy("createdAt", "desc")
+    );
+
+    const snap = await getDocs(q);
+
+    members = [];
+
+    membersTable.innerHTML = "";
+
+    if (snap.empty) {
+
+      membersTable.innerHTML = `
+        <tr>
+          <td colspan="9">
+            No members found
+          </td>
+        </tr>
+      `;
+
+      totalMembers.innerText = "0";
+
+      return;
+
+    }
+
+    snap.forEach((docSnap) => {
+
+      const data = docSnap.data();
+
+      members.push({
+        id: docSnap.id,
+        ...data
+      });
+
+    });
+
+    renderMembers(members);
+
+  } catch (error) {
+
+    console.error(error);
+
+    alert(error.message);
 
   }
 
-});
+}
+
+/* =========================================================
+   RENDER MEMBERS
+========================================================= */
+
+function renderMembers(data) {
+
+  membersTable.innerHTML = "";
+
+  totalMembers.innerText = data.length;
+
+  data.forEach((member) => {
+
+    const tr = document.createElement("tr");
+
+    tr.innerHTML = `
+      <td>${member.memberId || "-"}</td>
+
+      <td>${member.fullName || "-"}</td>
+
+      <td>${member.gender || "-"}</td>
+
+      <td>${member.phone || "-"}</td>
+
+      <td>${member.address || "-"}</td>
+
+      <td>
+        <span class="status active">
+          ${member.status || "Active"}
+        </span>
+      </td>
+
+      <td>${member.createdBy || "-"}</td>
+
+      <td>
+        ${
+          member.createdAt?.toDate
+          ? member.createdAt.toDate().toLocaleString()
+          : "-"
+        }
+      </td>
+
+      <td>
+
+        <button
+          class="edit-btn"
+          onclick="editMember('${member.id}')"
+        >
+          ✏️
+        </button>
+
+        <button
+          class="delete-btn"
+          onclick="deleteMember('${member.id}')"
+        >
+          🗑️
+        </button>
+
+      </td>
+    `;
+
+    membersTable.appendChild(tr);
+
+  });
+
+}
 
 /* =========================================================
    VALIDATION
 ========================================================= */
 
-function validatePhone(phone){
+function validatePhone(phone) {
 
   return /^[0-9]{9}$/.test(phone);
 
 }
 
-function validateNID(nid){
+function validateNID(nid) {
 
   return /^[0-9]{16}$/.test(nid);
 
 }
 
 /* =========================================================
-   DUPLICATE CHECK
+   CHECK DUPLICATE
 ========================================================= */
 
-async function checkDuplicate(phone, nid){
+async function checkDuplicate(
+  memberId,
+  phone,
+  currentId = null
+) {
+
+  const nidQuery = query(
+    collection(db, "members"),
+    where("memberId", "==", memberId)
+  );
 
   const phoneQuery = query(
     collection(db, "members"),
     where("phone", "==", phone)
   );
 
-  const nidQuery = query(
-    collection(db, "members"),
-    where("nid", "==", nid)
-  );
+  const [nidSnap, phoneSnap] =
+    await Promise.all([
+      getDocs(nidQuery),
+      getDocs(phoneQuery)
+    ]);
 
-  const [phoneSnap, nidSnap] = await Promise.all([
-    getDocs(phoneQuery),
-    getDocs(nidQuery)
-  ]);
+  let duplicate = false;
 
-  return !phoneSnap.empty || !nidSnap.empty;
+  nidSnap.forEach((docSnap) => {
+
+    if (docSnap.id !== currentId) {
+      duplicate = true;
+    }
+
+  });
+
+  phoneSnap.forEach((docSnap) => {
+
+    if (docSnap.id !== currentId) {
+      duplicate = true;
+    }
+
+  });
+
+  return duplicate;
 
 }
 
 /* =========================================================
-   ADD MEMBER
+   ADD / UPDATE MEMBER
 ========================================================= */
 
-memberForm?.addEventListener("submit", async (e) => {
+memberForm.addEventListener(
+  "submit",
+  async (e) => {
 
-  e.preventDefault();
+    e.preventDefault();
 
-  try{
+    try {
 
-    const name =
-      document.getElementById("name")
-      .value
-      .trim();
+      const memberId =
+        document
+        .getElementById("memberId")
+        .value
+        .trim();
 
-    const phone =
-      document.getElementById("phone")
-      .value
-      .trim();
+      const fullName =
+        document
+        .getElementById("fullName")
+        .value
+        .trim();
 
-    const nid =
-      document.getElementById("nid")
-      .value
-      .trim();
+      const gender =
+        document
+        .getElementById("gender")
+        .value;
 
-    /* PHONE VALIDATION */
+      const phone =
+        document
+        .getElementById("phone")
+        .value
+        .trim();
 
-    if(!validatePhone(phone)){
+      const address =
+        document
+        .getElementById("address")
+        .value
+        .trim();
 
-      alert(
-        "Phone number must be exactly 9 digits"
-      );
+      /* VALIDATION */
 
-      return;
+      if (!validateNID(memberId)) {
 
-    }
+        alert(
+          "NID must be exactly 16 digits"
+        );
 
-    /* NID VALIDATION */
+        return;
 
-    if(!validateNID(nid)){
+      }
 
-      alert(
-        "NID must be exactly 16 digits"
-      );
+      if (!validatePhone(phone)) {
 
-      return;
+        alert(
+          "Phone number must be exactly 9 digits"
+        );
 
-    }
+        return;
 
-    /* DUPLICATE CHECK */
+      }
 
-    const exists =
-      await checkDuplicate(phone, nid);
+      /* DUPLICATE CHECK */
 
-    if(exists){
+      const duplicate =
+        await checkDuplicate(
+          memberId,
+          phone,
+          editingId
+        );
 
-      alert(
-        "Duplicate phone or NID detected"
-      );
+      if (duplicate) {
 
-      return;
+        alert(
+          "Member already exists"
+        );
 
-    }
+        return;
 
-    /* SAVE */
+      }
 
-    await addDoc(
-      collection(db, "members"),
-      {
+      /* DATA */
 
-        name,
+      const payload = {
+
+        memberId,
+        fullName,
+        gender,
         phone,
-        nid,
+        address,
 
-        status:"Active",
-
-        createdAt:
-          serverTimestamp(),
+        status: "Active",
 
         createdBy:
           localStorage.getItem("name") ||
           auth.currentUser?.displayName ||
           "Admin"
 
+      };
+
+      /* UPDATE */
+
+      if (editingId) {
+
+        await updateDoc(
+          doc(db, "members", editingId),
+          payload
+        );
+
+        alert("Member updated");
+
+        editingId = null;
+
       }
-    );
 
-    alert("Member added successfully");
+      /* ADD */
 
-    memberForm.reset();
+      else {
 
-    memberModal.classList.remove("active");
+        payload.createdAt =
+          serverTimestamp();
 
-    loadMembers();
+        await addDoc(
+          collection(db, "members"),
+          payload
+        );
 
-  }catch(err){
+        alert("Member added");
 
-    console.error(err);
+      }
 
-    alert(err.message);
+      memberForm.reset();
+
+      loadMembers();
+
+    } catch (error) {
+
+      console.error(error);
+
+      alert(error.message);
+
+    }
 
   }
-
-});
+);
 
 /* =========================================================
-   LOAD MEMBERS
+   EDIT MEMBER
 ========================================================= */
 
-async function loadMembers(){
+window.editMember = function(id) {
 
-  try{
+  const member =
+    members.find((m) => m.id === id);
 
-    membersTable.innerHTML = "";
+  if (!member) return;
 
-    const q = query(
-      collection(db, "members")
-    );
+  editingId = id;
 
-    const snap = await getDocs(q);
+  document.getElementById("memberId")
+  .value =
+    member.memberId || "";
 
-    snap.forEach((docSnap) => {
+  document.getElementById("fullName")
+  .value =
+    member.fullName || "";
 
-      const member = docSnap.data();
+  document.getElementById("gender")
+  .value =
+    member.gender || "Male";
 
-      membersTable.innerHTML += `
-        <tr>
-          <td>${member.name}</td>
-          <td>${member.phone}</td>
-          <td>${member.nid}</td>
-          <td>${member.status}</td>
-          <td>
-            ${
-              member.createdAt?.toDate?.()
-              ?.toLocaleString() || "-"
-            }
-          </td>
-          <td>${member.createdBy || "-"}</td>
-        </tr>
-      `;
+  document.getElementById("phone")
+  .value =
+    member.phone || "";
+
+  document.getElementById("address")
+  .value =
+    member.address || "";
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
+
+};
+
+/* =========================================================
+   DELETE MEMBER
+========================================================= */
+
+window.deleteMember =
+  async function(id) {
+
+    const confirmDelete =
+      confirm(
+        "Delete this member?"
+      );
+
+    if (!confirmDelete) return;
+
+    try {
+
+      await deleteDoc(
+        doc(db, "members", id)
+      );
+
+      loadMembers();
+
+    } catch (error) {
+
+      console.error(error);
+
+      alert(error.message);
+
+    }
+
+  };
+
+/* =========================================================
+   SEARCH
+========================================================= */
+
+window.searchMembers = function() {
+
+  const value =
+    searchInput.value
+    .toLowerCase()
+    .trim();
+
+  const filtered =
+    members.filter((member) => {
+
+      return (
+
+        member.fullName
+        ?.toLowerCase()
+        .includes(value)
+
+        ||
+
+        member.phone
+        ?.includes(value)
+
+        ||
+
+        member.memberId
+        ?.includes(value)
+
+      );
 
     });
 
-  }catch(err){
+  renderMembers(filtered);
 
-    console.error(err);
-
-  }
-
-}
+};
 
 /* =========================================================
-   INIT
+   EXPORT CSV
+========================================================= */
+
+window.exportMembersCSV =
+  function() {
+
+    let csv =
+      "NID,Full Name,Gender,Phone,Address,Status\n";
+
+    members.forEach((member) => {
+
+      csv += `
+${member.memberId},
+${member.fullName},
+${member.gender},
+${member.phone},
+${member.address},
+${member.status}
+`;
+
+    });
+
+    const blob =
+      new Blob([csv], {
+        type: "text/csv"
+      });
+
+    const url =
+      URL.createObjectURL(blob);
+
+    const a =
+      document.createElement("a");
+
+    a.href = url;
+
+    a.download =
+      "members.csv";
+
+    a.click();
+
+  };
+
+/* =========================================================
+   LOAD
 ========================================================= */
 
 loadMembers();

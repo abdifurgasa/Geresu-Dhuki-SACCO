@@ -14,11 +14,13 @@
     Members
   </title>
 
+  <!-- CSS -->
   <link
     rel="stylesheet"
     href="css/style.css"
   >
 
+  <!-- FONT AWESOME -->
   <link
     rel="stylesheet"
     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
@@ -37,6 +39,7 @@
   id="sidebar"
 >
 
+  <!-- TOGGLE -->
   <button
     class="toggle-btn"
     onclick="toggleSidebar()"
@@ -44,17 +47,23 @@
     ☰
   </button>
 
+  <!-- LOGO -->
   <h2 class="logo">
     🏦 GERESU DHUKI SACCO
   </h2>
 
+  <!-- NAVIGATION -->
   <nav class="nav">
 
+    <!-- DASHBOARD -->
     <a
       href="dashboard.html"
       class="nav-item"
     >
-      <span class="icon">📊</span>
+
+      <span class="icon">
+        📊
+      </span>
 
       <span
         class="text"
@@ -62,13 +71,18 @@
       >
         Dashboard
       </span>
+
     </a>
 
+    <!-- MEMBERS -->
     <a
       href="members.html"
       class="nav-item active admin-only"
     >
-      <span class="icon">👥</span>
+
+      <span class="icon">
+        👥
+      </span>
 
       <span
         class="text"
@@ -76,13 +90,18 @@
       >
         Members
       </span>
+
     </a>
 
+    <!-- SAVINGS -->
     <a
       href="savings.html"
       class="nav-item"
     >
-      <span class="icon">💰</span>
+
+      <span class="icon">
+        💰
+      </span>
 
       <span
         class="text"
@@ -90,13 +109,18 @@
       >
         Savings
       </span>
+
     </a>
 
+    <!-- LOANS -->
     <a
       href="loans.html"
       class="nav-item"
     >
-      <span class="icon">🏦</span>
+
+      <span class="icon">
+        🏦
+      </span>
 
       <span
         class="text"
@@ -104,13 +128,18 @@
       >
         Loans
       </span>
+
     </a>
 
+    <!-- REPAYMENTS -->
     <a
       href="repayments.html"
       class="nav-item"
     >
-      <span class="icon">💵</span>
+
+      <span class="icon">
+        💵
+      </span>
 
       <span
         class="text"
@@ -118,13 +147,18 @@
       >
         Repayments
       </span>
+
     </a>
 
+    <!-- WITHDRAWALS -->
     <a
       href="withdrawals.html"
       class="nav-item admin-only"
     >
-      <span class="icon">💸</span>
+
+      <span class="icon">
+        💸
+      </span>
 
       <span
         class="text"
@@ -132,13 +166,18 @@
       >
         Withdrawals
       </span>
+
     </a>
 
+    <!-- REPORTS -->
     <a
       href="reports.html"
       class="nav-item admin-only"
     >
-      <span class="icon">📄</span>
+
+      <span class="icon">
+        📄
+      </span>
 
       <span
         class="text"
@@ -146,13 +185,18 @@
       >
         Reports
       </span>
+
     </a>
 
+    <!-- USERS -->
     <a
       href="users.html"
       class="nav-item admin-only"
     >
-      <span class="icon">👤</span>
+
+      <span class="icon">
+        👤
+      </span>
 
       <span
         class="text"
@@ -160,13 +204,18 @@
       >
         Users
       </span>
+
     </a>
 
+    <!-- SETTINGS -->
     <a
       href="settings.html"
       class="nav-item"
     >
-      <span class="icon">⚙️</span>
+
+      <span class="icon">
+        ⚙️
+      </span>
 
       <span
         class="text"
@@ -174,14 +223,19 @@
       >
         Settings
       </span>
+
     </a>
 
+    <!-- LOGOUT -->
     <a
       href="#"
       class="nav-item logout"
       id="logoutBtn"
     >
-      <span class="icon">🚪</span>
+
+      <span class="icon">
+        🚪
+      </span>
 
       <span
         class="text"
@@ -189,6 +243,7 @@
       >
         Logout
       </span>
+
     </a>
 
   </nav>
@@ -196,7 +251,7 @@
 </aside>
 
 <!-- =========================================================
-     MAIN
+     MAIN CONTENT
 ========================================================= -->
 
 <main
@@ -204,18 +259,19 @@
   id="main"
 >
 
-  <!-- TOPBAR -->
+  <!-- =========================================================
+       TOPBAR
+  ========================================================= -->
 
   <div class="topbar">
 
     <h2 data-i18n="membersManagement">
-      Members Management
+      MEMBERS MANAGEMENT
     </h2>
 
     <div class="topbar-actions">
 
       <!-- LANGUAGE -->
-
       <select
         id="languageSelect"
         onchange="changeLanguage(this.value)"
@@ -235,13 +291,12 @@
 
       </select>
 
-      <!-- ROLE -->
-
+      <!-- USER -->
       <div
         class="selected-box"
         id="roleBox"
       >
-        👤 Loading...
+        👤 Admin
       </div>
 
     </div>
@@ -265,11 +320,12 @@
   </div>
 
   <!-- =========================================================
-       CARD
+       SUMMARY CARDS
   ========================================================= -->
 
   <section class="cards">
 
+    <!-- TOTAL MEMBERS -->
     <div class="card blue">
 
       <h3 data-i18n="totalMembers">
@@ -282,6 +338,19 @@
 
     </div>
 
+    <!-- ACTIVE MEMBERS -->
+    <div class="card green">
+
+      <h3 data-i18n="activeMembers">
+        Active Members
+      </h3>
+
+      <p id="activeMembers">
+        0
+      </p>
+
+    </div>
+
   </section>
 
   <!-- =========================================================
@@ -289,37 +358,52 @@
   ========================================================= -->
 
   <section class="form-card">
+
     <h3 data-i18n="addMember">
       Add Member
     </h3>
+
     <form id="memberForm">
+
+      <!-- ROW -->
       <div class="grid-2">
+
         <!-- FULL NAME -->
         <input
           type="text"
           id="fullName"
           required
           placeholder="Full Name"
+          data-i18n-placeholder="fullName"
         >
-      </div>
-      <div class="grid-2">
-        <!-- GENDER -->
-        <select id="gender">
-          <option value="Male">
-            Male
-          </option>
-          <option value="Female">
-            Female
-          </option>
-        </select>
-         <!-- NID -->
+
+        <!-- NID -->
         <input
           type="text"
           id="memberId"
           maxlength="16"
           required
           placeholder="National ID (16 Digits)"
-          >
+        >
+
+      </div>
+
+      <!-- ROW -->
+      <div class="grid-2">
+
+        <!-- GENDER -->
+        <select id="gender">
+
+          <option value="Male">
+            Male
+          </option>
+
+          <option value="Female">
+            Female
+          </option>
+
+        </select>
+
         <!-- PHONE -->
         <input
           type="text"
@@ -328,67 +412,129 @@
           required
           placeholder="Phone Number (9 Digits)"
         >
+
       </div>
+
       <!-- ADDRESS -->
       <textarea
         id="address"
         placeholder="Address"
       ></textarea>
+
       <!-- BUTTON -->
       <button
         type="submit"
         class="primary-btn"
       >
+
         <i class="fa fa-plus"></i>
+
         <span data-i18n="addMember">
           Add Member
         </span>
+
       </button>
+
     </form>
+
   </section>
+
   <!-- =========================================================
        MEMBERS TABLE
   ========================================================= -->
+
   <section class="table-card">
+
+    <!-- TABLE HEADER -->
     <div class="table-header">
+
       <h3 data-i18n="membersList">
         Members List
       </h3>
+
       <div class="table-actions">
+
         <!-- SEARCH -->
         <input
           type="text"
           id="searchInput"
-          placeholder="Search member..."
+          class="search-input"
+          placeholder="🔍 Search member..."
         >
+
         <!-- EXPORT -->
         <button
           class="primary-btn"
           id="exportBtn"
         >
+
+          <i class="fa fa-download"></i>
+
           Export CSV
+
         </button>
+
       </div>
+
     </div>
+
+    <!-- TABLE -->
     <div class="table-wrapper">
+
       <table class="data-table">
+
         <thead>
+
           <tr>
-            <th>Full Name</th>
-            <th>Gender</th>
-            <th>NID</th>
-            <th>Phone</th>
-            <th>Address</th>
-            <th>Status</th>
-            <th>Created By</th>
-            <th>Created Date</th>
-            <th>Actions</th>
+
+            <th>
+              Full Name
+            </th>
+
+            <th>
+              Gender
+            </th>
+
+            <th>
+              NID
+            </th>
+
+            <th>
+              Phone
+            </th>
+
+            <th>
+              Address
+            </th>
+
+            <th>
+              Status
+            </th>
+
+            <th>
+              Created By
+            </th>
+
+            <th>
+              Created Date
+            </th>
+
+            <th>
+              Actions
+            </th>
+
           </tr>
+
         </thead>
+
         <tbody id="membersTable"></tbody>
+
       </table>
+
     </div>
+
   </section>
+
 </main>
 
 <!-- =========================================================
@@ -402,6 +548,7 @@
 
   <div class="modal-box">
 
+    <!-- HEADER -->
     <div class="modal-header">
 
       <h2 id="profileName">
@@ -417,45 +564,66 @@
 
     </div>
 
+    <!-- PROFILE GRID -->
     <div class="profile-grid">
-      
+
       <div class="profile-item">
 
-        <strong>NID:</strong>
+        <strong>
+          NID:
+        </strong>
 
-        <span id="profileNid"></span>
-
-      </div>
-      
-      <div class="profile-item">
-
-        <strong>Phone:</strong>
-
-        <span id="profilePhone"></span>
+        <span id="profileNid">
+          -
+        </span>
 
       </div>
 
       <div class="profile-item">
 
-        <strong>Gender:</strong>
+        <strong>
+          Phone:
+        </strong>
 
-        <span id="profileGender"></span>
-
-      </div>
-
-      <div class="profile-item">
-
-        <strong>Address:</strong>
-
-        <span id="profileAddress"></span>
+        <span id="profilePhone">
+          -
+        </span>
 
       </div>
 
       <div class="profile-item">
 
-        <strong>Status:</strong>
+        <strong>
+          Gender:
+        </strong>
 
-        <span id="profileStatus"></span>
+        <span id="profileGender">
+          -
+        </span>
+
+      </div>
+
+      <div class="profile-item">
+
+        <strong>
+          Address:
+        </strong>
+
+        <span id="profileAddress">
+          -
+        </span>
+
+      </div>
+
+      <div class="profile-item">
+
+        <strong>
+          Status:
+        </strong>
+
+        <span id="profileStatus">
+          Active
+        </span>
 
       </div>
 
@@ -469,11 +637,17 @@
      SCRIPTS
 ========================================================= -->
 
-  <script src="js/layout.js"></script>
+<!-- LAYOUT -->
+<script src="js/layout.js"></script>
 
-  <script src="js/i18n.js"></script>
+<!-- I18N -->
+<script src="js/i18n.js"></script>
 
-  <script type="module"src="js/members.js"></script>
+<!-- MEMBERS -->
+<script
+  type="module"
+  src="js/members.js"
+></script>
 
 </body>
 </html>

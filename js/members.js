@@ -1,4 +1,3 @@
-```javascript
 import { db, auth } from "./firebase.js";
 
 import {
@@ -15,11 +14,14 @@ import {
   serverTimestamp,
   orderBy,
   limit,
-  startAfter
+  startAfter,
+  updateDoc,
+  deleteDoc,
+  doc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 /* =========================================================
-   LANGUAGE
+   INIT LANGUAGE
 ========================================================= */
 
 initLanguage();
@@ -43,8 +45,6 @@ const openModalBtn =
 const closeModalBtn =
   document.getElementById("closeModalBtn");
 
-/* PROFILE */
-
 const profileModal =
   document.getElementById("profileModal");
 
@@ -54,13 +54,11 @@ const closeProfileBtn =
 const historyTable =
   document.getElementById("historyTable");
 
-/* SEARCH */
-
 const searchInput =
   document.getElementById("searchInput");
 
 /* =========================================================
-   GLOBALS
+   GLOBAL STATE
 ========================================================= */
 
 let members = [];
@@ -69,63 +67,29 @@ let lastVisible = null;
 
 let isLoadingMembers = false;
 
-/* TRANSACTIONS */
-
-let transactionPageSize = 20;
-
-let lastTransactionDoc = null;
-
-let currentMemberId = null;
-
-let loadingTransactions = false;
-
-let hasMoreTransactions = true;
+let editingMemberId = null;
 
 /* =========================================================
-   MODAL OPEN
+   MODAL OPEN/CLOSE
 ========================================================= */
 
-if (openModalBtn) {
+openModalBtn?.addEventListener("click", () => {
 
-  openModalBtn.addEventListener("click", () => {
+  modal.style.display = "flex";
 
-    modal.style.display = "flex";
+});
 
-  });
+closeModalBtn?.addEventListener("click", () => {
 
-}
+  modal.style.display = "none";
 
-/* =========================================================
-   MODAL CLOSE
-========================================================= */
+});
 
-if (closeModalBtn) {
+closeProfileBtn?.addEventListener("click", () => {
 
-  closeModalBtn.addEventListener("click", () => {
+  profileModal.style.display = "none";
 
-    modal.style.display = "none";
-
-  });
-
-}
-
-/* =========================================================
-   PROFILE CLOSE
-========================================================= */
-
-if (closeProfileBtn) {
-
-  closeProfileBtn.addEventListener("click", () => {
-
-    profileModal.style.display = "none";
-
-  });
-
-}
-
-/* =========================================================
-   OUTSIDE CLICK
-========================================================= */
+});
 
 window.addEventListener("click", (e) => {
 
@@ -163,7 +127,7 @@ function validateNID(nid) {
    DUPLICATE CHECK
 ========================================================= */
 
-async function checkDuplicate(phone, nid) {
+async function checkDuplicate(phone, nid, excludeId = null) {
 
   const phoneQ = query(
     collection(db, "members"),
@@ -175,17 +139,40 @@ async function checkDuplicate(phone, nid) {
     where("nid", "==", nid)
   );
 
-  const [phoneSnap, nidSnap] = await Promise.all([
-    getDocs(phoneQ),
-    getDocs(nidQ)
-  ]);
+  const [phoneSnap, nidSnap] =
+    await Promise.all([
+      getDocs(phoneQ),
+      getDocs(nidQ)
+    ]);
 
-  return !phoneSnap.empty || !nidSnap.empty;
+  let duplicate = false;
+
+  phoneSnap.forEach(docSnap => {
+
+    if (docSnap.id !== excludeId) {
+
+      duplicate = true;
+
+    }
+
+  });
+
+  nidSnap.forEach(docSnap => {
+
+    if (docSnap.id !== excludeId) {
+
+      duplicate = true;
+
+    }
+
+  });
+
+  return duplicate;
 
 }
 
 /* =========================================================
-   ADD MEMBER
+   ADD / UPDATE MEMBER
 ========================================================= */
 
 memberForm?.addEventListener("submit", async (e) => {
@@ -209,12 +196,12 @@ memberForm?.addEventListener("submit", async (e) => {
       document.getElementById("nid")
       .value.trim();
 
-    /* PHONE */
+    /* PHONE VALIDATION */
 
     if (!validatePhone(phone)) {
 
       alert(
-        translations[lang].phoneError ||
+        translations[lang]?.phoneError ||
         "Phone must be exactly 9 digits"
       );
 
@@ -222,12 +209,12 @@ memberForm?.addEventListener("submit", async (e) => {
 
     }
 
-    /* NID */
+    /* NID VALIDATION */
 
     if (!validateNID(nid)) {
 
       alert(
-        translations[lang].nidError ||
+        translations[lang]?.nidError ||
         "NID must be exactly 16 digits"
       );
 
@@ -235,46 +222,63 @@ memberForm?.addEventListener("submit", async (e) => {
 
     }
 
-    /* DUPLICATE */
+    /* DUPLICATE CHECK */
 
-    const isDuplicate =
-      await checkDuplicate(phone, nid);
+    const duplicate =
+      await checkDuplicate(
+        phone,
+        nid,
+        editingMemberId
+      );
 
-    if (isDuplicate) {
+    if (duplicate) {
 
       alert(
-        translations[lang].duplicateError ||
-        "Duplicate Phone or NID"
+        translations[lang]?.duplicateError ||
+        "Duplicate Phone or NID detected"
       );
 
       return;
 
     }
 
-    /* SAVE */
+    /* UPDATE */
 
-    await addDoc(
-      collection(db, "members"),
-      {
+    if (editingMemberId) {
 
-        name,
-        phone,
-        nid,
+      await updateDoc(
+        doc(db, "members", editingMemberId),
+        {
+          name,
+          phone,
+          nid
+        }
+      );
 
-        status:
-          translations[lang].active ||
-          "Active",
+      editingMemberId = null;
 
-        createdAt:
-          serverTimestamp(),
+    }
 
-        createdBy:
-          localStorage.getItem("name") ||
-          auth.currentUser?.displayName ||
-          "Admin"
+    /* ADD */
 
-      }
-    );
+    else {
+
+      await addDoc(
+        collection(db, "members"),
+        {
+          name,
+          phone,
+          nid,
+          status: "Active",
+          createdAt: serverTimestamp(),
+          createdBy:
+            localStorage.getItem("name") ||
+            auth.currentUser?.displayName ||
+            "Admin"
+        }
+      );
+
+    }
 
     memberForm.reset();
 
@@ -282,7 +286,9 @@ memberForm?.addEventListener("submit", async (e) => {
 
     loadMembers(true);
 
-  } catch (err) {
+  }
+
+  catch (err) {
 
     console.error(err);
 
@@ -344,9 +350,6 @@ async function loadMembers(reset = false) {
     lastVisible =
       snap.docs[snap.docs.length - 1];
 
-    const fragment =
-      document.createDocumentFragment();
-
     for (const docSnap of snap.docs) {
 
       const m = docSnap.data();
@@ -355,60 +358,63 @@ async function loadMembers(reset = false) {
 
       /* SAVINGS */
 
-      const sSnap = await getDocs(
-        query(
-          collection(db, "savings"),
-          where("memberId", "==", id)
-        )
-      );
+      const savingsSnap =
+        await getDocs(
+          query(
+            collection(db, "savings"),
+            where("memberId", "==", id)
+          )
+        );
 
       let totalSavings = 0;
 
-      sSnap.forEach(d => {
+      savingsSnap.forEach(d => {
 
-        totalSavings += Number(
-          d.data().amount || 0
-        );
+        totalSavings +=
+          Number(d.data().amount || 0);
 
       });
 
       /* LOANS */
 
-      const lSnap = await getDocs(
-        query(
-          collection(db, "loans"),
-          where("memberId", "==", id)
-        )
-      );
+      const loansSnap =
+        await getDocs(
+          query(
+            collection(db, "loans"),
+            where("memberId", "==", id)
+          )
+        );
 
       let totalLoans = 0;
 
-      lSnap.forEach(d => {
+      loansSnap.forEach(d => {
 
-        totalLoans += Number(
-          d.data().total || 0
-        );
+        totalLoans +=
+          Number(d.data().total || 0);
 
       });
 
       /* REPAYMENTS */
 
-      const rSnap = await getDocs(
-        query(
-          collection(db, "repayments"),
-          where("memberId", "==", id)
-        )
-      );
+      const repaymentsSnap =
+        await getDocs(
+          query(
+            collection(db, "repayments"),
+            where("memberId", "==", id)
+          )
+        );
 
       let totalRepayments = 0;
 
-      rSnap.forEach(d => {
+      repaymentsSnap.forEach(d => {
 
-        totalRepayments += Number(
-          d.data().amount || 0
-        );
+        totalRepayments +=
+          Number(d.data().amount || 0);
 
       });
+
+      const remainingLoan =
+        totalLoans - totalRepayments;
 
       const member = {
 
@@ -420,48 +426,59 @@ async function loadMembers(reset = false) {
 
         totalLoans,
 
-        remainingLoan:
-          totalLoans - totalRepayments
+        remainingLoan
 
       };
 
       members.push(member);
 
-      const row =
+      const tr =
         document.createElement("tr");
 
-      row.style.cursor = "pointer";
+      tr.innerHTML = `
+        <td>
+          <strong>${member.name}</strong>
+        </td>
 
-      row.innerHTML = `
-        <td><strong>${member.name}</strong></td>
         <td>${member.phone}</td>
+
         <td>${member.nid}</td>
+
         <td>${member.totalSavings}</td>
+
         <td>${member.totalLoans}</td>
+
         <td>${member.remainingLoan}</td>
+
         <td>${member.status}</td>
+
         <td>
           ${
             member.createdAt?.toDate?.()
             ?.toLocaleString() || "-"
           }
         </td>
-        <td>${member.createdBy || "-"}</td>
+
+        <td>
+          ${member.createdBy || "-"}
+        </td>
       `;
 
-      row.onclick = () => {
+      tr.style.cursor = "pointer";
+
+      tr.addEventListener("click", () => {
 
         openProfile(member.id);
 
-      };
+      });
 
-      fragment.appendChild(row);
+      membersTable.appendChild(tr);
 
     }
 
-    membersTable.appendChild(fragment);
+  }
 
-  } catch (err) {
+  catch (err) {
 
     console.error(err);
 
@@ -472,179 +489,189 @@ async function loadMembers(reset = false) {
 }
 
 /* =========================================================
-   PROFILE
+   SEARCH MEMBERS
 ========================================================= */
 
-function openProfile(memberId) {
+searchInput?.addEventListener("input", () => {
 
-  currentMemberId = memberId;
+  const value =
+    searchInput.value.toLowerCase();
+
+  const rows =
+    membersTable.querySelectorAll("tr");
+
+  rows.forEach(row => {
+
+    if (
+      row.innerText
+      .toLowerCase()
+      .includes(value)
+    ) {
+
+      row.style.display = "";
+
+    }
+
+    else {
+
+      row.style.display = "none";
+
+    }
+
+  });
+
+});
+
+/* =========================================================
+   OPEN PROFILE
+========================================================= */
+
+async function openProfile(memberId) {
 
   const member =
-    members.find(
-      m => m.id === memberId
-    );
+    members.find(m => m.id === memberId);
 
   if (!member) return;
 
   profileModal.style.display = "flex";
 
-  document.getElementById(
-    "profileTitle"
-  ).innerText = member.name;
+  document.getElementById("profileTitle")
+  .innerText =
+    member.name;
 
-  document.getElementById(
-    "profilePhone"
-  ).innerText = member.phone;
+  document.getElementById("profilePhone")
+  .innerText =
+    member.phone;
 
-  document.getElementById(
-    "profileNid"
-  ).innerText = member.nid;
+  document.getElementById("profileNid")
+  .innerText =
+    member.nid;
 
-  document.getElementById(
-    "profileSavings"
-  ).innerText = member.totalSavings;
+  document.getElementById("profileSavings")
+  .innerText =
+    member.totalSavings;
 
-  document.getElementById(
-    "profileLoans"
-  ).innerText = member.totalLoans;
+  document.getElementById("profileLoans")
+  .innerText =
+    member.totalLoans;
 
-  document.getElementById(
-    "profileRemaining"
-  ).innerText =
+  document.getElementById("profileRemaining")
+  .innerText =
     member.remainingLoan;
 
-  document.getElementById(
-    "profileInitial"
-  ).innerText =
+  document.getElementById("profileInitial")
+  .innerText =
     member.name.charAt(0).toUpperCase();
+
+  document.getElementById("profileStatus")
+  .innerText =
+    member.status;
 
   historyTable.innerHTML = "";
 
-  lastTransactionDoc = null;
+  /* LOAD TRANSACTIONS */
 
-  hasMoreTransactions = true;
+  const txQ = query(
+    collection(db, "transactions"),
+    where("memberId", "==", memberId),
+    orderBy("createdAt", "desc")
+  );
 
-  loadTransactions();
+  const txSnap = await getDocs(txQ);
+
+  txSnap.forEach(docSnap => {
+
+    const tx = docSnap.data();
+
+    historyTable.innerHTML += `
+      <tr>
+
+        <td>${tx.type || "-"}</td>
+
+        <td>${tx.amount || 0}</td>
+
+        <td>${tx.previous || 0}</td>
+
+        <td>${tx.total || 0}</td>
+
+        <td>${tx.status || "-"}</td>
+
+        <td>
+          ${
+            tx.createdAt?.toDate?.()
+            ?.toLocaleString() || "-"
+          }
+        </td>
+
+        <td>${tx.createdBy || "-"}</td>
+
+      </tr>
+    `;
+
+  });
 
 }
 
 /* =========================================================
-   LOAD TRANSACTIONS
+   EDIT MEMBER
 ========================================================= */
 
-async function loadTransactions() {
+window.editMember = (id) => {
 
-  if (
-    loadingTransactions ||
-    !hasMoreTransactions
-  ) return;
+  const member =
+    members.find(m => m.id === id);
 
-  loadingTransactions = true;
+  if (!member) return;
+
+  editingMemberId = id;
+
+  document.getElementById("name")
+  .value =
+    member.name;
+
+  document.getElementById("phone")
+  .value =
+    member.phone;
+
+  document.getElementById("nid")
+  .value =
+    member.nid;
+
+  modal.style.display = "flex";
+
+};
+
+/* =========================================================
+   DELETE MEMBER
+========================================================= */
+
+window.deleteMember = async (id) => {
+
+  const confirmDelete =
+    confirm("Delete member?");
+
+  if (!confirmDelete) return;
 
   try {
 
-    let q = query(
-      collection(db, "transactions"),
-      where("memberId", "==", currentMemberId),
-      orderBy("createdAt", "desc"),
-      limit(transactionPageSize)
+    await deleteDoc(
+      doc(db, "members", id)
     );
 
-    if (lastTransactionDoc) {
+    loadMembers(true);
 
-      q = query(
-        collection(db, "transactions"),
-        where("memberId", "==", currentMemberId),
-        orderBy("createdAt", "desc"),
-        startAfter(lastTransactionDoc),
-        limit(transactionPageSize)
-      );
+  }
 
-    }
-
-    const snap = await getDocs(q);
-
-    if (snap.empty) {
-
-      hasMoreTransactions = false;
-
-      loadingTransactions = false;
-
-      return;
-
-    }
-
-    lastTransactionDoc =
-      snap.docs[snap.docs.length - 1];
-
-    snap.forEach(doc => {
-
-      const tx = doc.data();
-
-      historyTable.insertAdjacentHTML(
-        "beforeend",
-        `
-          <tr>
-            <td>${tx.type}</td>
-            <td>${tx.amount}</td>
-            <td>${tx.previous}</td>
-            <td>${tx.total}</td>
-            <td>${tx.status}</td>
-            <td>
-              ${
-                tx.createdAt?.toDate?.()
-                ?.toLocaleString() || "-"
-              }
-            </td>
-            <td>${tx.createdBy}</td>
-          </tr>
-        `
-      );
-
-    });
-
-  } catch (err) {
+  catch (err) {
 
     console.error(err);
 
   }
 
-  loadingTransactions = false;
-
-}
-
-/* =========================================================
-   SEARCH
-========================================================= */
-
-searchInput?.addEventListener(
-  "input",
-  () => {
-
-    const value =
-      searchInput.value
-      .toLowerCase();
-
-    const rows =
-      membersTable.querySelectorAll("tr");
-
-    rows.forEach(row => {
-
-      row.style.display =
-        row.innerText
-          .toLowerCase()
-          .includes(value)
-          ? ""
-          : "none";
-
-    });
-
-  }
-);
+};
 
 /* =========================================================
    INIT
 ========================================================= */
 
 loadMembers();
-```

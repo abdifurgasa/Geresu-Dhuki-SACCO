@@ -1,3 +1,4 @@
+```javascript
 import { db, auth } from "./firebase.js";
 
 import {
@@ -13,15 +14,11 @@ import {
   where,
   serverTimestamp,
   orderBy,
-  limit,
-  startAfter,
-  updateDoc,
-  deleteDoc,
-  doc
+  limit
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 /* =========================================================
-   INIT LANGUAGE
+   LANGUAGE
 ========================================================= */
 
 initLanguage();
@@ -58,19 +55,13 @@ const searchInput =
   document.getElementById("searchInput");
 
 /* =========================================================
-   GLOBAL STATE
+   GLOBAL
 ========================================================= */
 
 let members = [];
 
-let lastVisible = null;
-
-let isLoadingMembers = false;
-
-let editingMemberId = null;
-
 /* =========================================================
-   MODAL OPEN/CLOSE
+   OPEN MODAL
 ========================================================= */
 
 openModalBtn?.addEventListener("click", () => {
@@ -79,17 +70,29 @@ openModalBtn?.addEventListener("click", () => {
 
 });
 
+/* =========================================================
+   CLOSE MODAL
+========================================================= */
+
 closeModalBtn?.addEventListener("click", () => {
 
   modal.style.display = "none";
 
 });
 
+/* =========================================================
+   CLOSE PROFILE
+========================================================= */
+
 closeProfileBtn?.addEventListener("click", () => {
 
   profileModal.style.display = "none";
 
 });
+
+/* =========================================================
+   CLOSE OUTSIDE
+========================================================= */
 
 window.addEventListener("click", (e) => {
 
@@ -127,52 +130,33 @@ function validateNID(nid) {
    DUPLICATE CHECK
 ========================================================= */
 
-async function checkDuplicate(phone, nid, excludeId = null) {
+async function checkDuplicate(phone, nid) {
 
-  const phoneQ = query(
+  const phoneQuery = query(
     collection(db, "members"),
     where("phone", "==", phone)
   );
 
-  const nidQ = query(
+  const nidQuery = query(
     collection(db, "members"),
     where("nid", "==", nid)
   );
 
   const [phoneSnap, nidSnap] =
     await Promise.all([
-      getDocs(phoneQ),
-      getDocs(nidQ)
+      getDocs(phoneQuery),
+      getDocs(nidQuery)
     ]);
 
-  let duplicate = false;
-
-  phoneSnap.forEach(docSnap => {
-
-    if (docSnap.id !== excludeId) {
-
-      duplicate = true;
-
-    }
-
-  });
-
-  nidSnap.forEach(docSnap => {
-
-    if (docSnap.id !== excludeId) {
-
-      duplicate = true;
-
-    }
-
-  });
-
-  return duplicate;
+  return (
+    !phoneSnap.empty ||
+    !nidSnap.empty
+  );
 
 }
 
 /* =========================================================
-   ADD / UPDATE MEMBER
+   ADD MEMBER
 ========================================================= */
 
 memberForm?.addEventListener("submit", async (e) => {
@@ -186,17 +170,20 @@ memberForm?.addEventListener("submit", async (e) => {
 
     const name =
       document.getElementById("name")
-      .value.trim();
+      .value
+      .trim();
 
     const phone =
       document.getElementById("phone")
-      .value.trim();
+      .value
+      .trim();
 
     const nid =
       document.getElementById("nid")
-      .value.trim();
+      .value
+      .trim();
 
-    /* PHONE VALIDATION */
+    /* PHONE */
 
     if (!validatePhone(phone)) {
 
@@ -209,7 +196,7 @@ memberForm?.addEventListener("submit", async (e) => {
 
     }
 
-    /* NID VALIDATION */
+    /* NID */
 
     if (!validateNID(nid)) {
 
@@ -222,63 +209,41 @@ memberForm?.addEventListener("submit", async (e) => {
 
     }
 
-    /* DUPLICATE CHECK */
+    /* DUPLICATE */
 
     const duplicate =
-      await checkDuplicate(
-        phone,
-        nid,
-        editingMemberId
-      );
+      await checkDuplicate(phone, nid);
 
     if (duplicate) {
 
       alert(
         translations[lang]?.duplicateError ||
-        "Duplicate Phone or NID detected"
+        "Duplicate phone or NID"
       );
 
       return;
 
     }
 
-    /* UPDATE */
+    /* SAVE */
 
-    if (editingMemberId) {
+    await addDoc(
+      collection(db, "members"),
+      {
+        name,
+        phone,
+        nid,
+        status: "Active",
 
-      await updateDoc(
-        doc(db, "members", editingMemberId),
-        {
-          name,
-          phone,
-          nid
-        }
-      );
+        createdAt:
+          serverTimestamp(),
 
-      editingMemberId = null;
-
-    }
-
-    /* ADD */
-
-    else {
-
-      await addDoc(
-        collection(db, "members"),
-        {
-          name,
-          phone,
-          nid,
-          status: "Active",
-          createdAt: serverTimestamp(),
-          createdBy:
-            localStorage.getItem("name") ||
-            auth.currentUser?.displayName ||
-            "Admin"
-        }
-      );
-
-    }
+        createdBy:
+          localStorage.getItem("name") ||
+          auth.currentUser?.displayName ||
+          "Admin"
+      }
+    );
 
     memberForm.reset();
 
@@ -304,57 +269,36 @@ memberForm?.addEventListener("submit", async (e) => {
 
 async function loadMembers(reset = false) {
 
-  if (isLoadingMembers) return;
-
-  isLoadingMembers = true;
-
   try {
 
     if (reset) {
 
       members = [];
 
-      lastVisible = null;
-
       membersTable.innerHTML = "";
 
     }
 
-    let q = query(
+    const q = query(
       collection(db, "members"),
       orderBy("createdAt", "desc"),
-      limit(20)
+      limit(100)
     );
 
-    if (lastVisible) {
+    const snap =
+      await getDocs(q);
 
-      q = query(
-        collection(db, "members"),
-        orderBy("createdAt", "desc"),
-        startAfter(lastVisible),
-        limit(20)
-      );
+    membersTable.innerHTML = "";
 
-    }
-
-    const snap = await getDocs(q);
-
-    if (snap.empty) {
-
-      isLoadingMembers = false;
-
-      return;
-
-    }
-
-    lastVisible =
-      snap.docs[snap.docs.length - 1];
+    members = [];
 
     for (const docSnap of snap.docs) {
 
-      const m = docSnap.data();
+      const m =
+        docSnap.data();
 
-      const id = docSnap.id;
+      const id =
+        docSnap.id;
 
       /* SAVINGS */
 
@@ -413,9 +357,6 @@ async function loadMembers(reset = false) {
 
       });
 
-      const remainingLoan =
-        totalLoans - totalRepayments;
-
       const member = {
 
         id,
@@ -426,7 +367,9 @@ async function loadMembers(reset = false) {
 
         totalLoans,
 
-        remainingLoan
+        remaining:
+          totalLoans -
+          totalRepayments
 
       };
 
@@ -448,7 +391,7 @@ async function loadMembers(reset = false) {
 
         <td>${member.totalLoans}</td>
 
-        <td>${member.remainingLoan}</td>
+        <td>${member.remaining}</td>
 
         <td>${member.status}</td>
 
@@ -468,7 +411,7 @@ async function loadMembers(reset = false) {
 
       tr.addEventListener("click", () => {
 
-        openProfile(member.id);
+        openProfile(member);
 
       });
 
@@ -484,54 +427,13 @@ async function loadMembers(reset = false) {
 
   }
 
-  isLoadingMembers = false;
-
 }
-
-/* =========================================================
-   SEARCH MEMBERS
-========================================================= */
-
-searchInput?.addEventListener("input", () => {
-
-  const value =
-    searchInput.value.toLowerCase();
-
-  const rows =
-    membersTable.querySelectorAll("tr");
-
-  rows.forEach(row => {
-
-    if (
-      row.innerText
-      .toLowerCase()
-      .includes(value)
-    ) {
-
-      row.style.display = "";
-
-    }
-
-    else {
-
-      row.style.display = "none";
-
-    }
-
-  });
-
-});
 
 /* =========================================================
    OPEN PROFILE
 ========================================================= */
 
-async function openProfile(memberId) {
-
-  const member =
-    members.find(m => m.id === memberId);
-
-  if (!member) return;
+async function openProfile(member) {
 
   profileModal.style.display = "flex";
 
@@ -557,11 +459,13 @@ async function openProfile(memberId) {
 
   document.getElementById("profileRemaining")
   .innerText =
-    member.remainingLoan;
+    member.remaining;
 
   document.getElementById("profileInitial")
   .innerText =
-    member.name.charAt(0).toUpperCase();
+    member.name
+    .charAt(0)
+    .toUpperCase();
 
   document.getElementById("profileStatus")
   .innerText =
@@ -569,19 +473,19 @@ async function openProfile(memberId) {
 
   historyTable.innerHTML = "";
 
-  /* LOAD TRANSACTIONS */
-
-  const txQ = query(
+  const txQuery = query(
     collection(db, "transactions"),
-    where("memberId", "==", memberId),
+    where("memberId", "==", member.id),
     orderBy("createdAt", "desc")
   );
 
-  const txSnap = await getDocs(txQ);
+  const txSnap =
+    await getDocs(txQuery);
 
-  txSnap.forEach(docSnap => {
+  txSnap.forEach(doc => {
 
-    const tx = docSnap.data();
+    const tx =
+      doc.data();
 
     historyTable.innerHTML += `
       <tr>
@@ -613,65 +517,43 @@ async function openProfile(memberId) {
 }
 
 /* =========================================================
-   EDIT MEMBER
+   SEARCH
 ========================================================= */
 
-window.editMember = (id) => {
+searchInput?.addEventListener("keyup", () => {
 
-  const member =
-    members.find(m => m.id === id);
+  const value =
+    searchInput.value
+    .toLowerCase();
 
-  if (!member) return;
+  const rows =
+    membersTable.querySelectorAll("tr");
 
-  editingMemberId = id;
+  rows.forEach(row => {
 
-  document.getElementById("name")
-  .value =
-    member.name;
+    if (
+      row.innerText
+      .toLowerCase()
+      .includes(value)
+    ) {
 
-  document.getElementById("phone")
-  .value =
-    member.phone;
+      row.style.display = "";
 
-  document.getElementById("nid")
-  .value =
-    member.nid;
+    }
 
-  modal.style.display = "flex";
+    else {
 
-};
+      row.style.display = "none";
 
-/* =========================================================
-   DELETE MEMBER
-========================================================= */
+    }
 
-window.deleteMember = async (id) => {
+  });
 
-  const confirmDelete =
-    confirm("Delete member?");
-
-  if (!confirmDelete) return;
-
-  try {
-
-    await deleteDoc(
-      doc(db, "members", id)
-    );
-
-    loadMembers(true);
-
-  }
-
-  catch (err) {
-
-    console.error(err);
-
-  }
-
-};
+});
 
 /* =========================================================
    INIT
 ========================================================= */
 
 loadMembers();
+```

@@ -289,45 +289,30 @@
   ========================================================= -->
 
   <section class="form-card">
-
     <h3 data-i18n="addMember">
       Add Member
     </h3>
-
     <form id="memberForm">
-
       <div class="grid-2">
-
         <!-- FULL NAME -->
-
         <input
           type="text"
           id="fullName"
           required
           placeholder="Full Name"
         >
-
       </div>
-
       <div class="grid-2">
-
         <!-- GENDER -->
-
         <select id="gender">
-
           <option value="Male">
             Male
           </option>
-
           <option value="Female">
             Female
           </option>
-
         </select>
-
-        
-        <!-- NID -->
-
+         <!-- NID -->
         <input
           type="text"
           id="memberId"
@@ -335,9 +320,7 @@
           required
           placeholder="National ID (16 Digits)"
           >
-
         <!-- PHONE -->
-
         <input
           type="text"
           id="phone"
@@ -345,106 +328,67 @@
           required
           placeholder="Phone Number (9 Digits)"
         >
-
       </div>
-
       <!-- ADDRESS -->
-
       <textarea
         id="address"
         placeholder="Address"
       ></textarea>
-
       <!-- BUTTON -->
-
       <button
         type="submit"
         class="primary-btn"
       >
         <i class="fa fa-plus"></i>
-
         <span data-i18n="addMember">
           Add Member
         </span>
       </button>
-
     </form>
-
   </section>
-
   <!-- =========================================================
        MEMBERS TABLE
   ========================================================= -->
-
   <section class="table-card">
-
     <div class="table-header">
-
       <h3 data-i18n="membersList">
         Members List
       </h3>
-
       <div class="table-actions">
-
         <!-- SEARCH -->
-
         <input
           type="text"
           id="searchInput"
           placeholder="Search member..."
         >
-
         <!-- EXPORT -->
-
         <button
           class="primary-btn"
           id="exportBtn"
         >
           Export CSV
         </button>
-
       </div>
-
     </div>
-
     <div class="table-wrapper">
-
       <table class="data-table">
-
         <thead>
-
           <tr>
-
             <th>Full Name</th>
-
             <th>Gender</th>
-            
             <th>NID</th>
-
             <th>Phone</th>
-
             <th>Address</th>
-
             <th>Status</th>
-
             <th>Created By</th>
-
             <th>Created Date</th>
-
             <th>Actions</th>
-
           </tr>
-
         </thead>
-
         <tbody id="membersTable"></tbody>
-
       </table>
-
     </div>
-
   </section>
-
 </main>
 
 <!-- =========================================================

@@ -337,52 +337,45 @@ tr:hover{
    MODALS
 ========================================================= */
 
-.modal,
-.profile-modal{
+/* =========================================================
+   MODAL
+========================================================= */
+
+.modal{
   position:fixed;
-  top:0;
-  left:0;
-  width:100%;
-  height:100%;
-  background:rgba(0,0,0,0.55);
+  inset:0;
+  background:rgba(0,0,0,0.45);
   display:none;
   justify-content:center;
   align-items:center;
   z-index:9999;
 }
 
-.modal-box,
-.profile-content{
-  width:95%;
-  max-width:750px;
-  background:#fff;
+.modal.active{
+  display:flex;
+}
+
+.modal-box{
+  width:100%;
+  max-width:500px;
+  background:white;
   border-radius:20px;
   padding:25px;
-  animation:popup 0.25s ease;
-  max-height:90vh;
-  overflow:auto;
+  animation:popup 0.2s ease;
 }
 
 @keyframes popup{
-
   from{
     transform:scale(0.9);
     opacity:0;
   }
-
   to{
     transform:scale(1);
     opacity:1;
   }
-
 }
 
-/* =========================================================
-   MODAL HEADER
-========================================================= */
-
-.modal-header,
-.profile-header{
+.modal-header{
   display:flex;
   justify-content:space-between;
   align-items:center;
@@ -393,16 +386,12 @@ tr:hover{
   border:none;
   background:#e74c3c;
   color:white;
-  width:40px;
-  height:40px;
-  border-radius:10px;
+  width:35px;
+  height:35px;
+  border-radius:50%;
   cursor:pointer;
-  font-size:18px;
+  font-size:16px;
 }
-
-/* =========================================================
-   FORM
-========================================================= */
 
 #memberForm{
   display:flex;
@@ -411,22 +400,43 @@ tr:hover{
 }
 
 #memberForm input{
-  width:100%;
   padding:14px;
   border:1px solid #ddd;
   border-radius:12px;
   font-size:15px;
+  outline:none;
+}
+
+#memberForm input:focus{
+  border-color:var(--primary);
 }
 
 .save-btn{
   border:none;
-  background:var(--primary);
-  color:white;
   padding:14px;
   border-radius:12px;
-  cursor:pointer;
+  background:var(--primary);
+  color:white;
+  font-size:16px;
   font-weight:700;
-  font-size:15px;
+  cursor:pointer;
+}
+
+/* =========================================================
+   ADD BUTTON
+========================================================= */
+
+.add-btn{
+  border:none;
+  padding:12px 18px;
+  border-radius:12px;
+  background:var(--primary);
+  color:white;
+  font-weight:700;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  gap:10px;
 }
 
 /* =========================================================

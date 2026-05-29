@@ -118,11 +118,11 @@ function renderMembers(data) {
     const tr = document.createElement("tr");
 
     tr.innerHTML = `
-      <td>${member.memberId || "-"}</td>
-
       <td>${member.fullName || "-"}</td>
-
+      
       <td>${member.gender || "-"}</td>
+     
+      <td>${member.memberId || "-"}</td>
 
       <td>${member.phone || "-"}</td>
 

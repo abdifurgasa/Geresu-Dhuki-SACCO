@@ -1,756 +1,318 @@
 import { db, auth } from "./firebase.js";
-
 import {
   collection,
   addDoc,
- 	getDocs,
+  getDocs,
   deleteDoc,
   updateDoc,
   doc,
   query,
-  where,
   orderBy,
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-/* =========================================================
-   ELEMENTS
-========================================================= */
-
-const savingForm =
-  document.getElementById("savingForm");
-
-const savingsTable =
-  document.getElementById("savingsTable");
-
-const totalSavings =
-  document.getElementById("totalSavings");
-
-const searchInput =
-  document.getElementById("searchInput");
-
-const exportBtn =
-  document.getElementById("exportBtn");
-
-const logoutBtn =
-  document.getElementById("logoutBtn");
-
-const profileModal =
-  document.getElementById("profileModal");
-
-const closeProfileBtn =
-  document.getElementById("closeProfileBtn");
-
-/* =========================================================
-   GLOBAL
-========================================================= */
-
-let savings = [];
+/* =========================
+STATE
+========================= */
 
 let members = [];
-
+let savings = [];
+let selectedMember = null;
 let editingId = null;
 
-let selectedMember = null;
+/* =========================
+ELEMENTS
+========================= */
 
-/* =========================================================
-   SIDEBAR TOGGLE
-========================================================= */
+const savingForm = document.getElementById("savingForm");
+const savingsTable = document.getElementById("savingsTable");
+const searchInput = document.getElementById("searchInput");
 
-window.toggleSidebar = function () {
-
-  const sidebar =
-    document.getElementById("sidebar");
-
-  sidebar.classList.toggle("collapsed");
-
-};
-
-/* =========================================================
-   LOGOUT
-========================================================= */
-
-if (logoutBtn) {
-
-  logoutBtn.addEventListener(
-    "click",
-    async (e) => {
-
-      e.preventDefault();
-
-      try {
-
-        await auth.signOut();
-
-        localStorage.clear();
-
-        window.location.href =
-          "index.html";
-
-      } catch (error) {
-
-        console.error(error);
-
-        alert(error.message);
-
-      }
-
-    }
-  );
-
-}
-
-/* =========================================================
-   LOAD MEMBERS
-========================================================= */
+/* =========================
+LOAD MEMBERS
+========================= */
 
 async function loadMembers() {
 
-  try {
+  const q = query(collection(db, "members"), orderBy("fullName"));
+  const snap = await getDocs(q);
 
-    const q = query(
-      collection(db, "members"),
-      orderBy("fullName")
-    );
+  members = [];
 
-    const snap =
-      await getDocs(q);
-
-    members = [];
-
-    snap.forEach((docSnap) => {
-
-      members.push({
-        id: docSnap.id,
-        ...docSnap.data()
-      });
-
-    });
-
-  } catch (error) {
-
-    console.error(error);
-
-  }
-
+  snap.forEach(d => {
+    members.push({ id: d.id, ...d.data() });
+  });
 }
 
-/* =========================================================
-   SEARCH MEMBER
-========================================================= */
+/* =========================
+SEARCH MEMBER
+========================= */
 
-window.searchMembers = function () {
+searchInput.addEventListener("input", () => {
 
-  const value =
-    searchInput.value
-      .toLowerCase()
-      .trim();
+  const value = searchInput.value.toLowerCase();
+  const box = document.getElementById("searchResults");
 
-  const resultBox =
-    document.getElementById(
-      "searchResults"
-    );
+  box.innerHTML = "";
 
-  resultBox.innerHTML = "";
+  if (!value) return;
 
-  if (!value) {
+  const filtered = members.filter(m =>
+    m.fullName?.toLowerCase().includes(value) ||
+    m.phone?.includes(value) ||
+    m.memberId?.includes(value)
+  );
 
-    resultBox.style.display =
-      "none";
+  filtered.forEach(m => {
 
-    return;
+    const div = document.createElement("div");
 
-  }
-
-  const filtered =
-    members.filter((member) => {
-
-      return (
-
-        member.fullName
-          ?.toLowerCase()
-          .includes(value)
-
-        ||
-
-        member.phone
-          ?.includes(value)
-
-        ||
-
-        member.memberId
-          ?.includes(value)
-
-      );
-
-    });
-
-  if (!filtered.length) {
-
-    resultBox.innerHTML = `
-      <div class="search-item">
-        No member found
-      </div>
-    `;
-
-    resultBox.style.display =
-      "block";
-
-    return;
-
-  }
-
-  filtered.forEach((member) => {
-
-    const div =
-      document.createElement("div");
-
-    div.className =
-      "search-item";
+    div.className = "search-item";
 
     div.innerHTML = `
-      <strong>
-        ${member.fullName}
-      </strong>
-      <br>
-      ${member.phone}
+      <strong>${m.fullName}</strong><br>
+      ${m.phone}
     `;
 
     div.onclick = () => {
 
-      selectedMember = member;
+      selectedMember = m;
 
-      document.getElementById(
-        "selectedMember"
-      ).innerHTML = `
-        👤 ${member.fullName}
-      `;
+      document.getElementById("selectedMember").innerHTML =
+        `👤 ${m.fullName}`;
 
-      searchInput.value =
-        member.fullName;
-
-      resultBox.style.display =
-        "none";
+      box.innerHTML = "";
+      searchInput.value = "";
 
     };
 
-    resultBox.appendChild(div);
+    box.appendChild(div);
 
   });
 
-  resultBox.style.display =
-    "block";
+});
 
-};
-
-/* =========================================================
-   LOAD SAVINGS
-========================================================= */
+/* =========================
+LOAD SAVINGS
+========================= */
 
 async function loadSavings() {
 
-  try {
+  const q = query(collection(db, "savings"), orderBy("createdAt", "desc"));
+  const snap = await getDocs(q);
 
-    savingsTable.innerHTML = `
-      <tr>
-        <td colspan="8">
-          Loading...
-        </td>
-      </tr>
-    `;
+  savings = [];
 
-    const q = query(
-      collection(db, "savings"),
-      orderBy("createdAt", "desc")
-    );
+  snap.forEach(d => {
+    savings.push({ id: d.id, ...d.data() });
+  });
 
-    const snap =
-      await getDocs(q);
-
-    savings = [];
-
-    if (snap.empty) {
-
-      savingsTable.innerHTML = `
-        <tr>
-          <td colspan="8">
-            No savings found
-          </td>
-        </tr>
-      `;
-
-      totalSavings.innerText = "0";
-
-      return;
-
-    }
-
-    snap.forEach((docSnap) => {
-
-      savings.push({
-        id: docSnap.id,
-        ...docSnap.data()
-      });
-
-    });
-
-    renderSavings(savings);
-
-  } catch (error) {
-
-    console.error(error);
-
-  }
-
+  render();
 }
 
-/* =========================================================
-   RENDER SAVINGS
-========================================================= */
+/* =========================
+RENDER TABLE (WITH EDIT/DELETE)
+========================= */
 
-function renderSavings(data) {
+function render() {
 
   savingsTable.innerHTML = "";
 
-  let total = 0;
+  savings.forEach((s) => {
 
-  data.forEach((saving) => {
+    const history = savings
+      .filter(x => x.memberId === s.memberId)
+      .sort((a, b) => (a.createdAt?.seconds || 0) - (b.createdAt?.seconds || 0));
 
-    total +=
-      Number(saving.amount || 0);
+    let previous = 0;
 
-    const tr =
-      document.createElement("tr");
+    for (let item of history) {
+      if (item.id === s.id) break;
+      previous += Number(item.amount || 0);
+    }
+
+    const total = previous + Number(s.amount || 0);
+
+    const tr = document.createElement("tr");
 
     tr.innerHTML = `
-      <td>
-        ${saving.memberName || "-"}
-      </td>
-
-      <td>
-        ${saving.phone || "-"}
-      </td>
-
-      <td>
-        ${saving.amount || 0}
-      </td>
-
-      <td>
-        ${saving.method || "-"}
-      </td>
-
-      <td>
-        <span class="status active">
-          ${saving.status || "Completed"}
-        </span>
-      </td>
-
-      <td>
-        ${saving.createdBy || "-"}
-      </td>
-
-      <td>
-        ${
-          saving.createdAt?.toDate
-            ? saving.createdAt
-                .toDate()
-                .toLocaleDateString()
-            : "-"
-        }
-      </td>
+      <td>${s.memberName}</td>
+      <td>${s.phone}</td>
+      <td>${s.amount}</td>
+      <td>${previous}</td>
+      <td>${total}</td>
+      <td>${s.createdAt?.toDate().toLocaleDateString() || "-"}</td>
 
       <td>
 
-        <button
-          class="edit-btn"
-          onclick="editSaving('${saving.id}')"
-        >
+        <button class="edit-btn" onclick="editSaving('${s.id}')">
           ✏️
         </button>
 
-        <button
-          class="delete-btn"
-          onclick="deleteSaving('${saving.id}')"
-        >
+        <button class="delete-btn" onclick="deleteSaving('${s.id}')">
           🗑️
         </button>
 
       </td>
     `;
 
-    tr.addEventListener(
-      "click",
-      (e) => {
-
-        if (
-          e.target.closest(".edit-btn")
-          ||
-          e.target.closest(".delete-btn")
-        ) {
-          return;
-        }
-
-        openProfile(saving);
-
-      }
-    );
+    tr.onclick = (e) => {
+      if (e.target.closest("button")) return;
+      openProfile(s.memberId);
+    };
 
     savingsTable.appendChild(tr);
 
   });
-
-  totalSavings.innerText =
-    total.toLocaleString();
-
 }
 
-/* =========================================================
-   ADD / UPDATE SAVING
-========================================================= */
+/* =========================
+ADD + UPDATE SAVING
+========================= */
 
-savingForm.addEventListener(
-  "submit",
-  async (e) => {
+savingForm.addEventListener("submit", async (e) => {
 
-    e.preventDefault();
+  e.preventDefault();
 
-    try {
+  if (!selectedMember) {
+    alert("Select member first");
+    return;
+  }
 
-      if (!selectedMember) {
+  const amount = Number(document.getElementById("amount").value);
 
-        alert(
-          "Please select member"
-        );
+  if (!amount || amount <= 0) {
+    alert("Invalid amount");
+    return;
+  }
 
-        return;
+  const payload = {
+    memberId: selectedMember.memberId,
+    memberName: selectedMember.fullName,
+    phone: selectedMember.phone,
+    amount,
+    createdBy: auth.currentUser?.displayName || "Admin"
+  };
 
-      }
+  try {
 
-      const amount =
-        document
-          .getElementById("amount")
-          .value
-          .trim();
+    if (editingId) {
 
-      const method =
-        document
-          .getElementById("method")
-          .value;
+      await updateDoc(doc(db, "savings", editingId), payload);
 
-      if (!amount || amount <= 0) {
+      alert("Updated successfully");
 
-        alert(
-          "Enter valid amount"
-        );
+      editingId = null;
 
-        return;
+      document.querySelector("#savingForm button").innerHTML =
+        "Save";
 
-      }
+    } else {
 
-      const payload = {
+      payload.createdAt = serverTimestamp();
 
-        memberId:
-          selectedMember.memberId,
+      await addDoc(collection(db, "savings"), payload);
 
-        memberName:
-          selectedMember.fullName,
-
-        phone:
-          selectedMember.phone,
-
-        amount:
-          Number(amount),
-
-        method,
-
-        status: "Completed",
-
-        createdBy:
-          localStorage.getItem("name")
-          ||
-          auth.currentUser?.displayName
-          ||
-          "Admin"
-
-      };
-
-      /* UPDATE */
-
-      if (editingId) {
-
-        await updateDoc(
-          doc(
-            db,
-            "savings",
-            editingId
-          ),
-          payload
-        );
-
-        alert(
-          "Saving updated"
-        );
-
-        editingId = null;
-
-        savingForm.querySelector(
-          "button"
-        ).innerHTML = `
-          <i class="fa fa-plus"></i>
-          Add Saving
-        `;
-
-      }
-
-      /* ADD */
-
-      else {
-
-        payload.createdAt =
-          serverTimestamp();
-
-        await addDoc(
-          collection(db, "savings"),
-          payload
-        );
-
-        alert(
-          "Saving added"
-        );
-
-      }
-
-      savingForm.reset();
-
-      selectedMember = null;
-
-      document.getElementById(
-        "selectedMember"
-      ).innerHTML =
-        "👤 Select Member";
-
-      loadSavings();
-
-    } catch (error) {
-
-      console.error(error);
-
-      alert(error.message);
+      alert("Added successfully");
 
     }
 
-  }
-);
+    savingForm.reset();
+    selectedMember = null;
 
-/* =========================================================
-   EDIT SAVING
-========================================================= */
+    document.getElementById("selectedMember").innerHTML =
+      "👤 Select member";
+
+    loadSavings();
+
+  } catch (err) {
+    alert(err.message);
+  }
+
+});
+
+/* =========================
+EDIT SAVING
+========================= */
 
 window.editSaving = function (id) {
 
-  const saving =
-    savings.find(
-      (s) => s.id === id
-    );
+  const saving = savings.find(s => s.id === id);
 
   if (!saving) return;
 
   editingId = id;
 
-  document.getElementById(
-    "amount"
-  ).value =
-    saving.amount || "";
-
-  document.getElementById(
-    "method"
-  ).value =
-    saving.method || "Cash";
+  document.getElementById("amount").value = saving.amount;
 
   selectedMember = {
-
-    memberId:
-      saving.memberId,
-
-    fullName:
-      saving.memberName,
-
-    phone:
-      saving.phone
-
+    memberId: saving.memberId,
+    fullName: saving.memberName,
+    phone: saving.phone
   };
 
-  document.getElementById(
-    "selectedMember"
-  ).innerHTML = `
-    👤 ${saving.memberName}
-  `;
+  document.getElementById("selectedMember").innerHTML =
+    `👤 ${saving.memberName}`;
 
-  savingForm.querySelector(
-    "button"
-  ).innerHTML = `
-    ✏️ Update Saving
-  `;
+  document.querySelector("#savingForm button").innerHTML =
+    "Update Saving";
 
-  window.scrollTo({
-    top: 0,
-    behavior: "smooth"
-  });
+  window.scrollTo({ top: 0, behavior: "smooth" });
 
 };
 
-/* =========================================================
-   DELETE SAVING
-========================================================= */
+/* =========================
+DELETE SAVING
+========================= */
 
-window.deleteSaving =
-  async function (id) {
+window.deleteSaving = async function (id) {
 
-    const confirmDelete =
-      confirm(
-        "Delete this saving?"
-      );
+  if (!confirm("Delete this saving?")) return;
 
-    if (!confirmDelete) return;
+  await deleteDoc(doc(db, "savings", id));
 
-    try {
+  loadSavings();
 
-      await deleteDoc(
-        doc(db, "savings", id)
-      );
+};
 
-      loadSavings();
+/* =========================
+PROFILE (FULL HISTORY)
+========================= */
 
-    } catch (error) {
+window.openProfile = function (memberId) {
 
-      console.error(error);
+  const list = savings.filter(s => s.memberId === memberId);
 
-      alert(error.message);
+  let total = 0;
 
-    }
+  document.getElementById("profileModal").classList.add("active");
 
-  };
+  document.getElementById("profileName").innerText =
+    list[0]?.memberName || "Profile";
 
-/* =========================================================
-   PROFILE MODAL
-========================================================= */
+  let html = "";
 
-function openProfile(saving) {
+  list.forEach(s => {
 
-  profileModal.classList.add(
-    "active"
-  );
+    total += Number(s.amount);
 
-  document.getElementById(
-    "profileName"
-  ).innerText =
-    saving.memberName || "-";
+    html += `
+      <tr>
+        <td>${s.createdAt?.toDate().toLocaleDateString()}</td>
+        <td>${s.amount}</td>
+        <td>${s.createdBy}</td>
+      </tr>
+    `;
+  });
 
-  document.getElementById(
-    "profilePhone"
-  ).innerText =
-    saving.phone || "-";
+  document.getElementById("savingHistory").innerHTML = html;
+  document.getElementById("profileTotalSaving").innerText = total;
 
-  document.getElementById(
-    "profileAmount"
-  ).innerText =
-    saving.amount || "0";
+};
 
-  document.getElementById(
-    "profileMethod"
-  ).innerText =
-    saving.method || "-";
-
-  document.getElementById(
-    "profileStatus"
-  ).innerText =
-    saving.status || "-";
-
-}
-
-/* CLOSE PROFILE */
-
-if (closeProfileBtn) {
-
-  closeProfileBtn.addEventListener(
-    "click",
-    () => {
-
-      profileModal.classList.remove(
-        "active"
-      );
-
-    }
-  );
-
-}
-
-window.addEventListener(
-  "click",
-  (e) => {
-
-    if (e.target === profileModal) {
-
-      profileModal.classList.remove(
-        "active"
-      );
-
-    }
-
-  }
-);
-
-/* =========================================================
-   EXPORT CSV
-========================================================= */
-
-if (exportBtn) {
-
-  exportBtn.addEventListener(
-    "click",
-    () => {
-
-      let csv =
-        "Member,Phone,Amount,Method,Status\n";
-
-      savings.forEach((saving) => {
-
-        csv +=
-`${saving.memberName},
-${saving.phone},
-${saving.amount},
-${saving.method},
-${saving.status}\n`;
-
-      });
-
-      const blob =
-        new Blob([csv], {
-          type: "text/csv"
-        });
-
-      const url =
-        URL.createObjectURL(blob);
-
-      const a =
-        document.createElement("a");
-
-      a.href = url;
-
-      a.download =
-        "savings.csv";
-
-      a.click();
-
-    }
-  );
-
-}
-
-/* =========================================================
-   LOAD
-========================================================= */
+/* =========================
+INIT
+========================= */
 
 loadMembers();
-
 loadSavings();

@@ -253,215 +253,108 @@
 <!-- =========================================================
      MAIN CONTENT
 ========================================================= -->
-
 <main class="main">
 
-  <!-- TOPBAR -->
-  <div class="topbar">
+<div class="topbar">
+<h2>💰 Savings Management</h2>
+</div>
 
-    <h2 data-i18n="savings_management">
-      💰 Savings Management
-    </h2>
+<!-- MEMBER SELECT -->
+<div class="form-card">
 
-    <!-- LANGUAGE -->
-    <select
-      id="languageSelect"
-      onchange="changeLanguage(this.value)"
-    >
+<h3>Select Member</h3>
 
-      <option value="en">
-        English
-      </option>
+<div class="search-container">
+<input id="searchInput" class="search-input"
+placeholder="Search member...">
 
-      <option value="am">
-        አማርኛ
-      </option>
+<div id="searchResults"></div>
+</div>
 
-      <option value="om">
-        Afaan Oromoo
-      </option>
-
-    </select>
-
-  </div>
-
-  <!-- =========================================================
-       MEMBER ACTION BAR
-  ========================================================= -->
-
-  <div class="member-action-bar">
-
-    <!-- SEARCH MEMBER -->
-    <div class="search-container">
-
-      <input
-        id="searchMember"
-        class="search-input"
-        data-i18n-placeholder="search_member"
-        placeholder="🔍 Search member"
-        autocomplete="off"
-      >
-
-      <!-- SEARCH RESULTS -->
-      <div
-        id="searchResults"
-        class="search-dropdown"
-      ></div>
-
-    </div>
-
-    <!-- SELECTED MEMBER -->
-    <div
-      id="selectedMember"
-      class="selected-box"
-    >
-
-      👤 Select a member
-
-    </div>
-
-    <!-- ADD SAVINGS BUTTON -->
-    <button
-      class="add-btn"
-      id="openModalBtn"
-    >
-
-      <i class="fa fa-plus"></i>
-
-      <span data-i18n="add_savings">
-        Add Savings
-      </span>
-
-    </button>
-
-  </div>
-
-  <!-- =========================================================
-       TABLE
-  ========================================================= -->
-
-  <div class="table-card">
-
-    <table class="table-modern">
-
-      <thead>
-
-        <tr>
-
-          <th data-i18n="name">
-            Name
-          </th>
-
-          <th data-i18n="phone">
-            Phone
-          </th>
-
-          <th data-i18n="depositAmount">
-            Deposit Amount
-          </th>
-
-          <th data-i18n="previousSaving">
-            Previous Saving
-          </th>
-
-          <th data-i18n="totalSavings">
-            Total Savings
-          </th>
-
-          <th data-i18n="createdDate">
-            Created Date
-          </th>
-
-          <th data-i18n="createdBy">
-            Created By
-          </th>
-          
-          <th data-i18n="action">
-            Action
-          </th>
-        </tr>
-
-      </thead>
-
-      <!-- TABLE BODY -->
-      <tbody id="savingsTable"></tbody>
-
-    </table>
-
-  </div>
-
-</main>
-
-<!-- =========================================================
-     MODAL
-========================================================= -->
-
-<div
-  class="modal"
-  id="savingsModal"
->
-
-  <div class="modal-box">
-
-    <!-- HEADER -->
-    <div class="modal-header">
-
-      <h2 data-i18n="add_savings">
-        Add Savings
-      </h2>
-
-      <button
-        class="modal-close-icon"
-        id="closeModalBtn"
-      >
-        ✖
-      </button>
-
-    </div>
-
-    <!-- FORM -->
-    <form id="savingsForm">
-
-      <input
-        type="number"
-        id="amount"
-        placeholder="Enter amount"
-        data-i18n-placeholder="enter_amount"
-        required
-      >
-
-      <button
-        type="submit"
-        class="save-btn"
-      >
-
-        <span data-i18n="save">
-          Save
-        </span>
-
-      </button>
-
-    </form>
-
-  </div>
+<div id="selectedMember" style="margin-top:10px;">
+👤 No member selected
+</div>
 
 </div>
 
-<!-- =========================================================
-     SCRIPTS
-========================================================= -->
+<!-- ADD SAVING -->
+<div class="form-card">
 
-<script
-  type="module"
-  src="js/layout.js"
-></script>
+<h3>Add Saving</h3>
 
-<script src="js/i18n.js"></script>
+<form id="savingForm">
 
-<script
-  type="module"
-  src="js/savings.js"
-></script>
+<input type="number" id="amount" placeholder="Amount" required>
 
+<button type="submit" class="primary-btn">
+<i class="fa fa-plus"></i> Save
+</button>
+
+</form>
+
+</div>
+
+<!-- TABLE -->
+<div class="table-card">
+
+<table class="data-table">
+
+<thead>
+<tr>
+<th>Name</th>
+<th>Phone</th>
+<th>Deposit</th>
+<th>Previous</th>
+<th>Total</th>
+<th>Date</th>
+<th>Action</th>
+</tr>
+</thead>
+
+<tbody id="savingsTable"></tbody>
+
+</table>
+
+</div>
+
+</main>
+
+<!-- PROFILE MODAL -->
+<div class="modal" id="profileModal">
+
+<div class="modal-box">
+
+<div class="modal-header">
+<h2 id="profileName">Profile</h2>
+<button id="closeProfileBtn">✖</button>
+</div>
+
+<div>
+<h3>Total:
+<span id="profileTotalSaving">0</span>
+</h3>
+
+<table class="data-table">
+
+<thead>
+<tr>
+<th>Date</th>
+<th>Amount</th>
+<th>By</th>
+</tr>
+</thead>
+
+<tbody id="savingHistory"></tbody>
+
+</table>
+
+</div>
+
+</div>
+
+</div>
+<script type="module" src="js/layout.js"></script>
+<script type="module" src="js/savings.js"></script>
+<script type="module" src="js/i18n.js"></script>
 </body>
 </html>

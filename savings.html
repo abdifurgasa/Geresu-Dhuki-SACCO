@@ -29,7 +29,70 @@
 </head>
 
 <body>
+<main
+  class="main"
+  id="main"
+>
 
+  <!-- =========================================================
+       TOPBAR
+  ========================================================= -->
+
+  <div class="topbar">
+
+    <h2 data-i18n="membersManagement">
+      SAVINGS MANAGEMENT
+    </h2>
+
+    <div class="topbar-actions">
+
+      <!-- LANGUAGE -->
+      <select
+        id="languageSelect"
+        onchange="changeLanguage(this.value)"
+      >
+
+        <option value="en">
+          English
+        </option>
+
+        <option value="am">
+          አማርኛ
+        </option>
+
+        <option value="om">
+          Afaan Oromoo
+        </option>
+
+      </select>
+
+      <!-- USER -->
+      <div
+        class="selected-box"
+        id="roleBox"
+      >
+        👤 Admin
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- =========================================================
+       PAGE HEADER
+  ========================================================= -->
+
+  <div class="page-header">
+
+    <h1 data-i18n="membersManagement">
+      Saving Management
+    </h1>
+
+    <p data-i18n="manageMembers">
+      Manage SACCO Savings
+    </p>
+
+  </div>
 <!-- =========================================================
      SIDEBAR
 ========================================================= -->

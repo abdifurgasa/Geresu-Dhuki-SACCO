@@ -541,14 +541,12 @@
      PROFILE MODAL
 ========================================================= -->
 
-<div
-  class="modal"
-  id="profileModal"
->
+<div class="modal" id="profileModal">
 
-  <div class="modal-box">
+  <div class="modal-box profile-modal-box">
 
     <!-- HEADER -->
+
     <div class="modal-header">
 
       <h2 id="profileName">
@@ -564,66 +562,112 @@
 
     </div>
 
-    <!-- PROFILE GRID -->
+    <!-- MEMBER INFO -->
+
     <div class="profile-grid">
 
       <div class="profile-item">
-
-        <strong>
-          NID:
-        </strong>
-
-        <span id="profileNid">
-          -
-        </span>
-
+        <strong>NID:</strong>
+        <span id="profileNid">-</span>
       </div>
 
       <div class="profile-item">
-
-        <strong>
-          Phone:
-        </strong>
-
-        <span id="profilePhone">
-          -
-        </span>
-
+        <strong>Phone:</strong>
+        <span id="profilePhone">-</span>
       </div>
 
       <div class="profile-item">
-
-        <strong>
-          Gender:
-        </strong>
-
-        <span id="profileGender">
-          -
-        </span>
-
+        <strong>Gender:</strong>
+        <span id="profileGender">-</span>
       </div>
 
       <div class="profile-item">
-
-        <strong>
-          Address:
-        </strong>
-
-        <span id="profileAddress">
-          -
-        </span>
-
+        <strong>Address:</strong>
+        <span id="profileAddress">-</span>
       </div>
 
       <div class="profile-item">
+        <strong>Status:</strong>
+        <span id="profileStatus">-</span>
+      </div>
 
-        <strong>
-          Status:
-        </strong>
+    </div>
 
-        <span id="profileStatus">
-          Active
-        </span>
+    <!-- SUMMARY CARDS -->
+
+    <div class="cards profile-cards">
+
+      <div class="card green">
+
+        <h3>Total Savings</h3>
+
+        <p id="profileSavings">
+          0
+        </p>
+
+      </div>
+
+      <div class="card blue">
+
+        <h3>Total Loans</h3>
+
+        <p id="profileLoans">
+          0
+        </p>
+
+      </div>
+
+      <div class="card red">
+
+        <h3>Remaining Loan</h3>
+
+        <p id="profileRemaining">
+          0
+        </p>
+
+      </div>
+
+    </div>
+
+    <!-- TRANSACTIONS -->
+
+    <div class="table-card profile-transactions">
+
+      <h3>
+        All Transactions
+      </h3>
+
+      <div class="table-wrapper">
+
+        <table class="data-table">
+
+          <thead>
+
+            <tr>
+
+              <th>Type</th>
+
+              <th>Amount</th>
+
+              <th>Previous</th>
+
+              <th>Total</th>
+
+              <th>Status</th>
+
+              <th>Date</th>
+
+              <th>Created By</th>
+
+            </tr>
+
+          </thead>
+
+          <tbody id="profileTransactions">
+
+          </tbody>
+
+        </table>
 
       </div>
 

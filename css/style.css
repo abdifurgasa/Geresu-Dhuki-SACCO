@@ -160,85 +160,60 @@ body{
    STATS CARDS
 ========================= */
 
-.cards,
+./* =========================
+   STATS CARDS - ONE ROW
+========================= */
+
 .stats{
     margin-top:20px;
     display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
-    gap:20px;
+    grid-template-columns:repeat(5, 1fr);
+    gap:15px;
 }
 
 .card{
     color:white;
-    padding:25px;
+    padding:18px;
     border-radius:20px;
     box-shadow:var(--shadow);
     transition:.3s;
     position:relative;
     overflow:hidden;
+    min-height:140px;
 }
 
 .card:hover{
-    transform:translateY(-6px);
-}
-
-.card::after{
-    content:"";
-    position:absolute;
-    width:120px;
-    height:120px;
-    border-radius:50%;
-    background:rgba(255,255,255,.15);
-    right:-40px;
-    top:-40px;
+    transform:translateY(-5px);
 }
 
 .card i{
-    font-size:32px;
-    margin-bottom:15px;
+    font-size:24px;
+    margin-bottom:10px;
 }
 
 .card h2{
-    margin:10px 0;
-    font-size:30px;
+    font-size:22px;
+    margin:8px 0;
 }
 
-/* Card Colors */
-
-.members{
-    background:linear-gradient(135deg,#2563eb,#60a5fa);
-}
-
-.savings{
-    background:linear-gradient(135deg,#16a34a,#4ade80);
-}
-
-.loans{
-    background:linear-gradient(135deg,#ea580c,#fb923c);
-}
-
-.withdrawals{
-    background:linear-gradient(135deg,#dc2626,#f87171);
-}
-
-.profit{
-    background:linear-gradient(135deg,#0891b2,#22d3ee);
+.card p{
+    font-size:13px;
 }
 
 /* =========================
-   QUICK ACTIONS
+   QUICK ACTIONS - ONE ROW
 ========================= */
 
 .actions{
     margin-top:20px;
     display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-    gap:20px;
+    grid-template-columns:repeat(4, 1fr);
+    gap:15px;
 }
 
 .action{
     background:white;
-    padding:25px;
+    padding:18px;
     border-radius:18px;
     text-align:center;
     box-shadow:var(--shadow);
@@ -251,9 +226,15 @@ body{
 }
 
 .action i{
+    font-size:24px;
     color:#17A8D4;
-    font-size:30px;
-    margin-bottom:12px;
+    margin-bottom:10px;
+}
+
+.action span{
+    display:block;
+    font-size:14px;
+    font-weight:600;
 }
 
 /* =========================
@@ -269,19 +250,39 @@ body{
 
 .chart-box{
     background:white;
-    padding:25px;
+    padding:20px;
     border-radius:18px;
     box-shadow:var(--shadow);
 }
 
-.chart-box h3{
-    margin-bottom:15px;
-    color:#374151;
-}
-
 /* =========================
-   RESPONSIVE
+   MOBILE RESPONSIVE
 ========================= */
+
+@media(max-width:1200px){
+
+    .stats{
+        display:flex;
+        overflow-x:auto;
+        gap:15px;
+        padding-bottom:10px;
+    }
+
+    .stats .card{
+        min-width:220px;
+    }
+
+    .actions{
+        display:flex;
+        overflow-x:auto;
+        gap:15px;
+        padding-bottom:10px;
+    }
+
+    .actions .action{
+        min-width:180px;
+    }
+}
 
 @media(max-width:900px){
 
@@ -289,22 +290,20 @@ body{
         width:80px;
     }
 
-    .main,
-    .main-content{
+    .main-content,
+    .main{
         margin-left:80px;
     }
 
-    .logo span,
-    .menu span,
-    .logout span{
-        display:none;
+    .logo div,
+    .menu li{
+        font-size:0;
     }
 
     .charts{
         grid-template-columns:1fr;
     }
 
-    .topbar,
     .header{
         flex-direction:column;
         gap:15px;

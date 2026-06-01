@@ -1,39 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>SACCO Banking Dashboard</title>
 
-<link rel="stylesheet" href="css/style.css"/>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>SACCO Premium Dashboard</title>
+
+<link rel="stylesheet" href="css/style.css">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
 </head>
 
 <body>
 
+<div class="app">
+
 <!-- ================= SIDEBAR ================= -->
 <aside class="sidebar" id="sidebar">
 
-  <div class="logo">
-    🏦 SACCO
-  </div>
+  <div class="logo">🏦 SACCO</div>
 
-  <nav class="nav">
-
-    <a class="nav-item active" href="#">
-      📊 Dashboard
-    </a>
-
-    <a class="nav-item" href="#">👥 Members</a>
-    <a class="nav-item" href="#">💰 Savings</a>
-    <a class="nav-item" href="#">🏦 Loans</a>
-    <a class="nav-item" href="#">💵 Repayments</a>
-
-    <a class="nav-item logout" onclick="logout()">
-      🚪 Logout
-    </a>
-
+  <nav>
+    <a class="nav-item active" href="#">📊 Dashboard</a>
+    <a class="nav-item" href="pages/members.html">👥 Members</a>
+    <a class="nav-item" href="pages/savings.html">💰 Savings</a>
+    <a class="nav-item" href="pages/loans.html">🏦 Loans</a>
+    <a class="nav-item danger" href="#" onclick="logout()">🚪 Logout</a>
   </nav>
+
+  <button class="collapse-btn" onclick="toggleSidebar()">☰</button>
 
 </aside>
 
@@ -43,12 +40,10 @@
   <!-- TOPBAR -->
   <div class="topbar">
 
-    <button onclick="toggleSidebar()" class="menu-btn">☰</button>
+    <h2>Financial Overview</h2>
 
-    <h2>Financial Dashboard</h2>
-
-    <div class="actions">
-      🔔 <span class="badge">3</span>
+    <div class="right">
+      <div class="badge">Live</div>
     </div>
 
   </div>
@@ -56,10 +51,25 @@
   <!-- CARDS -->
   <section class="cards">
 
-    <div class="card">Members <h3 id="members">0</h3></div>
-    <div class="card">Savings <h3 id="savings">0</h3></div>
-    <div class="card">Loans <h3 id="loans">0</h3></div>
-    <div class="card">Profit <h3 id="profit">0</h3></div>
+    <div class="card blue">
+      <h3>Members</h3>
+      <p id="members">0</p>
+    </div>
+
+    <div class="card green">
+      <h3>Savings</h3>
+      <p id="savings">0 ETB</p>
+    </div>
+
+    <div class="card orange">
+      <h3>Loans</h3>
+      <p id="loans">0 ETB</p>
+    </div>
+
+    <div class="card dark">
+      <h3>Profit</h3>
+      <p id="profit">0 ETB</p>
+    </div>
 
   </section>
 
@@ -70,8 +80,17 @@
 
 </main>
 
+</div>
+
+<!-- ================= SCRIPTS ================= -->
+<script type="module" src="js/auth-guard.js"></script>
 <script type="module" src="js/dashboard.js"></script>
-<script type="module" src="js/auth.js"></script>
+
+<script>
+function toggleSidebar(){
+  document.getElementById("sidebar").classList.toggle("collapsed");
+}
+</script>
 
 </body>
 </html>

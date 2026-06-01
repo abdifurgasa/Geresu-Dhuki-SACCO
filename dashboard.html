@@ -1,90 +1,186 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SACCO Dashboard</title>
 
-<title>SACCO Banking System</title>
+<link rel="stylesheet" href="style.css">
 
-<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700&display=swap" rel="stylesheet">
 </head>
-
 <body>
 
-<!-- TOP BAR -->
-<header class="topbar">
+<div class="dashboard">
 
-  <div class="brand">🏦 SACCO ERP</div>
+    <!-- Sidebar -->
+    <aside class="sidebar">
 
-  <div class="actions">
-    <button onclick="toggleSidebar()">☰</button>
-    <div id="roleBox">User</div>
-  </div>
+        <div class="logo">
+            <i class="fas fa-university"></i>
+            <div>
+                <h2>SACCO</h2>
+                <span>Banking System</span>
+            </div>
+        </div>
 
-</header>
+        <ul class="menu">
+            <li class="active"><i class="fas fa-chart-pie"></i> Dashboard</li>
+            <li><i class="fas fa-users"></i> Members</li>
+            <li><i class="fas fa-wallet"></i> Savings</li>
+            <li><i class="fas fa-landmark"></i> Loans</li>
+            <li><i class="fas fa-credit-card"></i> Repayments</li>
+            <li><i class="fas fa-money-bill-wave"></i> Withdrawals</li>
+            <li><i class="fas fa-file-alt"></i> Reports</li>
+            <li><i class="fas fa-user-cog"></i> Users</li>
+            <li><i class="fas fa-cog"></i> Settings</li>
+        </ul>
 
-<!-- LAYOUT -->
-<div class="layout">
+        <div class="logout">
+            <i class="fas fa-sign-out-alt"></i>
+            Logout
+        </div>
 
-  <!-- SIDEBAR -->
-  <aside class="sidebar" id="sidebar">
+    </aside>
 
-    <a class="nav active">Dashboard</a>
-    <a class="nav">Members</a>
-    <a class="nav">Savings</a>
-    <a class="nav">Loans</a>
-    <a class="nav">Transactions</a>
-    <a class="nav logout" id="logoutBtn">Logout</a>
+    <!-- Main -->
+    <main class="main-content">
 
-  </aside>
+        <!-- Header -->
+        <header class="header">
 
-  <!-- MAIN -->
-  <main class="main">
+            <div>
+                <h1>Financial Dashboard</h1>
+                <p>Overview of your SACCO performance</p>
+            </div>
 
-    <!-- CARDS -->
-    <section class="cards">
+            <div class="user-box">
+                <i class="fas fa-user-circle"></i>
+                <div>
+                    <strong>Admin</strong>
+                    <small>Administrator</small>
+                </div>
+            </div>
 
-      <div class="card">
-        <h3>Members</h3>
-        <p id="members">0</p>
-      </div>
+        </header>
 
-      <div class="card">
-        <h3>Savings</h3>
-        <p id="savings">0 ETB</p>
-      </div>
+        <!-- Welcome -->
+        <section class="welcome">
+            <h3>Dashboard Overview</h3>
+            <h2>Welcome to SACCO Banking System</h2>
+            <p>Here's what's happening with your SACCO today.</p>
+        </section>
 
-      <div class="card">
-        <h3>Loans</h3>
-        <p id="loans">0 ETB</p>
-      </div>
+        <!-- Stats -->
+        <section class="stats">
 
-      <div class="card profit">
-        <h3>Profit</h3>
-        <p id="profit">0 ETB</p>
-      </div>
+            <div class="card">
+                <i class="fas fa-users"></i>
+                <h2>1,248</h2>
+                <p>Total Members</p>
+            </div>
 
-    </section>
+            <div class="card">
+                <i class="fas fa-wallet"></i>
+                <h2>12.5M ETB</h2>
+                <p>Total Savings</p>
+            </div>
 
-    <!-- CHART -->
-    <section class="chartBox">
-      <canvas id="chart"></canvas>
-    </section>
+            <div class="card">
+                <i class="fas fa-landmark"></i>
+                <h2>8.7M ETB</h2>
+                <p>Total Loans</p>
+            </div>
 
-  </main>
+            <div class="card">
+                <i class="fas fa-money-bill-wave"></i>
+                <h2>2.3M ETB</h2>
+                <p>Withdrawals</p>
+            </div>
+
+        </section>
+
+        <!-- Quick Actions -->
+        <h2 class="title">Quick Actions</h2>
+
+        <section class="actions">
+
+            <div class="action">
+                <i class="fas fa-user-plus"></i>
+                <span>Add Member</span>
+            </div>
+
+            <div class="action">
+                <i class="fas fa-piggy-bank"></i>
+                <span>Savings</span>
+            </div>
+
+            <div class="action">
+                <i class="fas fa-landmark"></i>
+                <span>Loans</span>
+            </div>
+
+            <div class="action">
+                <i class="fas fa-money-bill-wave"></i>
+                <span>Withdrawals</span>
+            </div>
+
+        </section>
+
+        <!-- Charts -->
+        <section class="charts">
+
+            <div class="chart-box">
+                <h3>Performance Overview</h3>
+                <canvas id="lineChart"></canvas>
+            </div>
+
+            <div class="chart-box">
+                <h3>Loans vs Repayments</h3>
+                <canvas id="barChart"></canvas>
+            </div>
+
+        </section>
+
+    </main>
 
 </div>
 
-<script type="module" src="js/dashboard.js"></script>
-
 <script>
-function toggleSidebar(){
-  document.getElementById("sidebar").classList.toggle("hide");
-}
+
+new Chart(document.getElementById("lineChart"),{
+    type:"line",
+    data:{
+        labels:["Jan","Feb","Mar","Apr","May","Jun"],
+        datasets:[{
+            label:"Savings",
+            data:[100,150,180,220,260,300],
+            borderColor:"#17A8D4",
+            tension:0.4
+        }]
+    }
+});
+
+new Chart(document.getElementById("barChart"),{
+    type:"bar",
+    data:{
+        labels:["Jan","Feb","Mar","Apr","May","Jun"],
+        datasets:[
+        {
+            label:"Loans",
+            data:[100,130,180,210,260,300]
+        },
+        {
+            label:"Repayments",
+            data:[80,110,140,180,220,260]
+        }]
+    }
+});
+
 </script>
 
 </body>

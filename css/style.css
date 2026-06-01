@@ -98,74 +98,146 @@ body {
 .sidebar.collapsed .nav-item span {
   display: none;
 }
+/* =========================================================
+   PREMIUM FINTECH BACKGROUND (NEW BEAUTIFUL COLORS)
+========================================================= */
 
-/* ================= MAIN ================= */
-.main {
-  margin-left: 260px;
+body {
+  margin: 0;
+  font-family: Inter, sans-serif;
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+
+  background: radial-gradient(circle at 10% 10%, #4f46e5 0%, transparent 40%),
+              radial-gradient(circle at 90% 20%, #06b6d4 0%, transparent 40%),
+              radial-gradient(circle at 50% 90%, #a855f7 0%, transparent 45%),
+              #050816;
+  color: white;
+}
+
+/* =========================================================
+   SIDEBAR (GLASS PREMIUM)
+========================================================= */
+
+.sidebar {
+  width: 260px;
+  height: 100vh;
+
+  background: rgba(255,255,255,0.06);
+  backdrop-filter: blur(25px);
+
+  border-right: 1px solid rgba(255,255,255,0.08);
+
   padding: 20px;
-  width: 100%;
+}
+
+.sidebar h2 {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  padding: 12px;
+  margin: 8px 0;
+
+  border-radius: 14px;
+  cursor: pointer;
+
   transition: 0.3s;
 }
 
-.sidebar.collapsed ~ .main {
-  margin-left: 80px;
+.nav-item:hover {
+  background: rgba(255,255,255,0.1);
 }
 
-/* TOPBAR */
+/* =========================================================
+   MAIN AREA
+========================================================= */
+
+.main {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+/* =========================================================
+   TOPBAR
+========================================================= */
+
 .topbar {
   display: flex;
   justify-content: space-between;
-  padding: 15px;
-  background: var(--card);
-  backdrop-filter: blur(20px);
-  border-radius: 14px;
+  align-items: center;
+  margin-bottom: 20px;
 }
 
-/* NOTIFICATION */
-.notif {
-  position: relative;
-  font-size: 22px;
-}
+/* =========================================================
+   CARDS (PREMIUM GLASS)
+========================================================= */
 
-.notif span {
-  position: absolute;
-  top: -5px;
-  right: -10px;
-
-  background: red;
-  color: white;
-
-  font-size: 12px;
-  padding: 3px 6px;
-  border-radius: 50%;
-}
-
-/* CARDS */
 .cards {
-  margin-top: 20px;
   display: grid;
-  grid-template-columns: repeat(4,1fr);
-  gap: 15px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
 }
 
 .card {
-  padding: 18px;
-  border-radius: 16px;
-  background: var(--card);
-  backdrop-filter: blur(20px);
+  background: rgba(255,255,255,0.07);
+  backdrop-filter: blur(25px);
+
+  border: 1px solid rgba(255,255,255,0.08);
+
+  padding: 20px;
+  border-radius: 18px;
+
+  transition: 0.3s;
+
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
 }
 
-.card.blue { border-left: 4px solid #4facfe; }
-.card.green { border-left: 4px solid #43e97b; }
-.card.orange { border-left: 4px solid #fa709a; }
-.card.red { border-left: 4px solid #ff4b2b; }
+.card:hover {
+  transform: translateY(-6px);
+  background: rgba(255,255,255,0.12);
+  box-shadow: 0 20px 40px rgba(99,102,241,0.25);
+}
 
-/* GLASS CHART */
-.glass-box {
-  margin-top: 20px;
+/* =========================================================
+   CHART BOX
+========================================================= */
+
+.chart-box {
+  margin-top: 30px;
+
+  background: rgba(255,255,255,0.06);
+  backdrop-filter: blur(25px);
+
+  border-radius: 18px;
   padding: 20px;
-  background: var(--card);
-  border-radius: 16px;
+
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+/* =========================================================
+   MOBILE RESPONSIVE
+========================================================= */
+
+@media(max-width: 900px) {
+  .cards {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .sidebar {
+    width: 80px;
+  }
+
+  .sidebar h2 {
+    font-size: 14px;
+  }
 }
 /* =========================================================
    FORM

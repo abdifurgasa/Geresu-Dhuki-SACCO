@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SACCO Dashboard</title>
 
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="css/style.css">
 
 <link rel="stylesheet"
 href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -47,10 +47,9 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
 
     </aside>
 
-    <!-- Main -->
+    <!-- Main Content -->
     <main class="main-content">
 
-        <!-- Header -->
         <header class="header">
 
             <div>
@@ -61,45 +60,50 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
             <div class="user-box">
                 <i class="fas fa-user-circle"></i>
                 <div>
-                    <strong>Admin</strong>
+                    <strong>Admin</strong><br>
                     <small>Administrator</small>
                 </div>
             </div>
 
         </header>
 
-        <!-- Welcome -->
         <section class="welcome">
             <h3>Dashboard Overview</h3>
             <h2>Welcome to SACCO Banking System</h2>
             <p>Here's what's happening with your SACCO today.</p>
         </section>
 
-        <!-- Stats -->
+        <!-- Statistics Cards -->
         <section class="stats">
 
-            <div class="card">
+            <div class="card members">
                 <i class="fas fa-users"></i>
                 <h2>1,248</h2>
                 <p>Total Members</p>
             </div>
 
-            <div class="card">
+            <div class="card savings">
                 <i class="fas fa-wallet"></i>
                 <h2>12.5M ETB</h2>
                 <p>Total Savings</p>
             </div>
 
-            <div class="card">
+            <div class="card loans">
                 <i class="fas fa-landmark"></i>
                 <h2>8.7M ETB</h2>
                 <p>Total Loans</p>
             </div>
 
-            <div class="card">
+            <div class="card withdrawals">
                 <i class="fas fa-money-bill-wave"></i>
                 <h2>2.3M ETB</h2>
                 <p>Withdrawals</p>
+            </div>
+
+            <div class="card profit">
+                <i class="fas fa-chart-line"></i>
+                <h2>1.2M ETB</h2>
+                <p>Net Profit</p>
             </div>
 
         </section>
@@ -151,7 +155,6 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
 </div>
 
 <script>
-
 new Chart(document.getElementById("lineChart"),{
     type:"line",
     data:{
@@ -180,7 +183,6 @@ new Chart(document.getElementById("barChart"),{
         }]
     }
 });
-
 </script>
 
 </body>

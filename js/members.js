@@ -152,56 +152,68 @@ async function loadTransactions(memberId) {
 }
 
 /* ================= PROFILE ================= */
-window.openProfile = async (id) => {
+window.openProfile = function (member) {
+  profileModal.classList.add("active");
 
-  const m = members.find(x => x.id === id);
+  // BASIC INFO
+  document.getElementById("profileName").innerText = member.fullName;
+  document.getElementById("profileNid").innerText = member.memberId;
+  document.getElementById("profilePhone").innerText = member.phone;
+  document.getElementById("profileGender").innerText = member.gender;
+  document.getElementById("profileAddress").innerText = member.address;
+  document.getElementById("profileStatus").innerText = member.status || "Active";
 
-  profileName.innerText = m.fullName;
-  profileNid.innerText = m.memberId;
-  profilePhone.innerText = m.phone;
-  profileGender.innerText = m.gender;
-  profileAddress.innerText = m.address;
-  profileStatus.innerText = m.status;
+  // FILTER DATA FROM GLOBAL ARRAYS
+  const memberSavings = savings.filter(s => s.memberId === member.memberId);
+  const memberLoans = loans.filter(l => l.memberId === member.memberId);
 
-  document.getElementById("profileModal").classList.add("active");
+  // TOTAL CALCULATION
+  const totalSavings = memberSavings.reduce((sum, s) => sum + Number(s.amount || 0), 0);
+  const totalLoans = memberLoans.reduce((sum, l) => sum + Number(l.amount || 0), 0);
+  const remaining = totalLoans - totalSavings;
 
-  const transactions = await loadTransactions(m.memberId);
+  document.getElementById("profileSavings").innerText = totalSavings;
+  document.getElementById("profileLoans").innerText = totalLoans;
+  document.getElementById("profileRemaining").innerText = remaining;
 
-  const tbody = document.getElementById("profileTransactions");
-  tbody.innerHTML = "";
+  // TRANSACTIONS TABLE (IMPORTANT FIX)
+  const txBox = document.getElementById("profileTransactions");
+  txBox.innerHTML = "";
 
-  let savings = 0;
-  let loans = 0;
-  let repaid = 0;
+  const transactions = [
+    ...memberSavings.map(s => ({
+      type: "Savings",
+      amount: s.amount,
+      prev: "-",
+      total: "-",
+      status: s.status || "Done",
+      date: s.createdAt?.toDate?.().toLocaleDateString() || "-",
+      by: s.createdBy || "-"
+    })),
+    ...memberLoans.map(l => ({
+      type: "Loan",
+      amount: l.amount,
+      prev: "-",
+      total: "-",
+      status: l.status || "Active",
+      date: l.createdAt?.toDate?.().toLocaleDateString() || "-",
+      by: l.createdBy || "-"
+    }))
+  ];
 
   transactions.forEach(t => {
-
-    if (t.type === "savings") savings += Number(t.amount);
-    if (t.type === "loans") loans += Number(t.amount);
-    if (t.type === "repayments") repaid += Number(t.amount);
-
     const tr = document.createElement("tr");
-
     tr.innerHTML = `
       <td>${t.type}</td>
       <td>${t.amount}</td>
-      <td>${t.previous}</td>
+      <td>${t.prev}</td>
       <td>${t.total}</td>
       <td>${t.status}</td>
-      <td>${
-        t.createdAt?.toDate
-          ? t.createdAt.toDate().toLocaleDateString()
-          : "-"
-      }</td>
-      <td>${t.createdBy}</td>
+      <td>${t.date}</td>
+      <td>${t.by}</td>
     `;
-
-    tbody.appendChild(tr);
+    txBox.appendChild(tr);
   });
-
-  profileSavings.innerText = savings;
-  profileLoans.innerText = loans;
-  profileRemaining.innerText = loans - repaid;
 };
 
 /* ================= SEARCH ================= */

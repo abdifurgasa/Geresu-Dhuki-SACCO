@@ -68,7 +68,7 @@ function render(data) {
           ? m.createdAt.toDate().toLocaleDateString()
           : "-"
       }</td>
-      <td>${m.createdBy || "Unknown User"}</td>
+      createdBy: localStorage.getItem("userName") || "Unknown User"
       <td>
         <button onclick="editMember('${m.id}')">✏️</button>
         <button onclick="deleteMember('${m.id}')">🗑️</button>
@@ -95,8 +95,7 @@ form.addEventListener("submit", async (e) => {
     /* ✅ FIXED USER NAME */
     createdBy:
       localStorage.getItem("userName") ||
-      auth.currentUser?.email ||
-      "Unknown User"
+      createdBy: localStorage.getItem("userName") || "Unknown User""
   };
 
   if (editId) {

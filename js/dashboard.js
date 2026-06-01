@@ -295,7 +295,63 @@ async function updateChart() {
   );
 
 }
+// ================= SIDEBAR TOGGLE =================
+function toggleSidebar() {
+  document.getElementById("sidebar").classList.toggle("collapsed");
+}
 
+// ================= DARK MODE =================
+function toggleTheme() {
+  document.body.classList.toggle("light");
+}
+
+// ================= ACTIVE INDICATOR =================
+const items = document.querySelectorAll(".nav-item");
+const indicator = document.getElementById("indicator");
+
+function setActive(el) {
+  items.forEach(i => i.classList.remove("active"));
+  el.classList.add("active");
+
+  indicator.style.top = el.offsetTop + "px";
+  indicator.style.height = el.offsetHeight + "px";
+}
+
+// init indicator
+setActive(items[0]);
+
+// ================= NOTIFICATIONS =================
+let count = 3;
+
+// ================= REAL TIME UPDATES =================
+setInterval(() => {
+
+  document.getElementById("members").innerText =
+    Math.floor(Math.random() * 200);
+
+  document.getElementById("savings").innerText =
+    Math.floor(Math.random() * 10000);
+
+  document.getElementById("loans").innerText =
+    Math.floor(Math.random() * 5000);
+
+}, 3000);
+
+// ================= CHART =================
+const ctx = document.getElementById("chart");
+
+new Chart(ctx, {
+  type: "line",
+  data: {
+    labels: ["Jan","Feb","Mar","Apr","May","Jun"],
+    datasets: [{
+      label: "Performance",
+      data: [10,20,15,40,30,60],
+      borderColor: "#4facfe",
+      tension: 0.4
+    }]
+  }
+});
 /* =========================================================
    USER INFO
 ========================================================= */

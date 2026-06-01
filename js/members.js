@@ -65,7 +65,7 @@ function render(data) {
 
       <td>
         <button onclick="editMember('${m.id}')">✏️</button>
-        <button onclick="deleteMember('${m.id}')">🗑</button>
+        <button onclick="deleteMember('${m.id}')">🗑️</button>
         <button onclick="openProfile('${m.id}')">👁</button>
       </td>
     `;

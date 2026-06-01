@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>SACCO Banking</title>
+<title>SACCO Banking System</title>
 
 <link rel="stylesheet" href="css/style.css">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -15,62 +15,67 @@
 
 <body>
 
+<!-- TOP BAR -->
+<header class="topbar">
+
+  <div class="brand">🏦 SACCO ERP</div>
+
+  <div class="actions">
+    <button onclick="toggleSidebar()">☰</button>
+    <div id="roleBox">User</div>
+  </div>
+
+</header>
+
+<!-- LAYOUT -->
 <div class="layout">
 
-<!-- SIDEBAR -->
-<aside class="sidebar" id="sidebar">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
 
-  <div class="brand">🏦 SACCO</div>
+    <a class="nav active">Dashboard</a>
+    <a class="nav">Members</a>
+    <a class="nav">Savings</a>
+    <a class="nav">Loans</a>
+    <a class="nav">Transactions</a>
+    <a class="nav logout" id="logoutBtn">Logout</a>
 
-  <a class="nav active">Dashboard</a>
-  <a class="nav">Members</a>
-  <a class="nav">Savings</a>
-  <a class="nav">Loans</a>
+  </aside>
 
-  <button onclick="toggleSidebar()" class="toggle">☰</button>
+  <!-- MAIN -->
+  <main class="main">
 
-</aside>
+    <!-- CARDS -->
+    <section class="cards">
 
-<!-- MAIN -->
-<main class="main">
+      <div class="card">
+        <h3>Members</h3>
+        <p id="members">0</p>
+      </div>
 
-  <!-- HEADER -->
-  <header class="header">
-    <h2>Dashboard Overview</h2>
-    <div class="status">🟢 Live</div>
-  </header>
+      <div class="card">
+        <h3>Savings</h3>
+        <p id="savings">0 ETB</p>
+      </div>
 
-  <!-- CARDS -->
-  <section class="grid">
+      <div class="card">
+        <h3>Loans</h3>
+        <p id="loans">0 ETB</p>
+      </div>
 
-    <div class="glass-card">
-      <h3>Members</h3>
-      <p id="members">0</p>
-    </div>
+      <div class="card profit">
+        <h3>Profit</h3>
+        <p id="profit">0 ETB</p>
+      </div>
 
-    <div class="glass-card">
-      <h3>Savings</h3>
-      <p id="savings">0 ETB</p>
-    </div>
+    </section>
 
-    <div class="glass-card">
-      <h3>Loans</h3>
-      <p id="loans">0 ETB</p>
-    </div>
+    <!-- CHART -->
+    <section class="chartBox">
+      <canvas id="chart"></canvas>
+    </section>
 
-    <div class="glass-card profit">
-      <h3>Profit</h3>
-      <p id="profit">0 ETB</p>
-    </div>
-
-  </section>
-
-  <!-- CHART -->
-  <section class="chart">
-    <canvas id="chart"></canvas>
-  </section>
-
-</main>
+  </main>
 
 </div>
 

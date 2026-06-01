@@ -126,3 +126,18 @@ window.addEventListener("click", resetTimer);
 window.addEventListener("scroll", resetTimer);
 
 resetTimer();
+// ================= ROLE SYSTEM =================
+function applyRoleAccess() {
+  const role = localStorage.getItem("role");
+
+  if (role === "admin") {
+    document.querySelectorAll(".admin-only")
+      .forEach(el => el.style.display = "block");
+  } else {
+    document.querySelectorAll(".admin-only")
+      .forEach(el => el.style.display = "none");
+  }
+}
+
+// run immediately
+applyRoleAccess();

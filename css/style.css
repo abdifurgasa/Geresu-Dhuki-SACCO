@@ -672,71 +672,100 @@ textarea:focus{
 }
 
 /* =========================================================
-   PROFILE
-========================================================= */
-.profile-grid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:16px;
+   PROFILE MODAL CLEAN DESIGN
+========================================================= *
+.profile-clean {
+  width: 900px;
+  max-width: 95%;
+  background: #fff;
+  border-radius: 16px;
+  padding: 20px;
 }
 
-.profile-item{
-  background:#f8fafc;
-  padding:16px;
-  border-radius:16px;
-}
-.profile-modal-box{
-  max-width:1100px;
-  width:95%;
+/* HEADER */
+.profile-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
 }
 
-.profile-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-  gap:15px;
-  margin-bottom:25px;
+.close-btn {
+  border: none;
+  background: #eee;
+  padding: 6px 10px;
+  border-radius: 8px;
+  cursor: pointer;
 }
 
-.profile-item{
-  background:#f8fafc;
-  padding:15px;
-  border-radius:12px;
-  border:1px solid #e5e7eb;
+/* INFO GRID */
+.profile-info-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
 }
 
-.profile-cards{
-  margin-top:20px;
-  margin-bottom:20px;
+.info-card {
+  background: #f7f7f7;
+  padding: 10px;
+  border-radius: 10px;
+  font-size: 14px;
 }
 
-.profile-transactions{
-  margin-top:20px;
+.info-card label {
+  display: block;
+  font-size: 12px;
+  color: #777;
 }
 
-.profile-transactions h3{
-  margin-bottom:15px;
-}
-.profile-modal-box{
-  max-width:1000px;
-}
-
-.profile-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-  gap:15px;
-  margin-bottom:20px;
+/* SUMMARY */
+.profile-summary {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
 }
 
-.profile-item{
-  background:#f8fafc;
-  padding:15px;
-  border-radius:12px;
-  border:1px solid #e5e7eb;
+.summary-card {
+  flex: 1;
+  padding: 12px;
+  border-radius: 12px;
+  color: white;
+  text-align: center;
 }
 
-.profile-item strong{
-  display:block;
-  margin-bottom:6px;
+.summary-card.green { background: #22c55e; }
+.summary-card.blue { background: #3b82f6; }
+.summary-card.red { background: #ef4444; }
+
+/* TRANSACTIONS */
+.transaction-section {
+  margin-top: 20px;
+}
+
+.modal-table {
+  max-height: 250px;
+  overflow-y: auto;
+  border-radius: 10px;
+}
+
+.modal-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.modal-table th {
+  background: #16a34a;
+  color: white;
+  padding: 10px;
+  font-size: 13px;
+  position: sticky;
+  top: 0;
+}
+
+.modal-table td {
+  padding: 8px;
+  border-bottom: 1px solid #eee;
+  font-size: 13px;
 }
 /* =========================================================
    RESPONSIVE

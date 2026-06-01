@@ -1,49 +1,60 @@
-import { auth, db } from "./firebase.js";
+import { auth, db } from "./js/firebase.js";
+
 import {
-  signInWithEmailAndPassword,
-  onAuthStateChanged,
-  signOut
+  signInWithEmailAndPassword
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 import {
   doc,
-  getDoc,
-  updateDoc,
-  serverTimestamp
+  getDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-/* ================= LOGIN ================= */
-export async function login(email, password) {
+window.login = async function () {
 
-  const userCredential =
-    await signInWithEmailAndPassword(auth, email, password);
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
 
-  const user = userCredential.user;
-
-  const ref = doc(db, "users", user.uid);
-  const snap = await getDoc(ref);
-
-  let role = "user";
-  let language = "en";
-
-  if (snap.exists()) {
-    role = snap.data().role || "user";
-    language = snap.data().language || "en";
+  if (!email || !password) {
+    alert("Please fill all fields");
+    return;
   }
 
-  // save session
-  localStorage.setItem("uid", user.uid);
-  localStorage.setItem("role", role);
-  localStorage.setItem("language", language);
+  try {
 
-  await updateDoc(ref, {
-    lastLogin: serverTimestamp()
-  });
+    // 🔐 Firebase login
+    const userCredential =
+      await signInWithEmailAndPassword(auth, email, password);
 
-  // redirect based on role
-  if (role === "admin") {
-    window.location.href = "admin.html";
-  } else {
-    window.location.href = "user.html";
+    const user = userCredential.user;
+
+    // 📦 Get user role from Firestore
+    const userRef = doc(db, "users", user.uid);
+    const userSnap = await getDoc(userRef);
+
+    let role = "user";
+    let language = "en";
+
+    if (userSnap.exists()) {
+      role = userSnap.data().role || "user";
+      language = userSnap.data().language || "en";
+    }
+
+    // 💾 Save session
+    localStorage.setItem("uid", user.uid);
+    localStorage.setItem("role", role);
+    localStorage.setItem("language", language);
+
+    // 🚀 REDIRECT FIX (THIS IS WHAT YOU ARE MISSING)
+    if (role === "admin") {
+      window.location.href = "admin.html";
+    } else {
+      window.location.href = "dashboard.html";
+    }
+
   }
-}
+
+  catch (error) {
+    console.error(error);
+    alert(error.message);
+  }
+};

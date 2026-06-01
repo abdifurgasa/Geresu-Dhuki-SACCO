@@ -19,9 +19,71 @@ body {
   align-items: center;
 
   font-family: Inter, sans-serif;
-
-  background: linear-gradient(135deg,#0f172a,#1e293b);
   overflow: hidden;
+
+  /* 🌈 Animated gradient background */
+  background: linear-gradient(-45deg,
+    #0f172a,
+    #1e293b,
+    #0ea5e9,
+    #6366f1
+  );
+
+  background-size: 400% 400%;
+  animation: gradientBG 12s ease infinite;
+}
+
+/* ================= ANIMATION ================= */
+@keyframes gradientBG {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* ================= FLOATING BLUR BLOBS ================= */
+body::before,
+body::after {
+  content: "";
+  position: absolute;
+  width: 450px;
+  height: 450px;
+  border-radius: 50%;
+
+  filter: blur(90px);
+  opacity: 0.6;
+  z-index: 0;
+}
+
+/* blue glow */
+body::before {
+  background: #3b82f6;
+  top: -100px;
+  left: -120px;
+  animation: float1 8s ease-in-out infinite;
+}
+
+/* purple glow */
+body::after {
+  background: #8b5cf6;
+  bottom: -120px;
+  right: -120px;
+  animation: float2 10s ease-in-out infinite;
+}
+
+@keyframes float1 {
+  0%,100% { transform: translate(0,0); }
+  50% { transform: translate(40px,30px); }
+}
+
+@keyframes float2 {
+  0%,100% { transform: translate(0,0); }
+  50% { transform: translate(-40px,-30px); }
 }
 
 /* ================= LANGUAGE ================= */

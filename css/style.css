@@ -671,39 +671,9 @@ textarea:focus{
   }
 }
 
-.modal-header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-
-  margin-bottom:20px;
-}
-
-.modal-close-icon{
-  width:42px;
-  height:42px;
-
-  border:none;
-  border-radius:14px;
-
-  background:#f3f4f6;
-
-  color:#ef4444;
-
-  cursor:pointer;
-
-  transition:.2s;
-}
-
-.modal-close-icon:hover{
-  background:#ef4444;
-  color:white;
-}
-
 /* =========================================================
    PROFILE
 ========================================================= */
-
 .profile-grid{
   display:grid;
   grid-template-columns:1fr 1fr;

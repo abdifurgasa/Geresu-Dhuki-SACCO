@@ -2,8 +2,8 @@ import { db } from "./firebase.js";
 import { collection, onSnapshot } 
 from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-let savings=0;
-let loans=0;
+let savings = 0;
+let loans = 0;
 
 /* MEMBERS */
 onSnapshot(collection(db,"members"), snap=>{
@@ -17,10 +17,8 @@ onSnapshot(collection(db,"savings"), snap=>{
     savings += Number(d.data().amount || 0);
   });
 
-  document.getElementById("savings").innerText =
-    savings.toLocaleString() + " ETB";
-
-  updateChart();
+  document.getElementById("savings").innerText = savings + " ETB";
+  update();
 });
 
 /* LOANS */
@@ -30,40 +28,36 @@ onSnapshot(collection(db,"loans"), snap=>{
     loans += Number(d.data().amount || 0);
   });
 
-  document.getElementById("loans").innerText =
-    loans.toLocaleString() + " ETB";
-
-  updateChart();
+  document.getElementById("loans").innerText = loans + " ETB";
+  update();
 });
 
 /* PROFIT */
-function updateProfit(){
+function update(){
   document.getElementById("profit").innerText =
-    (savings - loans).toLocaleString() + " ETB";
+    (savings - loans) + " ETB";
+
+  drawChart();
 }
 
 /* CHART */
 let chart;
 
-function updateChart(){
-
-  updateProfit();
+function drawChart(){
 
   const ctx = document.getElementById("chart");
 
   if(chart) chart.destroy();
 
   chart = new Chart(ctx,{
-    type:"doughnut",
+    type:"line",
     data:{
       labels:["Savings","Loans"],
       datasets:[{
-        data:[savings, loans],
-        backgroundColor:["#22c55e","#f97316"]
+        data:[savings,loans],
+        borderColor:"#3b82f6",
+        tension:0.4
       }]
-    },
-    options:{
-      plugins:{legend:{position:"bottom"}}
     }
   });
 

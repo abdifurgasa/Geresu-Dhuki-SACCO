@@ -21,7 +21,6 @@ body {
   font-family: Inter, sans-serif;
   overflow: hidden;
 
-  /* 🌈 Animated gradient background */
   background: linear-gradient(-45deg,
     #0f172a,
     #1e293b,
@@ -31,22 +30,18 @@ body {
 
   background-size: 400% 400%;
   animation: gradientBG 12s ease infinite;
+
+  position: relative;
 }
 
 /* ================= ANIMATION ================= */
 @keyframes gradientBG {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
-/* ================= FLOATING BLUR BLOBS ================= */
+/* ================= FLOATING BLOBS ================= */
 body::before,
 body::after {
   content: "";
@@ -54,21 +49,18 @@ body::after {
   width: 450px;
   height: 450px;
   border-radius: 50%;
-
   filter: blur(90px);
   opacity: 0.6;
   z-index: 0;
 }
 
-/* blue glow */
 body::before {
   background: #3b82f6;
-  top: -100px;
+  top: -120px;
   left: -120px;
   animation: float1 8s ease-in-out infinite;
 }
 
-/* purple glow */
 body::after {
   background: #8b5cf6;
   bottom: -120px;
@@ -91,6 +83,7 @@ body::after {
   position: absolute;
   top: 20px;
   right: 20px;
+  z-index: 10;
 }
 
 .lang-select select {
@@ -105,14 +98,26 @@ body::after {
 .login-box {
   width: 380px;
   padding: 35px;
-  border-radius: 20px;
+  border-radius: 22px;
 
-  background: rgba(255,255,255,0.07);
-  backdrop-filter: blur(20px);
+  background: rgba(255,255,255,0.08);
+  backdrop-filter: blur(25px);
 
-  border: 1px solid rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.15);
 
   text-align: center;
+
+  z-index: 10;
+
+  box-shadow:
+    0 25px 60px rgba(0,0,0,0.4),
+    inset 0 1px 0 rgba(255,255,255,0.2);
+
+  transition: 0.3s ease;
+}
+
+.login-box:hover {
+  transform: translateY(-5px);
 }
 
 /* ================= INPUT ================= */
@@ -156,17 +161,22 @@ button {
   padding: 14px;
 
   border: none;
-  border-radius: 12px;
+  border-radius: 14px;
 
   background: linear-gradient(135deg,#4facfe,#00f2fe);
   color: white;
 
   font-weight: bold;
   cursor: pointer;
+
+  box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+
+  transition: all 0.3s ease;
 }
 
 button:hover {
-  transform: translateY(-2px);
+  transform: translateY(-3px);
+  box-shadow: 0 15px 35px rgba(0,0,0,0.4);
 }
 
 </style>
@@ -189,7 +199,6 @@ button:hover {
   <h2 data-i18n="title">SACCO LOGIN</h2>
   <p data-i18n="welcome">Welcome Back</p>
 
-  <!-- EMAIL -->
   <div class="input-group">
     <label data-i18n="email">Email</label>
     <div class="input-box">
@@ -198,7 +207,6 @@ button:hover {
     </div>
   </div>
 
-  <!-- PASSWORD -->
   <div class="input-group">
     <label data-i18n="password">Password</label>
     <div class="input-box">
@@ -207,39 +215,19 @@ button:hover {
     </div>
   </div>
 
-  <!-- ✅ FIXED BUTTON -->
   <button id="loginBtn" onclick="login()" data-i18n="login">
     Login
   </button>
 
 </div>
 
-<!-- ================= SCRIPT ================= -->
 <script>
 
 /* ================= LANGUAGE ================= */
 const translations = {
-  en: {
-    title: "SACCO LOGIN",
-    welcome: "Welcome Back",
-    email: "Email",
-    password: "Password",
-    login: "Login"
-  },
-  am: {
-    title: "SACCO መግቢያ",
-    welcome: "እንኳን ደህና መጡ",
-    email: "ኢሜይል",
-    password: "የይለፍ ቃል",
-    login: "ግባ"
-  },
-  om: {
-    title: "Seensa SACCO",
-    welcome: "Baga Nagaan Dhuftan",
-    email: "Imeelii",
-    password: "Jecha Darbii",
-    login: "Seeni"
-  }
+  en: { title:"SACCO LOGIN", welcome:"Welcome Back", email:"Email", password:"Password", login:"Login" },
+  am: { title:"SACCO መግቢያ", welcome:"እንኳን ደህና መጡ", email:"ኢሜይል", password:"የይለፍ ቃል", login:"ግባ" },
+  om: { title:"Seensa SACCO", welcome:"Baga Nagaan Dhuftan", email:"Imeelii", password:"Jecha Darbii", login:"Seeni" }
 };
 
 function changeLanguage(lang){
@@ -249,7 +237,7 @@ function changeLanguage(lang){
   });
 }
 
-/* ================= LOGIN (TEST WORKING FIRST) ================= */
+/* ================= LOGIN ================= */
 function login(){
 
   const email = document.getElementById("email").value;
@@ -265,11 +253,9 @@ function login(){
   btn.disabled = true;
 
   setTimeout(() => {
-
-    // ✅ REDIRECT WORKS NOW
     window.location.href = "dashboard.html";
-
   }, 1000);
+
 }
 
 </script>

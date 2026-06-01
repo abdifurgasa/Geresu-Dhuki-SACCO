@@ -354,3 +354,13 @@ opacity:1;
 transform:scale(1);
 }
 }
+/* =========================
+   GLOBAL PAGE ANIMATION
+========================= */
+body{
+animation:pageLoad .5s ease;
+}
+
+@keyframes pageLoad{
+from{
+opacity

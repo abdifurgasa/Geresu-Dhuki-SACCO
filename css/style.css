@@ -2,25 +2,7 @@
    GERESU DHUKI SACCO — MODERN UI
 ========================================================= */
 
-:root{
-  --primary:#17a8d3;
-  --primary-dark:#1295bc;
-  --primary-light:#33b9df;
-
-  --green:#16a34a;
-  --green-dark:#15803d;
-
-  --white:#ffffff;
-  --bg:#f4f7fb;
-  --text:#0f172a;
-  --gray:#64748b;
-  --border:#e2e8f0;
-}
-
-/* =========================
-   GLOBAL MODERN RESET
-========================= */
-
+/* ================= GLOBAL ================= */
 * {
   margin: 0;
   padding: 0;
@@ -29,243 +11,131 @@
 }
 
 body {
-  background: linear-gradient(135deg, #0f172a, #1e293b);
-  color: #fff;
-  min-height: 100vh;
   display: flex;
+  background: linear-gradient(135deg, #0f172a, #1e293b);
+  color: white;
 }
 
-/* smooth UI feel */
-a {
-  color: inherit;
-  text-decoration: none;
-}
-
-/* =========================================================
-   HEADINGS
-========================================================= */
-
-h1,
-h2,
-h3{
-  font-family:"Times New Roman",Times,serif;
-}
-
-h1{
-  text-transform:uppercase;
-  letter-spacing:1px;
-  font-weight:700;
-}
-
-/* =========================================================
-   SIDEBAR
-========================================================= */
-
+/* ================= SIDEBAR ================= */
 .sidebar {
   width: 260px;
   height: 100vh;
   position: fixed;
 
   background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(20px);
 
-  border-right: 1px solid rgba(255, 255, 255, 0.12);
+  border-right: 1px solid rgba(255,255,255,0.1);
 
   padding: 20px;
+}
+
+.logo {
+  margin-bottom: 30px;
+  font-size: 20px;
+}
+
+.nav {
   display: flex;
   flex-direction: column;
-
-  box-shadow: 10px 0 30px rgba(0, 0, 0, 0.3);
-}
-/* =========================================================
-   MAIN
-========================================================= */
-
-.main{
-  margin-left:280px;
-  padding:25px;
-  transition:0.3s;
+  gap: 10px;
 }
 
-.sidebar.collapsed ~ .main{
-  margin-left:100px;
+.nav-item {
+  padding: 12px;
+  border-radius: 12px;
+
+  text-decoration: none;
+  color: white;
+
+  background: rgba(255,255,255,0.06);
+  backdrop-filter: blur(10px);
+
+  transition: 0.3s;
 }
 
-/* =========================================================
-   TOPBAR
-========================================================= */
-
-.topbar{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  flex-wrap:wrap;
-  gap:15px;
-
-  padding:22px 25px;
-  border-radius:24px;
-
-  background:
-    linear-gradient(
-      135deg,
-      #17a8d3,
-      #1295bc
-    );
-
-  box-shadow:
-    0 10px 30px rgba(0,0,0,0.08);
+.nav-item:hover {
+  transform: translateX(6px);
+  background: rgba(255,255,255,0.12);
 }
 
-.topbar h2{
-  color:white;
-  font-size:30px;
-  font-weight:800;
+.nav-item.active {
+  background: linear-gradient(135deg,#4facfe,#00f2fe);
 }
 
-.topbar-actions{
-  display:flex;
-  align-items:center;
-  gap:12px;
+.logout {
+  background: rgba(255,0,0,0.2);
 }
 
-/* =========================================================
-   SELECT BOX
-========================================================= */
-
-select{
-  padding:12px 14px;
-  border-radius:14px;
-  border:none;
-  outline:none;
-  background:white;
-  font-size:14px;
-  cursor:pointer;
+/* ================= MAIN ================= */
+.main {
+  margin-left: 260px;
+  padding: 25px;
+  width: 100%;
 }
 
-/* =========================================================
-   ROLE BOX
-========================================================= */
+/* ================= TOPBAR ================= */
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 
-.selected-box{
-  background:white;
-  padding:12px 16px;
-  border-radius:14px;
-  font-weight:700;
-  color:#111827;
+  padding: 15px 20px;
+
+  background: rgba(255,255,255,0.06);
+  backdrop-filter: blur(15px);
+
+  border-radius: 16px;
 }
 
-/* =========================================================
-   PAGE HEADER
-========================================================= */
-
-.page-header{
-  margin:28px 0;
+/* ================= OVERVIEW ================= */
+.overview {
+  margin-top: 20px;
 }
 
-.page-header h1{
-  font-size:36px;
-  color:#111827;
-  margin-bottom:8px;
+/* ================= CARDS ================= */
+.cards {
+  margin-top: 20px;
+
+  display: grid;
+  grid-template-columns: repeat(auto-fit,minmax(200px,1fr));
+  gap: 15px;
 }
 
-.page-header p{
-  color:#6b7280;
-  font-size:16px;
+.card {
+  padding: 18px;
+  border-radius: 16px;
+
+  background: rgba(255,255,255,0.06);
+  backdrop-filter: blur(15px);
+
+  transition: 0.3s;
 }
 
-/* =========================================================
-   CARDS
-========================================================= */
-
-.cards{
-  display:grid;
-  grid-template-columns:
-    repeat(auto-fit,minmax(220px,1fr));
-
-  gap:20px;
-  margin-bottom:25px;
+.card:hover {
+  transform: translateY(-5px);
 }
 
-.card{
-  border-radius:24px;
-  padding:24px;
-  color:white;
+.card.blue { border-left: 4px solid #4facfe; }
+.card.green { border-left: 4px solid #43e97b; }
+.card.orange { border-left: 4px solid #fa709a; }
+.card.red { border-left: 4px solid #ff4b2b; }
 
-  box-shadow:
-    0 10px 25px rgba(0,0,0,0.08);
-
-  transition:.25s;
+/* ================= CHARTS ================= */
+.charts {
+  margin-top: 30px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
 }
 
-.card:hover{
-  transform:translateY(-5px);
-}
+.glass-box {
+  padding: 20px;
 
-.blue{
-  background:
-    linear-gradient(
-      135deg,
-      #17a8d3,
-      #1295bc
-    );
-}
+  background: rgba(255,255,255,0.05);
+  backdrop-filter: blur(20px);
 
-.green{
-  background:
-    linear-gradient(
-      135deg,
-      #22c55e,
-      #15803d
-    );
-}
-
-.orange{
-  background:
-    linear-gradient(
-      135deg,
-      #f59e0b,
-      #d97706
-    );
-}
-
-.red{
-  background:
-    linear-gradient(
-      135deg,
-      #ef4444,
-      #dc2626
-    );
-}
-
-.card h3{
-  font-size:16px;
-  margin-bottom:10px;
-}
-
-.card p{
-  font-size:34px;
-  font-weight:800;
-}
-
-/* =========================================================
-   FORM CARD
-========================================================= */
-
-.form-card{
-  background:white;
-  border-radius:24px;
-  padding:26px;
-  margin-bottom:25px;
-
-  box-shadow:
-    0 10px 30px rgba(0,0,0,0.05);
-}
-
-.form-card h3{
-  margin-bottom:20px;
-  font-size:24px;
-  color:#111827;
+  border-radius: 16px;
 }
 
 /* =========================================================

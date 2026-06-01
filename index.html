@@ -2,591 +2,309 @@
 <html lang="en">
 
 <head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title data-i18n="title">SACCO Login</title>
 
-  <meta charset="UTF-8" />
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  />
+<style>
 
-  <title>
-    Geresu Dhuki SACCO Login
-  </title>
-
-  <!-- =========================================================
-       STYLE
-  ========================================================= -->
-
-  <style>
-
-    /* =========================================================
-       BODY
-    ========================================================= */
-
+/* ================= GLOBAL ================= */
 body {
-
   margin: 0;
-
   height: 100vh;
-
   display: flex;
-
   justify-content: center;
-
   align-items: center;
 
+  font-family: Inter, sans-serif;
+
+  background: linear-gradient(135deg,#0f172a,#1e293b);
   overflow: hidden;
+}
 
-  position: relative;
+/* glow background */
+body::before,
+body::after {
+  content: "";
+  position: absolute;
+  width: 500px;
+  height: 500px;
+  filter: blur(70px);
+  z-index: 0;
+}
 
-  font-family: "Times New Roman", Times, serif;
+body::before {
+  background: radial-gradient(circle,#4facfe55,transparent);
+  top: -120px;
+  left: -120px;
+}
 
-  background-image: url("./assets/image/background.jpg");
+body::after {
+  background: radial-gradient(circle,#ff4b2b55,transparent);
+  bottom: -120px;
+  right: -120px;
+}
 
-  background-repeat: no-repeat;
-
-  background-position: center;
-
-  background-size: cover;
-
-}    
-    
-    /* =========================================================
-       LANGUAGE SELECT
-    ========================================================= */
-
-    .lang-select {
-
-      position: absolute;
-
-      top: 20px;
-
-      right: 20px;
-
-      z-index: 100;
-
-    }
-
-    .lang-select select {
-
-      padding: 10px 14px;
-
-      border: none;
-
-      border-radius: 10px;
-
-      outline: none;
-
-      font-size: 14px;
-
-      background: white;
-
-      cursor: pointer;
-
-    }
-
-    /* =========================================================
-       LOGIN BOX
-    ========================================================= */
-
-   .login-box {
-
-  position: relative;
-
+/* ================= LANGUAGE ================= */
+.lang-select {
+  position: absolute;
+  top: 20px;
+  right: 20px;
   z-index: 10;
+}
+
+.lang-select select {
+  padding: 10px 14px;
+  border-radius: 12px;
+
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.2);
+
+  color: white;
+  backdrop-filter: blur(15px);
+
+  cursor: pointer;
+}
+
+/* ================= LOGIN BOX ================= */
+.login-box {
+  position: relative;
+  z-index: 5;
 
   width: 380px;
-
-  max-width: 92%;
-
   padding: 35px;
 
   border-radius: 22px;
 
+  background: rgba(255,255,255,0.07);
+  backdrop-filter: blur(22px);
+
+  border: 1px solid rgba(255,255,255,0.12);
+
+  box-shadow: 0 25px 70px rgba(0,0,0,0.5);
+
   text-align: center;
 
-  background: rgba(255,255,255,0.12);
-
-  backdrop-filter: blur(18px);
-
-  border: 1px solid rgba(255,255,255,0.2);
-
-  box-shadow:
-    0 20px 50px rgba(0,0,0,0.35);
-
-  transition: none;
-
-  animation: none;
-
+  animation: fade 0.5s ease;
 }
-    /* =========================================================
-       LOGO
-    ========================================================= */
 
-    .logo {
-
-      font-size: 55px;
-
-      margin-bottom: 10px;
-
-      animation: floatLogo 3s ease-in-out infinite;
-
-    }
-
-    @keyframes floatLogo {
-
-      0% {
-        transform: translateY(0px);
-      }
-
-      50% {
-        transform: translateY(-6px);
-      }
-
-      100% {
-        transform: translateY(0px);
-      }
-
-    }
-
-    /* =========================================================
-       TEXT
-    ========================================================= */
-
-    h2 {
-
-      margin: 10px 0;
-
-      color: white;
-
-      font-size: 30px;
-
-      letter-spacing: 1px;
-
-    }
-
-    p {
-
-      color: rgba(255,255,255,0.9);
-
-      margin-bottom: 25px;
-
-    }
-
-    /* =========================================================
-       INPUT GROUP
-    ========================================================= */
-
-    .input-group {
-
-      margin-bottom: 18px;
-
-      text-align: left;
-
-    }
-
-    .input-group label {
-
-      display: block;
-
-      margin-bottom: 7px;
-
-      color: white;
-
-      font-size: 15px;
-
-    }
-
-    .input-box {
-
-      display: flex;
-
-      align-items: center;
-
-      background: rgba(255,255,255,0.15);
-
-      border-radius: 12px;
-
-      padding: 0 12px;
-
-      border: 1px solid rgba(255,255,255,0.2);
-
-    }
-
-    .input-box i {
-
-      color: white;
-
-      font-size: 15px;
-
-    }
-
-    .input-box input {
-
-      width: 100%;
-
-      padding: 14px;
-
-      border: none;
-
-      outline: none;
-
-      background: transparent;
-
-      color: white;
-
-      font-size: 15px;
-
-    }
-
-    .input-box input::placeholder {
-
-      color: rgba(255,255,255,0.7);
-
-    }
-
-    /* =========================================================
-       BUTTON
-    ========================================================= */
-
-    .login-btn {
-
-      width: 100%;
-
-      padding: 14px;
-
-      margin-top: 10px;
-
-      border: none;
-
-      border-radius: 14px;
-
-      background: #2563eb;
-
-      color: white;
-
-      font-size: 16px;
-
-      font-weight: bold;
-
-      cursor: pointer;
-
-      transition: 0.3s;
-
-    }
-
-    .login-btn:hover {
-
-      background: #1d4ed8;
-
-      transform: translateY(-2px);
-
-      box-shadow:
-        0 10px 25px rgba(37,99,235,0.45);
-
-    }
-
-    /* =========================================================
-       FOOTER
-    ========================================================= */
-
-    .footer {
-
-      margin-top: 20px;
-
-      color: rgba(255,255,255,0.7);
-
-      font-size: 13px;
-
-    }
-
-    /* =========================================================
-       MOBILE
-    ========================================================= */
-
-    @media(max-width:600px){
-
-      .login-box {
-
-        width: 90%;
-
-        padding: 25px;
-
-      }
-
-      h2 {
-
-        font-size: 24px;
-
-      }
-
-    }
-
-  </style>
-
-  <!-- FONT AWESOME -->
-
-  <link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
-  />
-
+@keyframes fade {
+  from {opacity:0; transform:translateY(20px);}
+  to {opacity:1; transform:translateY(0);}
+}
+
+/* ================= LOGO ================= */
+.logo {
+  font-size: 50px;
+  margin-bottom: 10px;
+  animation: float 3s infinite ease-in-out;
+}
+
+@keyframes float {
+  0%,100% {transform:translateY(0);}
+  50% {transform:translateY(-8px);}
+}
+
+/* ================= TEXT ================= */
+h2 {
+  color: white;
+  margin: 10px 0;
+}
+
+p {
+  color: rgba(255,255,255,0.7);
+}
+
+/* ================= INPUT ================= */
+.input-group {
+  margin-top: 15px;
+  text-align: left;
+}
+
+label {
+  color: white;
+  font-size: 14px;
+}
+
+.input-box {
+  display: flex;
+  align-items: center;
+
+  margin-top: 6px;
+
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.1);
+
+  border-radius: 12px;
+
+  padding: 12px;
+}
+
+.input-box i {
+  color: white;
+  margin-right: 10px;
+}
+
+.input-box input {
+  width: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: white;
+}
+
+.toggle-pass {
+  cursor: pointer;
+  color: #ccc;
+}
+
+/* ================= BUTTON ================= */
+button {
+  width: 100%;
+  margin-top: 20px;
+  padding: 14px;
+
+  border: none;
+  border-radius: 14px;
+
+  background: linear-gradient(135deg,#4facfe,#00f2fe);
+  color: white;
+
+  font-weight: bold;
+  cursor: pointer;
+
+  transition: 0.3s;
+}
+
+button:hover {
+  transform: translateY(-2px);
+}
+
+/* ================= MOBILE ================= */
+@media(max-width:600px){
+  .login-box {width: 90%;}
+}
+
+</style>
 </head>
 
 <body>
 
-<!-- =========================================================
-     LANGUAGE SELECT
-========================================================= -->
-
+<!-- LANGUAGE -->
 <div class="lang-select">
-
-  <select
-    id="langSelect"
-    onchange="changeLanguage(this.value)"
-  >
-
-    <option value="en">
-      English
-    </option>
-
-    <option value="am">
-      አማርኛ
-    </option>
-
-    <option value="om">
-      Afaan Oromoo
-    </option>
-
+  <select id="langSelect" onchange="changeLanguage(this.value)">
+    <option value="en">English</option>
+    <option value="am">አማርኛ</option>
+    <option value="om">Afaan Oromoo</option>
   </select>
-
 </div>
 
-<!-- =========================================================
-     LOGIN BOX
-========================================================= -->
-
+<!-- LOGIN -->
 <div class="login-box">
 
-  <!-- LOGO -->
+  <div class="logo">🏦</div>
 
-  <div class="logo">
-    🏦
-  </div>
-
-  <!-- TITLE -->
-
-  <h2>
-    GERESU DHUKI SACCO
-  </h2>
-
-  <p data-i18n="welcome">
-    Welcome Back
-  </p>
-
-  <!-- =========================================================
-       LOGIN FORM
-  ========================================================= -->
+  <h2 data-i18n="title">SACCO LOGIN</h2>
+  <p data-i18n="welcome">Welcome Back</p>
 
   <!-- EMAIL -->
-
   <div class="input-group">
-
-    <label>
-      Email
-    </label>
-
+    <label data-i18n="email">Email</label>
     <div class="input-box">
-
       <i class="fa fa-envelope"></i>
-
-      <input
-        type="email"
-        id="email"
-        placeholder="Enter your email"
-      />
-
+      <input id="email" type="email" placeholder="Enter email" data-i18n-placeholder="emailPh">
     </div>
-
   </div>
 
   <!-- PASSWORD -->
-
   <div class="input-group">
-
-    <label>
-      Password
-    </label>
-
+    <label data-i18n="password">Password</label>
     <div class="input-box">
-
       <i class="fa fa-lock"></i>
-
-      <input
-        type="password"
-        id="password"
-        placeholder="Enter your password"
-      />
-
+      <input id="password" type="password" placeholder="Enter password" data-i18n-placeholder="passPh">
+      <i class="fa fa-eye toggle-pass" onclick="togglePass()"></i>
     </div>
-
   </div>
 
-  <!-- LOGIN BUTTON -->
-
-  <button
-    class="login-btn"
-    onclick="login()"
-  >
-
-    <i class="fa fa-right-to-bracket"></i>
-
+  <button id="loginBtn" onclick="login()" data-i18n="login">
     Login
-
   </button>
-
-  <!-- FOOTER -->
-
-  <div class="footer">
-
-    © 2026 Geresu Dhuki SACCO
-
-  </div>
 
 </div>
 
-<!-- =========================================================
-     FIREBASE LOGIN
-========================================================= -->
+<!-- ================= JS ================= -->
+<script>
 
-<script type="module">
-
-import { auth, db }
-from "./js/firebase.js";
-
-import {
-
-  signInWithEmailAndPassword
-
-} from
-"https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-
-import {
-
-  doc,
-  getDoc
-
-} from
-"https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-/* =========================================================
-   LOGIN
-========================================================= */
-
-window.login = async function () {
-
-  const email =
-    document.getElementById("email").value;
-
-  const password =
-    document.getElementById("password").value;
-
-  if (!email || !password) {
-
-    alert("Please fill all fields");
-
-    return;
-
+/* ================= LANGUAGE ================= */
+const translations = {
+  en: {
+    title: "SACCO LOGIN",
+    welcome: "Welcome Back",
+    email: "Email",
+    password: "Password",
+    emailPh: "Enter email",
+    passPh: "Enter password",
+    login: "Login"
+  },
+  am: {
+    title: "SACCO መግቢያ",
+    welcome: "እንኳን ደህና መጡ",
+    email: "ኢሜይል",
+    password: "የይለፍ ቃል",
+    emailPh: "ኢሜይል ያስገቡ",
+    passPh: "የይለፍ ቃል ያስገቡ",
+    login: "ግባ"
+  },
+  om: {
+    title: "Seensa SACCO",
+    welcome: "Baga Nagaan Dhuftan",
+    email: "Imeelii",
+    password: "Jecha Darbii",
+    emailPh: "Imeelii galchi",
+    passPh: "Jecha darbii galchi",
+    login: "Seeni"
   }
-
-  try {
-
-    /* LOGIN */
-
-    const userCredential =
-      await signInWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
-
-    const user =
-      userCredential.user;
-
-    /* =====================================================
-       GET USER ROLE + NAME
-    ===================================================== */
-
-    const userRef =
-      doc(db, "users", user.uid);
-
-    const userSnap =
-      await getDoc(userRef);
-
-    let role = "user";
-
-    let fullName =
-      user.email;
-
-    if (userSnap.exists()) {
-
-      const data =
-        userSnap.data();
-
-      role =
-        data.role || "user";
-
-      fullName =
-        data.name || user.email;
-
-    }
-
-    /* =====================================================
-       SAVE LOCAL STORAGE
-    ===================================================== */
-
-    localStorage.setItem(
-      "role",
-      role
-    );
-
-    localStorage.setItem(
-      "name",
-      fullName
-    );
-
-    localStorage.setItem(
-      "email",
-      user.email
-    );
-
-    /* =====================================================
-       REDIRECT
-    ===================================================== */
-
-    window.location.href =
-      "dashboard.html";
-
-  }
-
-  catch (error) {
-
-    console.error(error);
-
-    alert(error.message);
-
-  }
-
 };
 
+function changeLanguage(lang){
+  document.querySelectorAll("[data-i18n]").forEach(el=>{
+    const key = el.getAttribute("data-i18n");
+    el.innerText = translations[lang][key];
+  });
+
+  document.querySelectorAll("[data-i18n-placeholder]").forEach(el=>{
+    const key = el.getAttribute("data-i18n-placeholder");
+    el.placeholder = translations[lang][key];
+  });
+}
+
+/* ================= PASSWORD TOGGLE ================= */
+function togglePass(){
+  const pass = document.getElementById("password");
+  pass.type = pass.type === "password" ? "text" : "password";
+}
+
+/* ================= LOGIN ================= */
+function login(){
+
+  const btn = document.getElementById("loginBtn");
+
+  btn.innerText = "Loading...";
+  btn.disabled = true;
+
+  setTimeout(()=>{
+    alert("Login success (connect Firebase here)");
+    btn.innerText = "Login";
+    btn.disabled = false;
+    // window.location.href = "dashboard.html";
+  },1500);
+
+}
+
 </script>
-
-<!-- =========================================================
-     LANGUAGE
-========================================================= -->
-
-<script src="js/i18n.js"></script>
 
 </body>
 </html>

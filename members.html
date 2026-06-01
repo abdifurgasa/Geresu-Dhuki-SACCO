@@ -3,329 +3,102 @@
 
 <head>
 
-  <meta charset="UTF-8">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  >
+<title data-i18n="members">Members</title>
 
-  <title data-i18n="members">
-    Members
-  </title>
-
-  <!-- CSS -->
-  <link
-    rel="stylesheet"
-    href="css/style.css"
-  >
-
-  <!-- FONT AWESOME -->
-  <link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
-  >
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 </head>
 
 <body>
 
-<!-- =========================================================
-     SIDEBAR
-========================================================= -->
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
 
-<aside
-  class="sidebar"
-  id="sidebar"
->
+  <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
 
-  <!-- TOGGLE -->
-  <button
-    class="toggle-btn"
-    onclick="toggleSidebar()"
-  >
-    ☰
-  </button>
+  <h2 class="logo">🏦 GERESU DHUKI SACCO</h2>
 
-  <!-- LOGO -->
-  <h2 class="logo">
-    🏦 GERESU DHUKI SACCO
-  </h2>
-
-  <!-- NAVIGATION -->
   <nav class="nav">
-
-    <!-- DASHBOARD -->
-    <a
-      href="dashboard.html"
-      class="nav-item"
-    >
-
-      <span class="icon">
-        📊
-      </span>
-
-      <span
-        class="text"
-        data-i18n="dashboard"
-      >
-        Dashboard
-      </span>
-
-    </a>
-
-    <!-- MEMBERS -->
-    <a
-      href="members.html"
-      class="nav-item active admin-only"
-    >
-
-      <span class="icon">
-        👥
-      </span>
-
-      <span
-        class="text"
-        data-i18n="members"
-      >
-        Members
-      </span>
-
-    </a>
-
-    <!-- SAVINGS -->
-    <a
-      href="savings.html"
-      class="nav-item"
-    >
-
-      <span class="icon">
-        💰
-      </span>
-
-      <span
-        class="text"
-        data-i18n="savings"
-      >
-        Savings
-      </span>
-
-    </a>
-
-    <!-- LOANS -->
-    <a
-      href="loans.html"
-      class="nav-item"
-    >
-
-      <span class="icon">
-        🏦
-      </span>
-
-      <span
-        class="text"
-        data-i18n="loans"
-      >
-        Loans
-      </span>
-
-    </a>
-
-    <!-- REPAYMENTS -->
-    <a
-      href="repayments.html"
-      class="nav-item"
-    >
-
-      <span class="icon">
-        💵
-      </span>
-
-      <span
-        class="text"
-        data-i18n="repayments"
-      >
-        Repayments
-      </span>
-
-    </a>
-
-    <!-- WITHDRAWALS -->
-    <a
-      href="withdrawals.html"
-      class="nav-item admin-only"
-    >
-
-      <span class="icon">
-        💸
-      </span>
-
-      <span
-        class="text"
-        data-i18n="withdrawals"
-      >
-        Withdrawals
-      </span>
-
-    </a>
-
-    <!-- REPORTS -->
-    <a
-      href="reports.html"
-      class="nav-item admin-only"
-    >
-
-      <span class="icon">
-        📄
-      </span>
-
-      <span
-        class="text"
-        data-i18n="reports"
-      >
-        Reports
-      </span>
-
-    </a>
-
-    <!-- USERS -->
-    <a
-      href="users.html"
-      class="nav-item admin-only"
-    >
-
-      <span class="icon">
-        👤
-      </span>
-
-      <span
-        class="text"
-        data-i18n="users"
-      >
-        Users
-      </span>
-
-    </a>
-
-    <!-- SETTINGS -->
-    <a
-      href="settings.html"
-      class="nav-item"
-    >
-
-      <span class="icon">
-        ⚙️
-      </span>
-
-      <span
-        class="text"
-        data-i18n="settings"
-      >
-        Settings
-      </span>
-
-    </a>
-
-    <!-- LOGOUT -->
-    <a
-      href="#"
-      class="nav-item logout"
-      id="logoutBtn"
-    >
-
-      <span class="icon">
-        🚪
-      </span>
-
-      <span
-        class="text"
-        data-i18n="logout"
-      >
-        Logout
-      </span>
-
-    </a>
-
+    <a href="dashboard.html" class="nav-item">📊 Dashboard</a>
+    <a href="members.html" class="nav-item active">👥 Members</a>
+    <a href="savings.html" class="nav-item">💰 Savings</a>
+    <a href="loans.html" class="nav-item">🏦 Loans</a>
+    <a href="repayments.html" class="nav-item">💵 Repayments</a>
+    <a href="withdrawals.html" class="nav-item">💸 Withdrawals</a>
+    <a href="reports.html" class="nav-item">📄 Reports</a>
+    <a href="users.html" class="nav-item">👤 Users</a>
+    <a href="settings.html" class="nav-item">⚙️ Settings</a>
+    <a href="#" id="logoutBtn" class="nav-item">🚪 Logout</a>
   </nav>
 
 </aside>
 
-<!-- =========================================================
-     MAIN CONTENT
-========================================================= -->
-<div class="topbar">
+<!-- MAIN CONTENT (FIXED) -->
+<main class="main">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+
     <h2 data-i18n="membersManagement">
       MEMBERS MANAGEMENT
     </h2>
 
     <div class="topbar-actions">
 
-      <!-- LANGUAGE -->
-      <select
-        id="languageSelect"
-        onchange="changeLanguage(this.value)"
-      >
-
-        <option value="en">
-          English
-        </option>
-
-        <option value="am">
-          አማርኛ
-        </option>
-
-        <option value="om">
-          Afaan Oromoo
-        </option>
-
+      <select id="languageSelect" onchange="changeLanguage(this.value)">
+        <option value="en">English</option>
+        <option value="am">አማርኛ</option>
+        <option value="om">Afaan Oromoo</option>
       </select>
 
-      <!-- USER -->
-      <div
-        class="selected-box"
-        id="roleBox"
-      >
+      <div class="selected-box">
         👤 Admin
       </div>
+
+      <!-- FIXED BUTTON LOCATION -->
+      <button class="primary-btn" onclick="openMemberModal()">
+        <i class="fa fa-plus"></i> Add Member
+      </button>
 
     </div>
 
   </div>
-  <button class="primary-btn" onclick="openMemberModal()">
-    <i class="fa fa-plus"></i> Add Member
-  </button>
-  </div>
 
-<!-- TABLE -->
-<section class="table-card">
+  <!-- TABLE -->
+  <section class="table-card">
 
-  <input id="searchInput" class="search-input" placeholder="Search">
+    <input id="searchInput" class="search-input" placeholder="Search">
 
-  <table class="data-table">
+    <table class="data-table">
 
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>NID</th>
-        <th>Phone</th>
-        <th>Gender</th>
-        <th>Status</th>
-        <th>Created At</th>
-        <th>Created By</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>NID</th>
+          <th>Phone</th>
+          <th>Gender</th>
+          <th>Status</th>
+          <th>Created At</th>
+          <th>Created By</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
 
-    <tbody id="membersTable"></tbody>
+      <tbody id="membersTable"></tbody>
 
-  </table>
+    </table>
 
-</section>
+  </section>
 
 </main>
 
-<!-- ================= MODAL ================= -->
+<!-- ================= MEMBER MODAL ================= -->
 <div class="modal" id="memberModal">
+
   <div class="modal-box">
 
     <h3 id="modalTitle">Add Member</h3>
@@ -348,47 +121,99 @@
     </form>
 
   </div>
+
 </div>
 
 <!-- ================= PROFILE MODAL ================= -->
 <div class="modal" id="profileModal">
-  <div class="modal-box">
+  <div class="modal-box profile-clean">
 
-    <h2 id="profileName"></h2>
+    <!-- HEADER -->
+    <div class="profile-header">
+      <h2 id="profileName">Member Name</h2>
+      <button id="closeProfileBtn" class="close-btn">✖</button>
+    </div>
 
-    <p>NID: <span id="profileNid"></span></p>
-    <p>Phone: <span id="profilePhone"></span></p>
-    <p>Gender: <span id="profileGender"></span></p>
-    <p>Address: <span id="profileAddress"></span></p>
-    <p>Status: <span id="profileStatus"></span></p>
+    <!-- BASIC INFO CARD -->
+    <div class="profile-info-grid">
 
-    <hr>
+      <div class="info-card">
+        <label>NID</label>
+        <span id="profileNid"></span>
+      </div>
 
-    <h3>Transactions</h3>
+      <div class="info-card">
+        <label>Phone</label>
+        <span id="profilePhone"></span>
+      </div>
 
-    <table class="data-table">
-      <thead>
-        <tr>
-          <th>Type</th>
-          <th>Amount</th>
-          <th>Previous</th>
-          <th>Total</th>
-          <th>Status</th>
-          <th>Date</th>
-          <th>Created By</th>
-        </tr>
-      </thead>
+      <div class="info-card">
+        <label>Gender</label>
+        <span id="profileGender"></span>
+      </div>
 
-      <tbody id="profileTransactions"></tbody>
-    </table>
+      <div class="info-card">
+        <label>Address</label>
+        <span id="profileAddress"></span>
+      </div>
 
-    <hr>
+      <div class="info-card status">
+        <label>Status</label>
+        <span id="profileStatus"></span>
+      </div>
 
-    <p>Total Savings: <span id="profileSavings"></span></p>
-    <p>Total Loans: <span id="profileLoans"></span></p>
-    <p>Remaining Loan: <span id="profileRemaining"></span></p>
+    </div>
+
+    <!-- SUMMARY CARDS -->
+    <div class="profile-summary">
+
+      <div class="summary-card green">
+        <h4>Savings</h4>
+        <p id="profileSavings">0</p>
+      </div>
+
+      <div class="summary-card blue">
+        <h4>Loans</h4>
+        <p id="profileLoans">0</p>
+      </div>
+
+      <div class="summary-card red">
+        <h4>Remaining</h4>
+        <p id="profileRemaining">0</p>
+      </div>
+
+    </div>
+
+    <!-- TRANSACTIONS TABLE -->
+    <div class="transaction-section">
+
+      <h3>Transactions</h3>
+
+      <div class="table-wrapper modal-table">
+
+        <table>
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th>Amount</th>
+              <th>Prev</th>
+              <th>Total</th>
+              <th>Status</th>
+              <th>Date</th>
+              <th>By</th>
+            </tr>
+          </thead>
+
+          <tbody id="profileTransactions"></tbody>
+        </table>
+
+      </div>
+
+    </div>
 
   </div>
+</div>
+
 </div>
 
 <script type="module" src="js/members.js"></script>

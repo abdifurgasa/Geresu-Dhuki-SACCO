@@ -1,141 +1,131 @@
-/* ================= GLOBAL ================= */
+
+/* RESET */
 *{
   margin:0;
   padding:0;
   box-sizing:border-box;
-  font-family: "Inter", sans-serif;
+  font-family:Inter;
 }
 
+/* BACKGROUND */
 body{
-  background:#0b1220;
+  background: radial-gradient(circle at top,#0f172a,#020617);
   color:white;
 }
 
-/* ================= APP LAYOUT ================= */
-.app{
+/* LAYOUT */
+.layout{
   display:flex;
   height:100vh;
 }
 
-/* ================= SIDEBAR (GLASSMORPHISM) ================= */
+/* SIDEBAR */
 .sidebar{
-  width:260px;
-  background:rgba(255,255,255,0.06);
+  width:250px;
+  background: rgba(255,255,255,0.05);
   backdrop-filter: blur(20px);
   border-right:1px solid rgba(255,255,255,0.1);
   padding:20px;
   transition:0.3s;
-  position:relative;
 }
 
-.sidebar.collapsed{
-  width:80px;
+.sidebar.hide{
+  width:70px;
 }
 
-.logo{
+.brand{
   font-size:22px;
   margin-bottom:30px;
 }
 
 /* NAV */
-.nav-item{
+.nav{
   display:block;
   padding:12px;
-  margin:6px 0;
+  margin:8px 0;
   border-radius:12px;
   color:white;
   text-decoration:none;
   transition:0.3s;
 }
 
-.nav-item:hover{
-  background:rgba(255,255,255,0.1);
+.nav:hover{
+  background:rgba(255,255,255,0.08);
 }
 
-.nav-item.active{
-  background:linear-gradient(135deg,#4facfe,#00f2fe);
-  color:#000;
+.active{
+  background:linear-gradient(135deg,#6366f1,#3b82f6);
 }
 
-.nav-item.danger{
-  color:#ff6b6b;
-}
-
-/* collapse button */
-.collapse-btn{
-  position:absolute;
-  bottom:20px;
-  left:20px;
-
+/* TOGGLE */
+.toggle{
+  margin-top:20px;
   padding:10px;
   border:none;
   border-radius:10px;
-
-  background:rgba(255,255,255,0.1);
+  background:#3b82f6;
   color:white;
   cursor:pointer;
 }
 
-/* ================= MAIN ================= */
+/* MAIN */
 .main{
   flex:1;
   padding:25px;
-  background:#f6f8fc;
-  color:#111;
 }
 
-/* ================= TOPBAR ================= */
-.topbar{
+/* HEADER */
+.header{
   display:flex;
   justify-content:space-between;
   align-items:center;
 
-  background:white;
-  padding:18px;
-  border-radius:16px;
+  padding:15px;
+  border-radius:14px;
 
-  box-shadow:0 10px 30px rgba(0,0,0,0.05);
+  background:rgba(255,255,255,0.05);
+  backdrop-filter: blur(15px);
 }
 
-/* LIVE BADGE */
-.badge{
+/* STATUS */
+.status{
   background:#22c55e;
-  color:white;
-  padding:6px 12px;
+  padding:5px 10px;
   border-radius:20px;
   font-size:12px;
 }
 
-/* ================= CARDS ================= */
-.cards{
+/* GRID */
+.grid{
   display:grid;
   grid-template-columns:repeat(4,1fr);
   gap:15px;
   margin-top:20px;
 }
 
-.card{
-  background:white;
+/* GLASS CARD */
+.glass-card{
+  background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.1);
   padding:20px;
   border-radius:18px;
-  box-shadow:0 10px 30px rgba(0,0,0,0.06);
+  backdrop-filter: blur(20px);
   transition:0.3s;
 }
 
-.card:hover{
+.glass-card:hover{
   transform:translateY(-5px);
 }
 
-.card.blue{border-left:5px solid #4facfe;}
-.card.green{border-left:5px solid #22c55e;}
-.card.orange{border-left:5px solid #f97316;}
-.card.dark{border-left:5px solid #6366f1;}
+/* PROFIT CARD */
+.profit{
+  background:linear-gradient(135deg,#22c55e,#16a34a);
+}
 
-/* ================= CHART ================= */
-.chart-box{
+/* CHART */
+.chart{
   margin-top:25px;
-  background:white;
+  background:rgba(255,255,255,0.05);
   padding:20px;
   border-radius:18px;
-  box-shadow:0 10px 30px rgba(0,0,0,0.06);
 }

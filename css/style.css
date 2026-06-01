@@ -170,13 +170,8 @@ background:#dc2626;
 background:#0891b2;
 }
 
+
 /* Actions */
-
-.section-title{
-margin:25px 0 15px;
-}
-
-./* Actions */
 .section-title{
 margin:25px 0 15px;
 }
@@ -208,114 +203,41 @@ color:white;
 /* HOVER EFFECT */
 .action:hover{
 transform:translateY(-5px);
-filter:brightness(1.05);
+filter:brightness(1.1);
 }
 
-/* =========================
-   DIFFERENT COLORS
-========================= */
+/* COLORS */
+.action.add-member{ background:#2563eb; }
+.action.savings{ background:#16a34a; }
+.action.loans{ background:#ea580c; }
+.action.withdrawals{ background:#dc2626; }
 
-.action.add-member{
-background:#2563eb; /* blue */
-}
-
-.action.savings{
-background:#16a34a; /* green */
-}
-
-.action.loans{
-background:#ea580c; /* orange */
-}
-
-.action.withdrawals{
-background:#dc2626; /* red */
-}
-
-.action.reports{
-background:#7c3aed; /* purple */
-}
-
-.action.settings{
-background:#0891b2; /* cyan */
-}
+/* CHARTS */
 .charts{
-grid-template-columns:1fr;
-}
-}
-
-
-/* Charts */
-
-
-
-.charts{
-
 margin-top:25px;
-
 display:grid;
-
 grid-template-columns:1fr 1fr;
-
 gap:20px;
-
 }
 
-
-
-.chart-box{
-
-background:white;
-
-padding:20px;
-
-border-radius:15px;
-
-box-shadow:var(--shadow);
-
-}
-
-
-
-/* Responsive */
-
-
-
+/* RESPONSIVE */
 @media(max-width:1100px){
 
-
-
 .stats,
-
 .actions{
-
 display:flex;
-
 overflow-x:auto;
-
 }
-
-
 
 .card{
-
 min-width:220px;
-
 }
-
-
 
 .action{
-
 min-width:180px;
-
 }
-
-
 
 .charts{
-
 grid-template-columns:1fr;
-
 }
-
 }

@@ -1,57 +1,108 @@
-import { db } from "./firebase.js";
-import { collection, onSnapshot } 
-from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+/* =========================
+   SIDEBAR TOGGLE
+========================= */
 
-let savings = 0;
-let loans = 0;
-
-/* MEMBERS */
-onSnapshot(collection(db,"members"), snap=>{
-  document.getElementById("members").innerText = snap.size;
-});
-
-/* SAVINGS */
-onSnapshot(collection(db,"savings"), snap=>{
-  savings = 0;
-  snap.forEach(d=> savings += Number(d.data().amount||0));
-  document.getElementById("savings").innerText = savings + " ETB";
-  update();
-});
-
-/* LOANS */
-onSnapshot(collection(db,"loans"), snap=>{
-  loans = 0;
-  snap.forEach(d=> loans += Number(d.data().amount||0));
-  document.getElementById("loans").innerText = loans + " ETB";
-  update();
-});
-
-/* PROFIT */
-function update(){
-  document.getElementById("profit").innerText =
-    (savings - loans) + " ETB";
-
-  drawChart();
+function toggleSidebar(){
+    document.querySelector(".sidebar").classList.toggle("collapsed");
+    document.querySelector(".main-content").classList.toggle("expanded");
 }
 
-/* CHART */
-let chart;
+/* =========================
+   MENU ACTIVE STATE
+========================= */
 
-function drawChart(){
+document.querySelectorAll(".menu li").forEach(item=>{
+    item.addEventListener("click", ()=>{
+        document.querySelectorAll(".menu li").forEach(i=>{
+            i.classList.remove("active");
+        });
+        item.classList.add("active");
+    });
+});
 
-  const ctx = document.getElementById("chart");
+/* =========================
+   LOAD FIREBASE DATA
+   (db comes from firebase.js)
+========================= */
 
-  if(chart) chart.destroy();
+async function loadDashboard(){
 
-  chart = new Chart(ctx,{
-    type:"bar",
-    data:{
-      labels:["Savings","Loans"],
-      datasets:[{
-        data:[savings,loans],
-        backgroundColor:["#16a34a","#f97316"]
-      }]
+    try{
+
+        // MEMBERS COUNT
+        const membersSnap = await db.collection("members").get();
+        const membersCount = membersSnap.size;
+
+        // SAVINGS TOTAL
+        const savingsSnap = await db.collection("savings").get();
+        let savingsTotal = 0;
+        savingsSnap.forEach(doc=>{
+            savingsTotal += doc.data().amount || 0;
+        });
+
+        // LOANS TOTAL
+        const loansSnap = await db.collection("loans").get();
+        let loansTotal = 0;
+        loansSnap.forEach(doc=>{
+            loansTotal += doc.data().amount || 0;
+        });
+
+        // UPDATE UI (no fake selectors)
+        document.querySelector(".members h2").innerText = membersCount;
+        document.querySelector(".savings h2").innerText = savingsTotal;
+        document.querySelector(".loans h2").innerText = loansTotal;
+
+        updateCharts(loansTotal, savingsTotal);
+
+    }catch(error){
+        console.error("Dashboard load error:", error);
     }
-  });
-
 }
+
+/* =========================
+   CHARTS
+========================= */
+
+let barChart, lineChart;
+
+function initCharts(){
+
+    barChart = new Chart(document.getElementById("barChart"),{
+        type:"bar",
+        data:{
+            labels:["Loans","Repayments"],
+            datasets:[{
+                label:"Amount",
+                data:[0,0]
+            }]
+        }
+    });
+
+    lineChart = new Chart(document.getElementById("lineChart"),{
+        type:"line",
+        data:{
+            labels:["Savings"],
+            datasets:[{
+                label:"Total Savings",
+                data:[0],
+                borderColor:"#17A8D4"
+            }]
+        }
+    });
+}
+
+function updateCharts(loans, savings){
+
+    barChart.data.datasets[0].data = [loans, loans * 0.8];
+    barChart.update();
+
+    lineChart.data.datasets[0].data = [savings];
+    lineChart.update();
+}
+
+/* =========================
+   INIT
+========================= */
+
+initCharts();
+loadDashboard();

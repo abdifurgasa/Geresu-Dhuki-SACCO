@@ -253,445 +253,104 @@
 <!-- =========================================================
      MAIN CONTENT
 ========================================================= -->
+<main class="main">
 
-<main
-  class="main"
-  id="main"
->
+<!-- TOPBAR -->
+<div class="topbar">
 
-  <!-- =========================================================
-       TOPBAR
-  ========================================================= -->
+  <h2 data-i18n="membersManagement">Members Management</h2>
 
-  <div class="topbar">
+  <button class="primary-btn" onclick="openMemberModal()">
+    <i class="fa fa-plus"></i> Add Member
+  </button>
 
-    <h2 data-i18n="membersManagement">
-      MEMBERS MANAGEMENT
-    </h2>
+</div>
 
-    <div class="topbar-actions">
+<!-- TABLE -->
+<section class="table-card">
 
-      <!-- LANGUAGE -->
-      <select
-        id="languageSelect"
-        onchange="changeLanguage(this.value)"
-      >
-
-        <option value="en">
-          English
-        </option>
-
-        <option value="am">
-          አማርኛ
-        </option>
-
-        <option value="om">
-          Afaan Oromoo
-        </option>
-
-      </select>
-
-      <!-- USER -->
-      <div
-        class="selected-box"
-        id="roleBox"
-      >
-        👤 Admin
-      </div>
-
-    </div>
-
+  <div class="table-header">
+    <input id="searchInput" class="search-input" placeholder="Search...">
+    <button id="exportBtn" class="primary-btn">Export CSV</button>
   </div>
 
-  <!-- =========================================================
-       PAGE HEADER
-  ========================================================= -->
-
-  <div class="page-header">
-
-    <h1 data-i18n="membersManagement">
-      Members Management
-    </h1>
-
-    <p data-i18n="manageMembers">
-      Manage SACCO members
-    </p>
-
-  </div>
-
-  <!-- =========================================================
-       SUMMARY CARDS
-  ========================================================= -->
-
-  <section class="cards">
-
-    <!-- TOTAL MEMBERS -->
-    <div class="card blue">
-
-      <h3 data-i18n="totalMembers">
-        Total Members
-      </h3>
-
-      <p id="totalMembers">
-        0
-      </p>
-
-    </div>
-
-    <!-- ACTIVE MEMBERS -->
-    <div class="card green">
-
-      <h3 data-i18n="activeMembers">
-        Active Members
-      </h3>
-
-      <p id="activeMembers">
-        0
-      </p>
-
-    </div>
-
-  </section>
-
-  <!-- =========================================================
-       MEMBER FORM
-  ========================================================= -->
-
-  <section class="form-card">
-
-    <h3 data-i18n="addMember">
-      Add Member
-    </h3>
-
-    <form id="memberForm">
-
-      <!-- ROW -->
-      <div class="grid-2">
-
-        <!-- FULL NAME -->
-        <input
-          type="text"
-          id="fullName"
-          required
-          placeholder="Full Name"
-          data-i18n-placeholder="fullName"
-        >
-
-        <!-- NID -->
-        <input
-          type="text"
-          id="memberId"
-          maxlength="16"
-          required
-          placeholder="National ID (16 Digits)"
-        >
-
-      </div>
-
-      <!-- ROW -->
-      <div class="grid-2">
-
-        <!-- GENDER -->
-        <select id="gender">
-
-          <option value="Male">
-            Male
-          </option>
-
-          <option value="Female">
-            Female
-          </option>
-
-        </select>
-
-        <!-- PHONE -->
-        <input
-          type="text"
-          id="phone"
-          maxlength="9"
-          required
-          placeholder="Phone Number (9 Digits)"
-        >
-
-      </div>
-
-      <!-- ADDRESS -->
-      <textarea
-        id="address"
-        placeholder="Address"
-      ></textarea>
-
-      <!-- BUTTON -->
-      <button
-        type="submit"
-        class="primary-btn"
-      >
-
-        <i class="fa fa-plus"></i>
-
-        <span data-i18n="addMember">
-          Add Member
-        </span>
-
-      </button>
-
-    </form>
-
-  </section>
-
-  <!-- =========================================================
-       MEMBERS TABLE
-  ========================================================= -->
-
-  <section class="table-card">
-
-    <!-- TABLE HEADER -->
-    <div class="table-header">
-
-      <h3 data-i18n="membersList">
-        Members List
-      </h3>
-
-      <div class="table-actions">
-
-        <!-- SEARCH -->
-        <input
-          type="text"
-          id="searchInput"
-          class="search-input"
-          placeholder="🔍 Search member..."
-        >
-
-        <!-- EXPORT -->
-        <button
-          class="primary-btn"
-          id="exportBtn"
-        >
-
-          <i class="fa fa-download"></i>
-
-          Export CSV
-
-        </button>
-
-      </div>
-
-    </div>
-
-    <!-- TABLE -->
-    <div class="table-wrapper">
-
-      <table class="data-table">
-
-        <thead>
-
-          <tr>
-
-            <th>
-              Full Name
-            </th>
-
-            <th>
-              Gender
-            </th>
-
-            <th>
-              NID
-            </th>
-
-            <th>
-              Phone
-            </th>
-
-            <th>
-              Address
-            </th>
-
-            <th>
-              Status
-            </th>
-
-            <th>
-              Created By
-            </th>
-
-            <th>
-              Created Date
-            </th>
-
-            <th>
-              Actions
-            </th>
-
-          </tr>
-
-        </thead>
-
-        <tbody id="membersTable"></tbody>
-
-      </table>
-
-    </div>
-
-  </section>
+  <table class="data-table">
+
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>NID</th>
+        <th>Phone</th>
+        <th>Gender</th>
+        <th>Status</th>
+        <th>Created At</th>
+        <th>Created By</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+
+    <tbody id="membersTable"></tbody>
+
+  </table>
+
+</section>
 
 </main>
 
-<!-- =========================================================
-     PROFILE MODAL
-========================================================= -->
+<!-- ===================== MODAL ===================== -->
+<div class="modal" id="memberModal">
 
-<div class="modal" id="profileModal">
-
-  <div class="modal-box profile-modal-box">
-
-    <!-- HEADER -->
+  <div class="modal-box">
 
     <div class="modal-header">
-
-      <h2 id="profileName">
-        Member Profile
-      </h2>
-
-      <button
-        class="modal-close-icon"
-        id="closeProfileBtn"
-      >
-        ✖
-      </button>
-
+      <h2 id="modalTitle">Add Member</h2>
+      <button onclick="closeMemberModal()">✖</button>
     </div>
 
-    <!-- MEMBER INFO -->
+    <form id="memberForm">
 
-    <div class="profile-grid">
+      <input id="fullName" placeholder="Full Name" required>
+      <input id="memberId" placeholder="NID (16 digits)" maxlength="16" required>
+      <input id="phone" placeholder="Phone (9 digits)" maxlength="9" required>
 
-      <div class="profile-item">
-        <strong>NID:</strong>
-        <span id="profileNid">-</span>
-      </div>
+      <select id="gender">
+        <option>Male</option>
+        <option>Female</option>
+      </select>
 
-      <div class="profile-item">
-        <strong>Phone:</strong>
-        <span id="profilePhone">-</span>
-      </div>
+      <textarea id="address" placeholder="Address"></textarea>
 
-      <div class="profile-item">
-        <strong>Gender:</strong>
-        <span id="profileGender">-</span>
-      </div>
+      <button class="primary-btn" type="submit">Save</button>
 
-      <div class="profile-item">
-        <strong>Address:</strong>
-        <span id="profileAddress">-</span>
-      </div>
-
-      <div class="profile-item">
-        <strong>Status:</strong>
-        <span id="profileStatus">-</span>
-      </div>
-
-    </div>
-
-    <!-- SUMMARY CARDS -->
-
-    <div class="cards profile-cards">
-
-      <div class="card green">
-
-        <h3>Total Savings</h3>
-
-        <p id="profileSavings">
-          0
-        </p>
-
-      </div>
-
-      <div class="card blue">
-
-        <h3>Total Loans</h3>
-
-        <p id="profileLoans">
-          0
-        </p>
-
-      </div>
-
-      <div class="card red">
-
-        <h3>Remaining Loan</h3>
-
-        <p id="profileRemaining">
-          0
-        </p>
-
-      </div>
-
-    </div>
-
-    <!-- TRANSACTIONS -->
-
-    <div class="table-card profile-transactions">
-
-      <h3>
-        All Transactions
-      </h3>
-
-      <div class="table-wrapper">
-
-        <table class="data-table">
-
-          <thead>
-
-            <tr>
-
-              <th>Type</th>
-
-              <th>Amount</th>
-
-              <th>Previous</th>
-
-              <th>Total</th>
-
-              <th>Status</th>
-
-              <th>Date</th>
-
-              <th>Created By</th>
-
-            </tr>
-
-          </thead>
-
-          <tbody id="profileTransactions">
-
-          </tbody>
-
-        </table>
-
-      </div>
-
-    </div>
+    </form>
 
   </div>
 
 </div>
 
-<!-- =========================================================
-     SCRIPTS
-========================================================= -->
+<!-- ===================== PROFILE MODAL ===================== -->
+<div class="modal" id="profileModal">
 
-<!-- LAYOUT -->
+  <div class="modal-box">
+
+    <div class="modal-header">
+      <h2 id="profileName">Profile</h2>
+      <button onclick="closeProfileModal()">✖</button>
+    </div>
+
+    <p>NID: <span id="profileNid"></span></p>
+    <p>Phone: <span id="profilePhone"></span></p>
+    <p>Gender: <span id="profileGender"></span></p>
+    <p>Address: <span id="profileAddress"></span></p>
+    <p>Status: <span id="profileStatus"></span></p>
+
+  </div>
+
+</div>
+
+<script type="module" src="js/members.js"></script>
 <script src="js/layout.js"></script>
-
-<!-- I18N -->
 <script src="js/i18n.js"></script>
-
-<!-- MEMBERS -->
-<script
-  type="module"
-  src="js/members.js"
-></script>
 
 </body>
 </html>

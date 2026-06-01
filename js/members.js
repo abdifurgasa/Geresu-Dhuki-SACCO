@@ -21,15 +21,9 @@ const search = document.getElementById("searchInput");
 const modal = document.getElementById("memberModal");
 const profileModal = document.getElementById("profileModal");
 
-/* ================= USER NAME FIX ================= */
-function getUserName() {
-  return (
-    auth.currentUser?.displayName ||
-    auth.currentUser?.email ||
-    localStorage.getItem("userName") ||
-    "Unknown User"
-  );
-}
+/* ================= USER ================= */
+const userName =
+  localStorage.getItem("userName") || "Unknown User";
 
 /* ================= MODAL CONTROL ================= */
 window.openMemberModal = () => {
@@ -46,26 +40,22 @@ window.closeProfileModal = () => {
   profileModal.classList.remove("active");
 };
 
-/* ✅ FIX CLOSE X + OUTSIDE CLICK */
+/* FIX: click outside modal closes */
 document.addEventListener("click", (e) => {
-  if (e.target.classList.contains("modal")) {
-    e.target.classList.remove("active");
-  }
+  if (e.target === modal) modal.classList.remove("active");
+  if (e.target === profileModal) profileModal.classList.remove("active");
 });
 
 /* ================= LOAD MEMBERS ================= */
 async function loadMembers() {
   const snap = await getDocs(collection(db, "members"));
 
-  members = snap.docs.map(d => ({
-    id: d.id,
-    ...d.data()
-  }));
+  members = snap.docs.map(d => ({ id: d.id, ...d.data() }));
 
   render(members);
 }
 
-/* ================= RENDER TABLE ================= */
+/* ================= RENDER ================= */
 function render(data) {
   table.innerHTML = "";
 
@@ -73,19 +63,17 @@ function render(data) {
     const tr = document.createElement("tr");
 
     tr.innerHTML = `
-      <td>${m.fullName || "-"}</td>
-      <td>${m.memberId || "-"}</td>
-      <td>${m.phone || "-"}</td>
-      <td>${m.gender || "-"}</td>
+      <td>${m.fullName}</td>
+      <td>${m.memberId}</td>
+      <td>${m.phone}</td>
+      <td>${m.gender}</td>
       <td>${m.status || "Active"}</td>
-
       <td>${
         m.createdAt?.toDate
           ? m.createdAt.toDate().toLocaleDateString()
           : "-"
       }</td>
-
-      <td>${m.createdBy || "-"}</td>
+      <td>${m.createdBy || "Unknown User"}</td>
 
       <td>
         <button onclick="editMember('${m.id}')">✏️</button>
@@ -109,7 +97,9 @@ form.addEventListener("submit", async (e) => {
     gender: gender.value,
     address: address.value,
     status: "Active",
-    createdBy: getUserName()
+
+    /* ✅ FIXED USER NAME */
+    createdBy: localStorage.getItem("userName") || "Unknown User"
   };
 
   if (editId) {
@@ -126,7 +116,6 @@ form.addEventListener("submit", async (e) => {
 /* ================= DELETE ================= */
 window.deleteMember = async (id) => {
   if (!confirm("Delete member?")) return;
-
   await deleteDoc(doc(db, "members", id));
   loadMembers();
 };
@@ -134,22 +123,20 @@ window.deleteMember = async (id) => {
 /* ================= EDIT ================= */
 window.editMember = (id) => {
   const m = members.find(x => x.id === id);
-  if (!m) return;
 
-  fullName.value = m.fullName || "";
-  memberId.value = m.memberId || "";
-  phone.value = m.phone || "";
-  gender.value = m.gender || "Male";
-  address.value = m.address || "";
+  fullName.value = m.fullName;
+  memberId.value = m.memberId;
+  phone.value = m.phone;
+  gender.value = m.gender;
+  address.value = m.address;
 
   editId = id;
   openMemberModal();
 };
 
 /* ================= PROFILE ================= */
-window.openProfile = async (id) => {
+window.openProfile = function (id) {
   const member = members.find(m => m.id === id);
-  if (!member) return;
 
   profileModal.classList.add("active");
 
@@ -160,10 +147,10 @@ window.openProfile = async (id) => {
   document.getElementById("profileAddress").innerText = member.address;
   document.getElementById("profileStatus").innerText = member.status || "Active";
 
-  await loadProfileTransactions(member.memberId);
+  loadProfileTransactions(member.memberId);
 };
 
-/* ================= PROFILE TRANSACTIONS ================= */
+/* ================= TRANSACTIONS ================= */
 async function loadProfileTransactions(memberId) {
   const collections = ["savings", "loans", "repayments", "withdrawals"];
 
@@ -181,7 +168,7 @@ async function loadProfileTransactions(memberId) {
           amount: x.amount || 0,
           status: x.status || "Done",
           date: x.createdAt?.toDate?.().toLocaleDateString() || "-",
-          by: x.createdBy || getUserName()
+          by: x.createdBy || "Unknown User"
         });
       }
     });
@@ -213,9 +200,9 @@ search.addEventListener("input", () => {
 
   render(
     members.filter(m =>
-      (m.fullName || "").toLowerCase().includes(v) ||
-      (m.phone || "").includes(v) ||
-      (m.memberId || "").includes(v)
+      m.fullName.toLowerCase().includes(v) ||
+      m.phone.includes(v) ||
+      m.memberId.includes(v)
     )
   );
 });

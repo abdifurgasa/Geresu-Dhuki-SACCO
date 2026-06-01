@@ -12,416 +12,160 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 /* =========================================================
-   LIVE DOM ELEMENTS
+   DOM ELEMENTS
 ========================================================= */
 
-const membersEl =
-  document.getElementById("members");
-
-const savingsEl =
-  document.getElementById("savings");
-
-const loansEl =
-  document.getElementById("loans");
-
-const withdrawalsEl =
-  document.getElementById("withdrawals");
-
-const profitEl =
-  document.getElementById("profit");
+const membersEl = document.getElementById("members");
+const savingsEl = document.getElementById("savings");
+const loansEl = document.getElementById("loans");
+const withdrawalsEl = document.getElementById("withdrawals");
+const profitEl = document.getElementById("profit");
 
 let chartInstance = null;
 
 /* =========================================================
-   ANIMATION COUNTER
+   SAFE NUMBER ANIMATION
 ========================================================= */
 
-function animateValue(
-  el,
-  start,
-  end,
-  duration = 800
-) {
-
+function animateValue(el, start, end, duration = 800) {
   if (!el) return;
 
   let startTimestamp = null;
 
   const step = (timestamp) => {
+    if (!startTimestamp) startTimestamp = timestamp;
 
-    if (!startTimestamp)
-      startTimestamp = timestamp;
+    const progress = Math.min((timestamp - startTimestamp) / duration, 1);
 
-    const progress = Math.min(
-      (timestamp - startTimestamp) / duration,
-      1
-    );
+    const value = Math.floor(progress * (end - start) + start);
 
-    const value = Math.floor(
-      progress * (end - start) + start
-    );
+    el.innerText = value.toLocaleString();
 
-    el.innerText =
-      value.toLocaleString() + " ETB";
-
-    if (progress < 1) {
-
-      window.requestAnimationFrame(step);
-
-    }
-
+    if (progress < 1) requestAnimationFrame(step);
   };
 
-  window.requestAnimationFrame(step);
-
+  requestAnimationFrame(step);
 }
 
 /* =========================================================
-   LOAD DASHBOARD DATA (REALTIME)
+   LOAD DASHBOARD DATA
 ========================================================= */
 
 function loadDashboard() {
 
-  /* ---------------- MEMBERS ---------------- */
+  // MEMBERS
+  onSnapshot(collection(db, "members"), (snap) => {
+    if (membersEl) membersEl.innerText = snap.size.toLocaleString();
+  });
 
-  onSnapshot(
-    collection(db, "members"),
-    (snap) => {
+  // SAVINGS
+  onSnapshot(collection(db, "savings"), (snap) => {
+    let total = 0;
+    snap.forEach(d => total += Number(d.data().amount || 0));
 
-      const count = snap.size;
+    animateValue(savingsEl, 0, total);
+  });
 
-      if (membersEl) {
+  // LOANS
+  onSnapshot(collection(db, "loans"), (snap) => {
+    let total = 0;
+    snap.forEach(d => total += Number(d.data().amount || 0));
 
-        membersEl.innerText =
-          count.toLocaleString();
+    animateValue(loansEl, 0, total);
+  });
 
-      }
+  // WITHDRAWALS
+  onSnapshot(collection(db, "withdrawals"), (snap) => {
+    let total = 0;
+    snap.forEach(d => total += Number(d.data().amount || 0));
 
-    }
-  );
-
-  /* ---------------- SAVINGS ---------------- */
-
-  onSnapshot(
-    collection(db, "savings"),
-    (snap) => {
-
-      let total = 0;
-
-      snap.forEach((doc) => {
-
-        total += Number(
-          doc.data().amount || 0
-        );
-
-      });
-
-      animateValue(
-        savingsEl,
-        0,
-        total
-      );
-
-      updateChart();
-
-    }
-  );
-
-  /* ---------------- LOANS ---------------- */
-
-  onSnapshot(
-    collection(db, "loans"),
-    (snap) => {
-
-      let total = 0;
-
-      snap.forEach((doc) => {
-
-        total += Number(
-          doc.data().amount || 0
-        );
-
-      });
-
-      animateValue(
-        loansEl,
-        0,
-        total
-      );
-
-      updateChart();
-
-    }
-  );
-
-  /* ---------------- WITHDRAWALS ---------------- */
-
-  onSnapshot(
-    collection(db, "withdrawals"),
-    (snap) => {
-
-      let total = 0;
-
-      snap.forEach((doc) => {
-
-        total += Number(
-          doc.data().amount || 0
-        );
-
-      });
-
-      animateValue(
-        withdrawalsEl,
-        0,
-        total
-      );
-
-      updateChart();
-
-    }
-  );
-
+    animateValue(withdrawalsEl, 0, total);
+  });
 }
 
 /* =========================================================
-   CHART (LOANS VS REPAYMENTS)
+   CHART UPDATE
 ========================================================= */
 
 async function updateChart() {
 
-  const loansSnap =
-    await getDocs(
-      collection(db, "loans")
-    );
-
-  const repaySnap =
-    await getDocs(
-      collection(db, "repayments")
-    );
+  const loansSnap = await getDocs(collection(db, "loans"));
+  const repaySnap = await getDocs(collection(db, "repayments"));
 
   let loansTotal = 0;
-
   let repayTotal = 0;
 
-  loansSnap.forEach((d) => {
+  loansSnap.forEach(d => loansTotal += Number(d.data().amount || 0));
+  repaySnap.forEach(d => repayTotal += Number(d.data().amount || 0));
 
-    loansTotal += Number(
-      d.data().amount || 0
-    );
-
-  });
-
-  repaySnap.forEach((d) => {
-
-    repayTotal += Number(
-      d.data().amount || 0
-    );
-
-  });
-
-  const ctx =
-    document.getElementById(
-      "financeChart"
-    );
-
+  const ctx = document.getElementById("financeChart");
   if (!ctx) return;
 
-  if (chartInstance) {
-
-    chartInstance.destroy();
-
-  }
+  if (chartInstance) chartInstance.destroy();
 
   chartInstance = new Chart(ctx, {
-
     type: "bar",
-
     data: {
-
-      labels: [
-        "Loans",
-        "Repayments"
-      ],
-
+      labels: ["Loans", "Repayments"],
       datasets: [{
-
         label: "ETB",
-
-        data: [
-          loansTotal,
-          repayTotal
-        ],
-
-        backgroundColor: [
-          "#f97316",
-          "#22c55e"
-        ]
-
+        data: [loansTotal, repayTotal],
+        backgroundColor: ["#f97316", "#22c55e"]
       }]
-
     },
-
     options: {
-
       responsive: true,
-
-      plugins: {
-
-        legend: {
-          display: false
-        }
-
-      },
-
-      animation: {
-
-        duration: 1200
-
-      }
-
+      plugins: { legend: { display: false } }
     }
-
   });
 
-  /* ---------------- PROFIT ---------------- */
-
-  const profit =
-    repayTotal - loansTotal;
-
-  animateValue(
-    profitEl,
-    0,
-    profit
-  );
-
-}
-// ================= SIDEBAR TOGGLE =================
-function toggleSidebar() {
-  document.getElementById("sidebar").classList.toggle("collapsed");
+  const profit = repayTotal - loansTotal;
+  animateValue(profitEl, 0, profit);
 }
 
-// ================= DARK MODE =================
-function toggleTheme() {
-  document.body.classList.toggle("light");
-}
-
-// ================= ACTIVE INDICATOR =================
-const items = document.querySelectorAll(".nav-item");
-const indicator = document.getElementById("indicator");
-
-function setActive(el) {
-  items.forEach(i => i.classList.remove("active"));
-  el.classList.add("active");
-
-  indicator.style.top = el.offsetTop + "px";
-  indicator.style.height = el.offsetHeight + "px";
-}
-
-// init indicator
-setActive(items[0]);
-
-// ================= NOTIFICATIONS =================
-let count = 3;
-
-// ================= REAL TIME UPDATES =================
-setInterval(() => {
-
-  document.getElementById("members").innerText =
-    Math.floor(Math.random() * 200);
-
-  document.getElementById("savings").innerText =
-    Math.floor(Math.random() * 10000);
-
-  document.getElementById("loans").innerText =
-    Math.floor(Math.random() * 5000);
-
-}, 3000);
-
-// ================= CHART =================
-const ctx = document.getElementById("chart");
-
-new Chart(ctx, {
-  type: "line",
-  data: {
-    labels: ["Jan","Feb","Mar","Apr","May","Jun"],
-    datasets: [{
-      label: "Performance",
-      data: [10,20,15,40,30,60],
-      borderColor: "#4facfe",
-      tension: 0.4
-    }]
-  }
-});
 /* =========================================================
-   USER INFO
+   AUTH PROTECTION (🔥 FIX FOR LOGOUT BUG)
 ========================================================= */
 
-onAuthStateChanged(
-  auth,
-  (user) => {
+onAuthStateChanged(auth, (user) => {
 
-    if (!user) return;
-
-    const name =
-      localStorage.getItem("name") ||
-      user.displayName ||
-      "Admin";
-
-    const roleBox =
-      document.getElementById(
-        "roleBox"
-      );
-
-    if (roleBox) {
-
-      roleBox.innerText =
-        `👤 ${name}`;
-
-    }
-
+  if (!user) {
+    window.location.href = "index.html";
+    return;
   }
-);
+
+  console.log("LOGIN OK:", user.email);
+
+  // ✅ ONLY RUN AFTER LOGIN CONFIRMED
+  loadDashboard();
+  updateChart();
+
+  const roleBox = document.getElementById("roleBox");
+
+  if (roleBox) {
+    roleBox.innerText = "👤 " + (user.email || "User");
+  }
+
+});
 
 /* =========================================================
    LOGOUT
 ========================================================= */
 
-document.addEventListener(
-  "DOMContentLoaded",
-  () => {
+document.addEventListener("DOMContentLoaded", () => {
 
-    const logoutBtn =
-      document.getElementById(
-        "logoutBtn"
-      );
+  const logoutBtn = document.getElementById("logoutBtn");
 
-    if (logoutBtn) {
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", async (e) => {
+      e.preventDefault();
 
-      logoutBtn.addEventListener(
-        "click",
-        async (e) => {
+      await signOut(auth);
 
-          e.preventDefault();
+      localStorage.clear();
 
-          await signOut(auth);
-
-          localStorage.clear();
-
-          window.location.href =
-            "login.html";
-
-        }
-      );
-
-    }
-
+      window.location.href = "index.html";
+    });
   }
-);
 
-/* =========================================================
-   INIT
-========================================================= */
-
-loadDashboard();
-
-updateChart();
+});

@@ -1,61 +1,49 @@
 import { auth, db } from "./firebase.js";
-
 import {
-  signInWithEmailAndPassword
+  signInWithEmailAndPassword,
+  onAuthStateChanged,
+  signOut
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 import {
   doc,
-  getDoc
+  getDoc,
+  updateDoc,
+  serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-/* =========================
-   LOGIN FUNCTION
-========================= */
-window.login = async function () {
+/* ================= LOGIN ================= */
+export async function login(email, password) {
 
-  console.log("LOGIN CLICKED");
+  const userCredential =
+    await signInWithEmailAndPassword(auth, email, password);
 
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
-  const msg = document.getElementById("msg");
+  const user = userCredential.user;
 
-  msg.innerText = "";
+  const ref = doc(db, "users", user.uid);
+  const snap = await getDoc(ref);
 
-  if (!email || !password) {
-    msg.innerText = "Please enter email and password";
-    return;
+  let role = "user";
+  let language = "en";
+
+  if (snap.exists()) {
+    role = snap.data().role || "user";
+    language = snap.data().language || "en";
   }
 
-  try {
+  // save session
+  localStorage.setItem("uid", user.uid);
+  localStorage.setItem("role", role);
+  localStorage.setItem("language", language);
 
-    // 🔐 Firebase login
-    const userCred = await signInWithEmailAndPassword(auth, email, password);
+  await updateDoc(ref, {
+    lastLogin: serverTimestamp()
+  });
 
-    const uid = userCred.user.uid;
-
-    // 👮 Get role from Firestore
-    const snap = await getDoc(doc(db, "users", uid));
-
-    let role = "member"; // SAFE DEFAULT
-
-    if (snap.exists()) {
-      role = snap.data().role;
-    }
-
-    // 💾 Save role
-    localStorage.setItem("role", role);
-
-    console.log("LOGIN SUCCESS ROLE:", role);
-
-    // 🚀 Redirect
-    window.location.href = "dashboard.html";
-
-  } catch (error) {
-
-    console.error(error);
-    msg.innerText = error.message;
-
+  // redirect based on role
+  if (role === "admin") {
+    window.location.href = "admin.html";
+  } else {
+    window.location.href = "user.html";
   }
-
-};
+}

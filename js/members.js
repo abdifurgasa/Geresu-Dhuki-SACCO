@@ -9,20 +9,18 @@ import {
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-/* ===================== ELEMENTS ===================== */
-const form = document.getElementById("memberForm");
-const table = document.getElementById("membersTable");
-const search = document.getElementById("searchInput");
-const exportBtn = document.getElementById("exportBtn");
-
-/* ===================== STATE ===================== */
+/* ================= STATE ================= */
 let members = [];
 let editId = null;
 
-/* ===================== MODALS ===================== */
+/* ================= ELEMENTS ================= */
+const table = document.getElementById("membersTable");
+const form = document.getElementById("memberForm");
+const search = document.getElementById("searchInput");
+
+/* ================= MODAL CONTROL ================= */
 window.openMemberModal = () => {
   document.getElementById("memberModal").classList.add("active");
-  document.getElementById("modalTitle").innerText = "Add Member";
   form.reset();
   editId = null;
 };
@@ -35,19 +33,16 @@ window.closeProfileModal = () => {
   document.getElementById("profileModal").classList.remove("active");
 };
 
-/* ===================== LOAD MEMBERS ===================== */
+/* ================= LOAD MEMBERS ================= */
 async function loadMembers() {
   const snap = await getDocs(collection(db, "members"));
 
-  members = snap.docs.map(d => ({
-    id: d.id,
-    ...d.data()
-  }));
+  members = snap.docs.map(d => ({ id: d.id, ...d.data() }));
 
   render(members);
 }
 
-/* ===================== RENDER ===================== */
+/* ================= RENDER ================= */
 function render(data) {
   table.innerHTML = "";
 
@@ -79,7 +74,7 @@ function render(data) {
   });
 }
 
-/* ===================== ADD / EDIT ===================== */
+/* ================= ADD / EDIT ================= */
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
 
@@ -104,7 +99,15 @@ form.addEventListener("submit", async (e) => {
   loadMembers();
 });
 
-/* ===================== EDIT ===================== */
+/* ================= DELETE ================= */
+window.deleteMember = async (id) => {
+  if (!confirm("Delete member?")) return;
+
+  await deleteDoc(doc(db, "members", id));
+  loadMembers();
+};
+
+/* ================= EDIT ================= */
 window.editMember = (id) => {
   const m = members.find(x => x.id === id);
 
@@ -115,21 +118,42 @@ window.editMember = (id) => {
   address.value = m.address;
 
   editId = id;
-
-  document.getElementById("modalTitle").innerText = "Edit Member";
   openMemberModal();
 };
 
-/* ===================== DELETE ===================== */
-window.deleteMember = async (id) => {
-  if (!confirm("Delete member?")) return;
+/* ================= TRANSACTIONS ================= */
+async function loadTransactions(memberId) {
 
-  await deleteDoc(doc(db, "members", id));
-  loadMembers();
-};
+  const collections = ["savings", "loans", "repayments", "withdrawals"];
 
-/* ===================== PROFILE ===================== */
-window.openProfile = (id) => {
+  let all = [];
+
+  for (let c of collections) {
+    const snap = await getDocs(collection(db, c));
+
+    snap.forEach(d => {
+      const x = d.data();
+
+      if (x.memberId === memberId) {
+        all.push({
+          type: c,
+          amount: x.amount || 0,
+          previous: x.previous || 0,
+          total: x.total || 0,
+          status: x.status || "Done",
+          createdAt: x.createdAt,
+          createdBy: x.createdBy || "-"
+        });
+      }
+    });
+  }
+
+  return all;
+}
+
+/* ================= PROFILE ================= */
+window.openProfile = async (id) => {
+
   const m = members.find(x => x.id === id);
 
   profileName.innerText = m.fullName;
@@ -137,12 +161,50 @@ window.openProfile = (id) => {
   profilePhone.innerText = m.phone;
   profileGender.innerText = m.gender;
   profileAddress.innerText = m.address;
-  profileStatus.innerText = m.status || "Active";
+  profileStatus.innerText = m.status;
 
   document.getElementById("profileModal").classList.add("active");
+
+  const transactions = await loadTransactions(m.memberId);
+
+  const tbody = document.getElementById("profileTransactions");
+  tbody.innerHTML = "";
+
+  let savings = 0;
+  let loans = 0;
+  let repaid = 0;
+
+  transactions.forEach(t => {
+
+    if (t.type === "savings") savings += Number(t.amount);
+    if (t.type === "loans") loans += Number(t.amount);
+    if (t.type === "repayments") repaid += Number(t.amount);
+
+    const tr = document.createElement("tr");
+
+    tr.innerHTML = `
+      <td>${t.type}</td>
+      <td>${t.amount}</td>
+      <td>${t.previous}</td>
+      <td>${t.total}</td>
+      <td>${t.status}</td>
+      <td>${
+        t.createdAt?.toDate
+          ? t.createdAt.toDate().toLocaleDateString()
+          : "-"
+      }</td>
+      <td>${t.createdBy}</td>
+    `;
+
+    tbody.appendChild(tr);
+  });
+
+  profileSavings.innerText = savings;
+  profileLoans.innerText = loans;
+  profileRemaining.innerText = loans - repaid;
 };
 
-/* ===================== SEARCH ===================== */
+/* ================= SEARCH ================= */
 search.addEventListener("input", () => {
   const v = search.value.toLowerCase();
 
@@ -155,22 +217,5 @@ search.addEventListener("input", () => {
   );
 });
 
-/* ===================== EXPORT ===================== */
-exportBtn.onclick = () => {
-  let csv = "Name,NID,Phone,Gender,Status,CreatedAt,CreatedBy\n";
-
-  members.forEach(m => {
-    csv += `${m.fullName},${m.memberId},${m.phone},${m.gender},${m.status},${m.createdAt},${m.createdBy}\n`;
-  });
-
-  const blob = new Blob([csv], { type: "text/csv" });
-  const url = URL.createObjectURL(blob);
-
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "members.csv";
-  a.click();
-};
-
-/* ===================== INIT ===================== */
+/* ================= INIT ================= */
 loadMembers();

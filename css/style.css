@@ -183,7 +183,21 @@ gap:15px;
 }
 
 .action{
-background:white;
+.members{
+background:#2563eb;
+}
+
+.savings{
+background:#16a34a;
+}
+
+.loans{
+background:#ea580c;
+}
+
+.withdrawals{
+background:#dc2626;
+}
 padding:20px;
 text-align:center;
 border-radius:15px;

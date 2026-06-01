@@ -6,12 +6,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title data-i18n="title">SACCO Login</title>
 
-<!-- Font Awesome -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 
 <style>
 
-/* ================= GLOBAL ================= */
+/* ================= BODY ================= */
 body {
   margin: 0;
   height: 100vh;
@@ -25,103 +24,39 @@ body {
   overflow: hidden;
 }
 
-/* glow background */
-body::before,
-body::after {
-  content: "";
-  position: absolute;
-  width: 500px;
-  height: 500px;
-  filter: blur(70px);
-  z-index: 0;
-}
-
-body::before {
-  background: radial-gradient(circle,#4facfe55,transparent);
-  top: -120px;
-  left: -120px;
-}
-
-body::after {
-  background: radial-gradient(circle,#ff4b2b55,transparent);
-  bottom: -120px;
-  right: -120px;
-}
-
 /* ================= LANGUAGE ================= */
 .lang-select {
   position: absolute;
   top: 20px;
   right: 20px;
-  z-index: 10;
 }
 
 .lang-select select {
-  padding: 10px 14px;
-  border-radius: 12px;
-
+  padding: 10px;
+  border-radius: 10px;
   background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.2);
-
   color: white;
-  backdrop-filter: blur(15px);
-
-  cursor: pointer;
+  border: 1px solid rgba(255,255,255,0.2);
 }
 
 /* ================= LOGIN BOX ================= */
 .login-box {
-  position: relative;
-  z-index: 5;
-
   width: 380px;
   padding: 35px;
-
-  border-radius: 22px;
+  border-radius: 20px;
 
   background: rgba(255,255,255,0.07);
-  backdrop-filter: blur(22px);
+  backdrop-filter: blur(20px);
 
   border: 1px solid rgba(255,255,255,0.12);
 
-  box-shadow: 0 25px 70px rgba(0,0,0,0.5);
-
   text-align: center;
-
-  animation: fade 0.5s ease;
-}
-
-@keyframes fade {
-  from {opacity:0; transform:translateY(20px);}
-  to {opacity:1; transform:translateY(0);}
-}
-
-/* ================= LOGO ================= */
-.logo {
-  font-size: 50px;
-  margin-bottom: 10px;
-  animation: float 3s infinite ease-in-out;
-}
-
-@keyframes float {
-  0%,100% {transform:translateY(0);}
-  50% {transform:translateY(-8px);}
-}
-
-/* ================= TEXT ================= */
-h2 {
-  color: white;
-  margin: 10px 0;
-}
-
-p {
-  color: rgba(255,255,255,0.7);
 }
 
 /* ================= INPUT ================= */
 .input-group {
-  margin-top: 15px;
   text-align: left;
+  margin-top: 15px;
 }
 
 label {
@@ -132,14 +67,10 @@ label {
 .input-box {
   display: flex;
   align-items: center;
-
   margin-top: 6px;
 
   background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.1);
-
   border-radius: 12px;
-
   padding: 12px;
 }
 
@@ -156,11 +87,6 @@ label {
   color: white;
 }
 
-.toggle-pass {
-  cursor: pointer;
-  color: #ccc;
-}
-
 /* ================= BUTTON ================= */
 button {
   width: 100%;
@@ -168,24 +94,17 @@ button {
   padding: 14px;
 
   border: none;
-  border-radius: 14px;
+  border-radius: 12px;
 
   background: linear-gradient(135deg,#4facfe,#00f2fe);
   color: white;
 
   font-weight: bold;
   cursor: pointer;
-
-  transition: 0.3s;
 }
 
 button:hover {
   transform: translateY(-2px);
-}
-
-/* ================= MOBILE ================= */
-@media(max-width:600px){
-  .login-box {width: 90%;}
 }
 
 </style>
@@ -205,8 +124,6 @@ button:hover {
 <!-- LOGIN -->
 <div class="login-box">
 
-  <div class="logo">🏦</div>
-
   <h2 data-i18n="title">SACCO LOGIN</h2>
   <p data-i18n="welcome">Welcome Back</p>
 
@@ -215,7 +132,7 @@ button:hover {
     <label data-i18n="email">Email</label>
     <div class="input-box">
       <i class="fa fa-envelope"></i>
-      <input id="email" type="email" placeholder="Enter email" data-i18n-placeholder="emailPh">
+      <input id="email" type="email" placeholder="Enter email">
     </div>
   </div>
 
@@ -224,17 +141,18 @@ button:hover {
     <label data-i18n="password">Password</label>
     <div class="input-box">
       <i class="fa fa-lock"></i>
-      <input id="password" type="password" placeholder="Enter password" data-i18n-placeholder="passPh">
-      <i class="fa fa-eye toggle-pass" onclick="togglePass()"></i>
+      <input id="password" type="password" placeholder="Enter password">
     </div>
   </div>
 
-<button id="loginBtn"></button> data-i18n="login">
+  <!-- ✅ FIXED BUTTON -->
+  <button id="loginBtn" onclick="login()" data-i18n="login">
     Login
+  </button>
 
 </div>
 
-<!-- ================= JS ================= -->
+<!-- ================= SCRIPT ================= -->
 <script>
 
 /* ================= LANGUAGE ================= */
@@ -244,8 +162,6 @@ const translations = {
     welcome: "Welcome Back",
     email: "Email",
     password: "Password",
-    emailPh: "Enter email",
-    passPh: "Enter password",
     login: "Login"
   },
   am: {
@@ -253,8 +169,6 @@ const translations = {
     welcome: "እንኳን ደህና መጡ",
     email: "ኢሜይል",
     password: "የይለፍ ቃል",
-    emailPh: "ኢሜይል ያስገቡ",
-    passPh: "የይለፍ ቃል ያስገቡ",
     login: "ግባ"
   },
   om: {
@@ -262,8 +176,6 @@ const translations = {
     welcome: "Baga Nagaan Dhuftan",
     email: "Imeelii",
     password: "Jecha Darbii",
-    emailPh: "Imeelii galchi",
-    passPh: "Jecha darbii galchi",
     login: "Seeni"
   }
 };
@@ -273,38 +185,32 @@ function changeLanguage(lang){
     const key = el.getAttribute("data-i18n");
     el.innerText = translations[lang][key];
   });
-
-  document.querySelectorAll("[data-i18n-placeholder]").forEach(el=>{
-    const key = el.getAttribute("data-i18n-placeholder");
-    el.placeholder = translations[lang][key];
-  });
 }
 
-/* ================= PASSWORD TOGGLE ================= */
-function togglePass(){
-  const pass = document.getElementById("password");
-  pass.type = pass.type === "password" ? "text" : "password";
-}
-
-/* ================= LOGIN ================= */
+/* ================= LOGIN (TEST WORKING FIRST) ================= */
 function login(){
 
-  const btn = document.getElementById("loginBtn");
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
 
+  if(!email || !password){
+    alert("Fill all fields");
+    return;
+  }
+
+  const btn = document.getElementById("loginBtn");
   btn.innerText = "Loading...";
   btn.disabled = true;
 
-  setTimeout(()=>{
-    alert("Login success (connect Firebase here)");
-    btn.innerText = "Login";
-    btn.disabled = false;
-    // window.location.href = "dashboard.html";
-  },1500);
+  setTimeout(() => {
 
+    // ✅ REDIRECT WORKS NOW
+    window.location.href = "dashboard.html";
+
+  }, 1000);
 }
 
-<script src="js/layout.js"></script>
-<script src="js/login.js"></script>
+</script>
 
 </body>
 </html>

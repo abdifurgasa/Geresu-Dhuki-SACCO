@@ -241,3 +241,116 @@ min-width:180px;
 grid-template-columns:1fr;
 }
 }
+/* =========================
+   GLOBAL ANIMATIONS
+========================= */
+
+/* smooth page load */
+body{
+animation:pageFade .4s ease;
+}
+
+@keyframes pageFade{
+from{
+opacity:0;
+transform:scale(0.98);
+}
+to{
+opacity:1;
+transform:scale(1);
+}
+}
+
+/* =========================
+   SIDEBAR ANIMATION
+========================= */
+.sidebar{
+animation:slideLeft .4s ease;
+}
+
+@keyframes slideLeft{
+from{
+transform:translateX(-20px);
+opacity:0;
+}
+to{
+transform:translateX(0);
+opacity:1;
+}
+}
+
+/* =========================
+   HEADER ANIMATION
+========================= */
+.header{
+animation:slideDown .4s ease;
+}
+
+@keyframes slideDown{
+from{
+transform:translateY(-15px);
+opacity:0;
+}
+to{
+transform:translateY(0);
+opacity:1;
+}
+}
+
+/* =========================
+   CARDS ANIMATION
+========================= */
+.card{
+animation:fadeUp .5s ease both;
+transition:.3s;
+}
+
+.card:hover{
+transform:translateY(-6px) scale(1.02);
+}
+
+@keyframes fadeUp{
+from{
+opacity:0;
+transform:translateY(20px);
+}
+to{
+opacity:1;
+transform:translateY(0);
+}
+}
+
+/* =========================
+   ACTIONS ANIMATION
+========================= */
+.action{
+animation:fadeUp .6s ease both;
+transition:.3s;
+}
+
+.action:hover{
+transform:translateY(-8px) scale(1.04);
+}
+
+/* =========================
+   CHART ANIMATION
+========================= */
+.chart-box{
+animation:zoomIn .6s ease both;
+transition:.3s;
+}
+
+.chart-box:hover{
+transform:scale(1.02);
+}
+
+@keyframes zoomIn{
+from{
+opacity:0;
+transform:scale(0.95);
+}
+to{
+opacity:1;
+transform:scale(1);
+}
+}

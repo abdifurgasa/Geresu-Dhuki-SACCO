@@ -1,60 +1,65 @@
 import { auth, db } from "./js/firebase.js";
 
-import {
-  signInWithEmailAndPassword
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { signInWithEmailAndPassword }
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-import {
-  doc,
-  getDoc
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { doc, getDoc }
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-window.login = async function () {
+/* ================= LOGIN ================= */
 
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
+document.addEventListener("DOMContentLoaded", () => {
 
-  if (!email || !password) {
-    alert("Please fill all fields");
-    return;
-  }
+  const btn = document.getElementById("loginBtn");
 
-  try {
+  btn.addEventListener("click", async () => {
 
-    // 🔐 Firebase login
-    const userCredential =
-      await signInWithEmailAndPassword(auth, email, password);
+    try {
 
-    const user = userCredential.user;
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
 
-    // 📦 Get user role from Firestore
-    const userRef = doc(db, "users", user.uid);
-    const userSnap = await getDoc(userRef);
+      if (!email || !password) {
+        alert("Fill all fields");
+        return;
+      }
 
-    let role = "user";
-    let language = "en";
+      // 🔐 LOGIN FIREBASE
+      const userCredential =
+        await signInWithEmailAndPassword(auth, email, password);
 
-    if (userSnap.exists()) {
-      role = userSnap.data().role || "user";
-      language = userSnap.data().language || "en";
+      const user = userCredential.user;
+
+      // 📦 GET ROLE
+      const ref = doc(db, "users", user.uid);
+      const snap = await getDoc(ref);
+
+      let role = "user";
+
+      if (snap.exists()) {
+        role = snap.data().role || "user";
+      }
+
+      // 💾 SAVE SESSION
+      localStorage.setItem("uid", user.uid);
+      localStorage.setItem("role", role);
+
+      // 🚀 REDIRECT FIX
+      console.log("LOGIN SUCCESS → redirecting");
+
+      if (role === "admin") {
+        window.location.href = "dashboard.html"; // or admin.html
+      } else {
+        window.location.href = "dashboard.html";
+      }
+
     }
 
-    // 💾 Save session
-    localStorage.setItem("uid", user.uid);
-    localStorage.setItem("role", role);
-    localStorage.setItem("language", language);
-
-    // 🚀 REDIRECT FIX (THIS IS WHAT YOU ARE MISSING)
-    if (role === "admin") {
-      window.location.href = "admin.html";
-    } else {
-      window.location.href = "dashboard.html";
+    catch (error) {
+      console.error(error);
+      alert(error.message);
     }
 
-  }
+  });
 
-  catch (error) {
-    console.error(error);
-    alert(error.message);
-  }
-};
+});

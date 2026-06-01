@@ -11,18 +11,17 @@ import {
 
 /* ================= STATE ================= */
 let members = [];
-let savings = [];
-let loans = [];
 let editId = null;
 
 /* ================= ELEMENTS ================= */
 const table = document.getElementById("membersTable");
 const form = document.getElementById("memberForm");
 const search = document.getElementById("searchInput");
+
 const modal = document.getElementById("memberModal");
 const profileModal = document.getElementById("profileModal");
 
-/* ================= MODAL ================= */
+/* ================= MODAL CONTROL ================= */
 window.openMemberModal = () => {
   modal.classList.add("active");
   form.reset();
@@ -33,33 +32,22 @@ window.closeMemberModal = () => {
   modal.classList.remove("active");
 };
 
-/* CLOSE PROFILE (FIXED) */
-const closeProfileBtn = document.getElementById("closeProfileBtn");
-closeProfileBtn?.addEventListener("click", () => {
+window.closeProfileModal = () => {
   profileModal.classList.remove("active");
-});
+};
 
-window.addEventListener("click", (e) => {
-  if (e.target === profileModal) {
-    profileModal.classList.remove("active");
+/* CLOSE BUTTON FIX (IMPORTANT) */
+document.addEventListener("click", (e) => {
+  if (e.target.classList.contains("modal")) {
+    e.target.classList.remove("active");
   }
 });
 
-/* ================= LOAD DATA ================= */
+/* ================= LOAD MEMBERS ================= */
 async function loadMembers() {
   const snap = await getDocs(collection(db, "members"));
   members = snap.docs.map(d => ({ id: d.id, ...d.data() }));
   render(members);
-}
-
-async function loadSavings() {
-  const snap = await getDocs(collection(db, "savings"));
-  savings = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-}
-
-async function loadLoans() {
-  const snap = await getDocs(collection(db, "loans"));
-  loans = snap.docs.map(d => ({ id: d.id, ...d.data() }));
 }
 
 /* ================= RENDER ================= */
@@ -75,8 +63,12 @@ function render(data) {
       <td>${m.phone}</td>
       <td>${m.gender}</td>
       <td>${m.status || "Active"}</td>
-      <td>${m.createdAt?.toDate?.().toLocaleDateString() || "-"}</td>
-      <td>${m.createdBy || "-"}</td>
+      <td>${
+        m.createdAt?.toDate
+          ? m.createdAt.toDate().toLocaleDateString()
+          : "-"
+      }</td>
+      <td>${m.createdBy || "Unknown User"}</td>
       <td>
         <button onclick="editMember('${m.id}')">✏️</button>
         <button onclick="deleteMember('${m.id}')">🗑️</button>
@@ -99,7 +91,12 @@ form.addEventListener("submit", async (e) => {
     gender: gender.value,
     address: address.value,
     status: "Active",
-    createdBy: auth.currentUser?.displayName || "Admin"
+
+    /* ✅ FIXED USER NAME */
+    createdBy:
+      localStorage.getItem("userName") ||
+      auth.currentUser?.email ||
+      "Unknown User"
   };
 
   if (editId) {
@@ -109,7 +106,7 @@ form.addEventListener("submit", async (e) => {
     await addDoc(collection(db, "members"), data);
   }
 
-  modal.classList.remove("active");
+  closeMemberModal();
   loadMembers();
 });
 
@@ -131,13 +128,12 @@ window.editMember = (id) => {
   address.value = m.address;
 
   editId = id;
-  modal.classList.add("active");
+  openMemberModal();
 };
 
-/* ================= PROFILE (FIXED) ================= */
-window.openProfile = function (memberId) {
-
-  const member = members.find(m => m.id === memberId);
+/* ================= PROFILE ================= */
+window.openProfile = function (id) {
+  const member = members.find(m => m.id === id);
 
   profileModal.classList.add("active");
 
@@ -148,40 +144,43 @@ window.openProfile = function (memberId) {
   document.getElementById("profileAddress").innerText = member.address;
   document.getElementById("profileStatus").innerText = member.status || "Active";
 
-  /* FILTER DATA */
-  const memberSavings = savings.filter(s => s.memberId === member.memberId);
-  const memberLoans = loans.filter(l => l.memberId === member.memberId);
+  /* IMPORTANT FIX: real data must come from DB collections */
+  loadProfileTransactions(member.memberId);
+};
 
-  const totalSavings = memberSavings.reduce((a, b) => a + Number(b.amount || 0), 0);
-  const totalLoans = memberLoans.reduce((a, b) => a + Number(b.amount || 0), 0);
+/* ================= PROFILE TRANSACTIONS ================= */
+async function loadProfileTransactions(memberId) {
+  const collections = ["savings", "loans", "repayments", "withdrawals"];
 
-  document.getElementById("profileSavings").innerText = totalSavings;
-  document.getElementById("profileLoans").innerText = totalLoans;
-  document.getElementById("profileRemaining").innerText = totalLoans - totalSavings;
+  let transactions = [];
 
-  /* TRANSACTIONS */
-  const tx = document.getElementById("profileTransactions");
-  tx.innerHTML = "";
+  for (let c of collections) {
+    const snap = await getDocs(collection(db, c));
 
-  const all = [
-    ...memberSavings.map(s => ({
-      type: "Savings",
-      amount: s.amount,
-      status: s.status || "Done",
-      date: s.createdAt?.toDate?.().toLocaleDateString() || "-",
-      by: s.createdBy || "-"
-    })),
-    ...memberLoans.map(l => ({
-      type: "Loan",
-      amount: l.amount,
-      status: l.status || "Active",
-      date: l.createdAt?.toDate?.().toLocaleDateString() || "-",
-      by: l.createdBy || "-"
-    }))
-  ];
+    snap.forEach(d => {
+      const x = d.data();
 
-  all.forEach(t => {
+      if (x.memberId === memberId) {
+        transactions.push({
+          type: c,
+          amount: x.amount || 0,
+          status: x.status || "Done",
+          date: x.createdAt?.toDate?.().toLocaleDateString() || "-",
+          by:
+            x.createdBy ||
+            localStorage.getItem("userName") ||
+            "Unknown User"
+        });
+      }
+    });
+  }
+
+  const box = document.getElementById("profileTransactions");
+  box.innerHTML = "";
+
+  transactions.forEach(t => {
     const tr = document.createElement("tr");
+
     tr.innerHTML = `
       <td>${t.type}</td>
       <td>${t.amount}</td>
@@ -191,9 +190,10 @@ window.openProfile = function (memberId) {
       <td>${t.date}</td>
       <td>${t.by}</td>
     `;
-    tx.appendChild(tr);
+
+    box.appendChild(tr);
   });
-};
+}
 
 /* ================= SEARCH ================= */
 search.addEventListener("input", () => {
@@ -209,10 +209,4 @@ search.addEventListener("input", () => {
 });
 
 /* ================= INIT ================= */
-async function init() {
-  await loadMembers();
-  await loadSavings();
-  await loadLoans();
-}
-
-init();
+loadMembers();

@@ -255,24 +255,18 @@
 ========================================================= -->
 <main class="main">
 
-<!-- TOPBAR -->
+<!-- TOP -->
 <div class="topbar">
-
   <h2 data-i18n="membersManagement">Members Management</h2>
-
   <button class="primary-btn" onclick="openMemberModal()">
     <i class="fa fa-plus"></i> Add Member
   </button>
-
 </div>
 
 <!-- TABLE -->
 <section class="table-card">
 
-  <div class="table-header">
-    <input id="searchInput" class="search-input" placeholder="Search...">
-    <button id="exportBtn" class="primary-btn">Export CSV</button>
-  </div>
+  <input id="searchInput" class="search-input" placeholder="Search">
 
   <table class="data-table">
 
@@ -297,15 +291,11 @@
 
 </main>
 
-<!-- ===================== MODAL ===================== -->
+<!-- ================= MODAL ================= -->
 <div class="modal" id="memberModal">
-
   <div class="modal-box">
 
-    <div class="modal-header">
-      <h2 id="modalTitle">Add Member</h2>
-      <button onclick="closeMemberModal()">✖</button>
-    </div>
+    <h3 id="modalTitle">Add Member</h3>
 
     <form id="memberForm">
 
@@ -320,23 +310,18 @@
 
       <textarea id="address" placeholder="Address"></textarea>
 
-      <button class="primary-btn" type="submit">Save</button>
+      <button type="submit">Save</button>
 
     </form>
 
   </div>
-
 </div>
 
-<!-- ===================== PROFILE MODAL ===================== -->
+<!-- ================= PROFILE MODAL ================= -->
 <div class="modal" id="profileModal">
-
   <div class="modal-box">
 
-    <div class="modal-header">
-      <h2 id="profileName">Profile</h2>
-      <button onclick="closeProfileModal()">✖</button>
-    </div>
+    <h2 id="profileName"></h2>
 
     <p>NID: <span id="profileNid"></span></p>
     <p>Phone: <span id="profilePhone"></span></p>
@@ -344,8 +329,33 @@
     <p>Address: <span id="profileAddress"></span></p>
     <p>Status: <span id="profileStatus"></span></p>
 
-  </div>
+    <hr>
 
+    <h3>Transactions</h3>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Amount</th>
+          <th>Previous</th>
+          <th>Total</th>
+          <th>Status</th>
+          <th>Date</th>
+          <th>Created By</th>
+        </tr>
+      </thead>
+
+      <tbody id="profileTransactions"></tbody>
+    </table>
+
+    <hr>
+
+    <p>Total Savings: <span id="profileSavings"></span></p>
+    <p>Total Loans: <span id="profileLoans"></span></p>
+    <p>Remaining Loan: <span id="profileRemaining"></span></p>
+
+  </div>
 </div>
 
 <script type="module" src="js/members.js"></script>

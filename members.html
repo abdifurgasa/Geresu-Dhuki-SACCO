@@ -253,15 +253,48 @@
 <!-- =========================================================
      MAIN CONTENT
 ========================================================= -->
-<main class="main">
-
-<!-- TOP -->
 <div class="topbar">
-  <h2 data-i18n="membersManagement">Members Management</h2>
+    <h2 data-i18n="membersManagement">
+      MEMBERS MANAGEMENT
+    </h2>
+
+    <div class="topbar-actions">
+
+      <!-- LANGUAGE -->
+      <select
+        id="languageSelect"
+        onchange="changeLanguage(this.value)"
+      >
+
+        <option value="en">
+          English
+        </option>
+
+        <option value="am">
+          አማርኛ
+        </option>
+
+        <option value="om">
+          Afaan Oromoo
+        </option>
+
+      </select>
+
+      <!-- USER -->
+      <div
+        class="selected-box"
+        id="roleBox"
+      >
+        👤 Admin
+      </div>
+
+    </div>
+
+  </div>
   <button class="primary-btn" onclick="openMemberModal()">
     <i class="fa fa-plus"></i> Add Member
   </button>
-</div>
+  </div>
 
 <!-- TABLE -->
 <section class="table-card">

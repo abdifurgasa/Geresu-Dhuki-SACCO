@@ -2,46 +2,69 @@ import { db } from "./firebase.js";
 import { collection, onSnapshot } 
 from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-/* ================= SIDEBAR ================= */
-window.toggleSidebar = function () {
-  document.querySelector(".sidebar").classList.toggle("active");
-};
+let savings=0;
+let loans=0;
 
-/* ================= LOGOUT ================= */
-window.logout = function () {
-  window.location.href = "index.html";
-};
-
-/* ================= REALTIME DATA ================= */
-
-onSnapshot(collection(db, "members"), (snap) => {
+/* MEMBERS */
+onSnapshot(collection(db,"members"), snap=>{
   document.getElementById("members").innerText = snap.size;
 });
 
-onSnapshot(collection(db, "savings"), (snap) => {
-  let total = 0;
-  snap.forEach(d => total += d.data().amount || 0);
-  document.getElementById("savings").innerText = total;
+/* SAVINGS */
+onSnapshot(collection(db,"savings"), snap=>{
+  savings = 0;
+  snap.forEach(d=>{
+    savings += Number(d.data().amount || 0);
+  });
+
+  document.getElementById("savings").innerText =
+    savings.toLocaleString() + " ETB";
+
+  updateChart();
 });
 
-onSnapshot(collection(db, "loans"), (snap) => {
-  let total = 0;
-  snap.forEach(d => total += d.data().amount || 0);
-  document.getElementById("loans").innerText = total;
+/* LOANS */
+onSnapshot(collection(db,"loans"), snap=>{
+  loans = 0;
+  snap.forEach(d=>{
+    loans += Number(d.data().amount || 0);
+  });
+
+  document.getElementById("loans").innerText =
+    loans.toLocaleString() + " ETB";
+
+  updateChart();
 });
 
-/* ================= CHART ================= */
-const ctx = document.getElementById("chart");
+/* PROFIT */
+function updateProfit(){
+  document.getElementById("profit").innerText =
+    (savings - loans).toLocaleString() + " ETB";
+}
 
-new Chart(ctx, {
-  type: "line",
-  data: {
-    labels: ["Jan","Feb","Mar","Apr","May"],
-    datasets: [{
-      label: "SACCO Growth",
-      data: [10,20,40,30,60],
-      borderColor: "#4facfe",
-      tension: 0.4
-    }]
-  }
-});
+/* CHART */
+let chart;
+
+function updateChart(){
+
+  updateProfit();
+
+  const ctx = document.getElementById("chart");
+
+  if(chart) chart.destroy();
+
+  chart = new Chart(ctx,{
+    type:"doughnut",
+    data:{
+      labels:["Savings","Loans"],
+      datasets:[{
+        data:[savings, loans],
+        backgroundColor:["#22c55e","#f97316"]
+      }]
+    },
+    options:{
+      plugins:{legend:{position:"bottom"}}
+    }
+  });
+
+}

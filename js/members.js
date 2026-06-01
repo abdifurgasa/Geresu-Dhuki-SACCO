@@ -21,6 +21,16 @@ const search = document.getElementById("searchInput");
 const modal = document.getElementById("memberModal");
 const profileModal = document.getElementById("profileModal");
 
+/* ================= USER NAME FIX ================= */
+function getUserName() {
+  return (
+    auth.currentUser?.displayName ||
+    auth.currentUser?.email ||
+    localStorage.getItem("userName") ||
+    "Unknown User"
+  );
+}
+
 /* ================= MODAL CONTROL ================= */
 window.openMemberModal = () => {
   modal.classList.add("active");
@@ -36,7 +46,7 @@ window.closeProfileModal = () => {
   profileModal.classList.remove("active");
 };
 
-/* CLOSE BUTTON FIX (IMPORTANT) */
+/* ✅ FIX CLOSE X + OUTSIDE CLICK */
 document.addEventListener("click", (e) => {
   if (e.target.classList.contains("modal")) {
     e.target.classList.remove("active");
@@ -46,11 +56,16 @@ document.addEventListener("click", (e) => {
 /* ================= LOAD MEMBERS ================= */
 async function loadMembers() {
   const snap = await getDocs(collection(db, "members"));
-  members = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+  members = snap.docs.map(d => ({
+    id: d.id,
+    ...d.data()
+  }));
+
   render(members);
 }
 
-/* ================= RENDER ================= */
+/* ================= RENDER TABLE ================= */
 function render(data) {
   table.innerHTML = "";
 
@@ -58,17 +73,20 @@ function render(data) {
     const tr = document.createElement("tr");
 
     tr.innerHTML = `
-      <td>${m.fullName}</td>
-      <td>${m.memberId}</td>
-      <td>${m.phone}</td>
-      <td>${m.gender}</td>
+      <td>${m.fullName || "-"}</td>
+      <td>${m.memberId || "-"}</td>
+      <td>${m.phone || "-"}</td>
+      <td>${m.gender || "-"}</td>
       <td>${m.status || "Active"}</td>
+
       <td>${
         m.createdAt?.toDate
           ? m.createdAt.toDate().toLocaleDateString()
           : "-"
       }</td>
-      createdBy: localStorage.getItem("userName") || "Unknown User"
+
+      <td>${m.createdBy || "-"}</td>
+
       <td>
         <button onclick="editMember('${m.id}')">✏️</button>
         <button onclick="deleteMember('${m.id}')">🗑️</button>
@@ -91,11 +109,7 @@ form.addEventListener("submit", async (e) => {
     gender: gender.value,
     address: address.value,
     status: "Active",
-
-    /* ✅ FIXED USER NAME */
-    createdBy:
-      localStorage.getItem("userName") ||
-      createdBy: localStorage.getItem("userName") || "Unknown User""
+    createdBy: getUserName()
   };
 
   if (editId) {
@@ -112,6 +126,7 @@ form.addEventListener("submit", async (e) => {
 /* ================= DELETE ================= */
 window.deleteMember = async (id) => {
   if (!confirm("Delete member?")) return;
+
   await deleteDoc(doc(db, "members", id));
   loadMembers();
 };
@@ -119,20 +134,22 @@ window.deleteMember = async (id) => {
 /* ================= EDIT ================= */
 window.editMember = (id) => {
   const m = members.find(x => x.id === id);
+  if (!m) return;
 
-  fullName.value = m.fullName;
-  memberId.value = m.memberId;
-  phone.value = m.phone;
-  gender.value = m.gender;
-  address.value = m.address;
+  fullName.value = m.fullName || "";
+  memberId.value = m.memberId || "";
+  phone.value = m.phone || "";
+  gender.value = m.gender || "Male";
+  address.value = m.address || "";
 
   editId = id;
   openMemberModal();
 };
 
 /* ================= PROFILE ================= */
-window.openProfile = function (id) {
+window.openProfile = async (id) => {
   const member = members.find(m => m.id === id);
+  if (!member) return;
 
   profileModal.classList.add("active");
 
@@ -143,8 +160,7 @@ window.openProfile = function (id) {
   document.getElementById("profileAddress").innerText = member.address;
   document.getElementById("profileStatus").innerText = member.status || "Active";
 
-  /* IMPORTANT FIX: real data must come from DB collections */
-  loadProfileTransactions(member.memberId);
+  await loadProfileTransactions(member.memberId);
 };
 
 /* ================= PROFILE TRANSACTIONS ================= */
@@ -165,10 +181,7 @@ async function loadProfileTransactions(memberId) {
           amount: x.amount || 0,
           status: x.status || "Done",
           date: x.createdAt?.toDate?.().toLocaleDateString() || "-",
-          by:
-            x.createdBy ||
-            localStorage.getItem("userName") ||
-            "Unknown User"
+          by: x.createdBy || getUserName()
         });
       }
     });
@@ -200,9 +213,9 @@ search.addEventListener("input", () => {
 
   render(
     members.filter(m =>
-      m.fullName.toLowerCase().includes(v) ||
-      m.phone.includes(v) ||
-      m.memberId.includes(v)
+      (m.fullName || "").toLowerCase().includes(v) ||
+      (m.phone || "").includes(v) ||
+      (m.memberId || "").includes(v)
     )
   );
 });

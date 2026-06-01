@@ -3,7 +3,8 @@ import { auth, db } from "./firebase.js";
 import {
   signInWithEmailAndPassword,
   signOut,
-  onAuthStateChanged
+  setPersistence,
+  browserLocalPersistence
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 import {
@@ -11,9 +12,7 @@ import {
   getDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-/* =========================
-   LOGIN
-========================= */
+/* ================= LOGIN ================= */
 window.login = async function () {
 
   const email = document.getElementById("email").value;
@@ -21,66 +20,39 @@ window.login = async function () {
 
   try {
 
-    const userCred = await signInWithEmailAndPassword(auth, email, password);
+    // 🔥 CRITICAL FIX (PREVENT LOGOUT)
+    await setPersistence(auth, browserLocalPersistence);
 
-    const uid = userCred.user.uid;
+    const cred =
+      await signInWithEmailAndPassword(auth, email, password);
 
-    const userSnap = await getDoc(doc(db, "users", uid));
+    const uid = cred.user.uid;
 
-    if (!userSnap.exists()) {
-      alert("User profile not found");
-      return;
+    const snap =
+      await getDoc(doc(db, "users", uid));
+
+    let role = "member";
+
+    if (snap.exists()) {
+      role = snap.data().role || "member";
     }
 
-    const userData = userSnap.data();
+    // store UI only (NOT AUTH)
+    localStorage.setItem("role", role);
 
-    const role = userData.role || "member";
-
-    // STORE SESSION
-    sessionStorage.setItem("uid", uid);
-    sessionStorage.setItem("role", role);
-    sessionStorage.setItem("email", email);
-
-    // REDIRECT
+    // redirect ONLY after auth stable
     window.location.href = "dashboard.html";
 
-  } catch (err) {
-    console.error(err);
-    alert("Login failed: wrong email or password");
+  } catch (e) {
+    alert(e.message);
   }
 };
 
-/* =========================
-   LOGOUT (FIXED)
-========================= */
-window.logoutUser = async function () {
+/* ================= LOGOUT ================= */
+window.logout = async function () {
 
   await signOut(auth);
 
-  sessionStorage.clear();
   localStorage.clear();
-
   window.location.href = "index.html";
 };
-
-/* =========================
-   AUTH GUARD (PROTECT PAGES)
-========================= */
-export function protectPage() {
-
-  onAuthStateChanged(auth, (user) => {
-
-    if (!user) {
-      window.location.href = "index.html";
-    }
-
-  });
-
-}
-
-/* =========================
-   ROLE HELPER (FIXED)
-========================= */
-export function getRole() {
-  return sessionStorage.getItem("role") || "member";
-}

@@ -1,16 +1,27 @@
-export function setUserSession(user) {
-  localStorage.setItem("userId", user.uid);
-  localStorage.setItem("userName", user.displayName || "Unknown User");
-  localStorage.setItem("userEmail", user.email);
+import { db, auth } from "./firebase.js";
+import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-  // ROLE (you can store from Firestore later)
-  localStorage.setItem("role", user.role || "user");
+/* GET USER ROLE FROM FIREBASE */
+export async function getUserRole() {
+  const user = auth.currentUser;
+  if (!user) return null;
+
+  const snap = await getDoc(doc(db, "users", user.uid));
+
+  if (!snap.exists()) {
+    return { name: "Unknown User", role: "user" };
+  }
+
+  return snap.data();
 }
 
-export function getUserName() {
-  return localStorage.getItem("userName") || "Unknown User";
-}
-
-export function isAdmin() {
-  return localStorage.getItem("role") === "admin";
+/* SHOW / HIDE ADMIN FEATURES */
+export function applyRole(role) {
+  document.querySelectorAll(".admin-only").forEach(el => {
+    if (role === "admin") {
+      el.style.display = "";
+    } else {
+      el.style.display = "none";
+    }
+  });
 }

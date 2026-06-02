@@ -255,23 +255,23 @@ return "-";
 MODAL FUNCTIONS
 ========================== */
 
-window.openAddModal = function(){
+function openAddModal() {
 
-editingId = null;
+    editingId = null;
 
-document.getElementById("modalTitle").textContent =
-"Add Member";
+    document.getElementById("modalTitle").textContent = "Add Member";
 
-document.getElementById("memberId").value = "";
-document.getElementById("fullName").value = "";
-document.getElementById("phone").value = "";
-document.getElementById("nid").value = "";
-document.getElementById("status").value = "Active";
+    document.getElementById("memberId").value = "";
+    document.getElementById("fullName").value = "";
+    document.getElementById("phone").value = "";
+    document.getElementById("nid").value = "";
+    document.getElementById("status").value = "Active";
 
-document.getElementById("memberModal")
-.style.display = "flex";
+    document.getElementById("memberModal").style.display = "flex";
+}
 
-};
+// IMPORTANT: expose globally
+window.openAddModal = openAddModal;
 
 window.closeModal = function(){
 

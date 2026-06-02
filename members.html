@@ -1,229 +1,224 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title data-i18n="members">Members</title>
+<title>SACCO Members</title>
 
 <link rel="stylesheet" href="css/style.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
 </head>
 
 <body>
 
+<div class="dashboard-container">
+
 <!-- SIDEBAR -->
 <aside class="sidebar" id="sidebar">
 
-  <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+    <button class="menu-toggle" id="toggleBtn">
+        <i class="fas fa-bars"></i>
+    </button>
 
-  <h2 class="logo">🏦 GERESU DHUKI SACCO</h2>
+    <div class="sidebar-header">
+        <div class="logo-icon">
+            <i class="fas fa-university"></i>
+        </div>
 
-  <nav class="nav">
-    <a href="dashboard.html" class="nav-item">📊 Dashboard</a>
-    <a href="members.html" class="nav-item active">👥 Members</a>
-    <a href="savings.html" class="nav-item">💰 Savings</a>
-    <a href="loans.html" class="nav-item">🏦 Loans</a>
-    <a href="repayments.html" class="nav-item">💵 Repayments</a>
-    <a href="withdrawals.html" class="nav-item">💸 Withdrawals</a>
-    <a href="reports.html" class="nav-item">📄 Reports</a>
-    <a href="users.html" class="nav-item">👤 Users</a>
-    <a href="settings.html" class="nav-item">⚙️ Settings</a>
-    <a href="#" id="logoutBtn" class="nav-item">🚪 Logout</a>
-  </nav>
+        <div class="logo-text">
+            <h2>SACCO</h2>
+            <span>Banking System</span>
+        </div>
+    </div>
+
+    <ul class="sidebar-menu">
+
+        <li>
+            <a href="dashboard.html">
+                <i class="fas fa-chart-pie"></i>
+                <span data-i18n="dashboard">Dashboard</span>
+            </a>
+        </li>
+
+        <li class="active">
+            <a href="members.html">
+                <i class="fas fa-users"></i>
+                <span data-i18n="members">Members</span>
+            </a>
+        </li>
+
+        <li>
+            <a href="savings.html">
+                <i class="fas fa-wallet"></i>
+                <span data-i18n="savings">Savings</span>
+            </a>
+        </li>
+
+        <li>
+            <a href="loans.html">
+                <i class="fas fa-landmark"></i>
+                <span data-i18n="loans">Loans</span>
+            </a>
+        </li>
+
+        <li>
+            <a href="repayments.html">
+                <i class="fas fa-money-check-dollar"></i>
+                <span data-i18n="repayments">Repayments</span>
+            </a>
+        </li>
+
+        <li>
+            <a href="withdrawals.html">
+                <i class="fas fa-money-bill-transfer"></i>
+                <span data-i18n="withdrawals">Withdrawals</span>
+            </a>
+        </li>
+
+        <li>
+            <a href="reports.html">
+                <i class="fas fa-file-alt"></i>
+                <span data-i18n="reports">Reports</span>
+            </a>
+        </li>
+
+        <li>
+            <a href="users.html">
+                <i class="fas fa-user"></i>
+                <span data-i18n="users">Users</span>
+            </a>
+        </li>
+
+        <li>
+            <a href="settings.html">
+                <i class="fas fa-gear"></i>
+                <span data-i18n="settings">Settings</span>
+            </a>
+        </li>
+
+    </ul>
+
+    <div class="sidebar-footer">
+        <a href="#">
+            <i class="fas fa-right-from-bracket"></i>
+            <span data-i18n="logout">Logout</span>
+        </a>
+    </div>
 
 </aside>
 
-<!-- MAIN CONTENT (FIXED) -->
-<main class="main">
+<!-- MAIN CONTENT -->
+<main class="main-content" id="mainContent">
 
-  <!-- TOPBAR -->
-  <div class="topbar">
+<!-- TOP BAR -->
+<div class="topbar">
 
-    <h2 data-i18n="membersManagement">
-      MEMBERS MANAGEMENT
-    </h2>
+    <div>
+        <h1 data-i18n="members">Members</h1>
+        <p data-i18n="overview">Manage SACCO Members</p>
+    </div>
 
     <div class="topbar-actions">
 
-      <select id="languageSelect" onchange="changeLanguage(this.value)">
-        <option value="en">English</option>
-        <option value="am">አማርኛ</option>
-        <option value="om">Afaan Oromoo</option>
-      </select>
+        <div class="language-selector">
+            <select id="languageSelect" onchange="changeLanguage(this.value)">
+                <option value="en">English</option>
+                <option value="om">Afaan Oromo</option>
+                <option value="am">አማርኛ</option>
+            </select>
+        </div>
 
-      <div class="selected-box">
-        👤 Admin
-      </div>
-
-      <!-- FIXED BUTTON LOCATION -->
-      <button class="primary-btn" onclick="openMemberModal()">
-        <i class="fa fa-plus"></i> Add Member
-      </button>
+        <button class="btn-primary" onclick="openAddModal()">
+            <i class="fas fa-plus"></i>
+            Add Member
+        </button>
 
     </div>
 
-  </div>
+</div>
 
-  <!-- TABLE -->
-  <section class="table-card">
+<!-- SEARCH -->
+<div class="search-bar">
+    <input type="text" id="searchInput" placeholder="Search members...">
+    <button onclick="searchMembers()">
+        <i class="fas fa-search"></i>
+    </button>
+</div>
 
-    <input id="searchInput" class="search-input" placeholder="Search">
+<!-- TABLE -->
+<div class="table-container">
 
-    <table class="data-table">
-
-      <thead>
+<table>
+    <thead>
         <tr>
-          <th>Name</th>
-          <th>NID</th>
-          <th>Phone</th>
-          <th>Gender</th>
-          <th>Status</th>
-          <th>Created At</th>
-          <th>Created By</th>
-          <th>Actions</th>
+            <th>Full Name</th>
+            <th>Phone</th>
+            <th>NID</th>
+            <th>Status</th>
+            <th>Actions</th>
         </tr>
-      </thead>
+    </thead>
 
-      <tbody id="membersTable"></tbody>
+    <tbody id="membersTable">
+        <!-- Firebase Data Here -->
+    </tbody>
 
-    </table>
+</table>
 
-  </section>
+</div>
+
+<!-- PAGINATION -->
+<div class="pagination">
+    <button onclick="prevPage()">Prev</button>
+    <span id="pageInfo">1</span>
+    <button onclick="nextPage()">Next</button>
+</div>
 
 </main>
+</div>
 
-<!-- ================= MEMBER MODAL ================= -->
+<!-- ADD / EDIT MODAL -->
 <div class="modal" id="memberModal">
 
-  <div class="modal-box">
+<div class="modal-content">
 
-    <!-- CLOSE BUTTON (X) -->
-    <button class="modal-close" onclick="closeMemberModal()">
-      ✖
-    </button>
+    <h2 id="modalTitle">Add Member</h2>
 
-    <h3 id="modalTitle">Add Member</h3>
+    <input type="hidden" id="memberId">
 
-    <form id="memberForm">
+    <input type="text" id="fullName" placeholder="Full Name">
 
-      <input id="fullName" placeholder="Full Name" required>
-      <input id="memberId" placeholder="NID (16 digits)" maxlength="16" required>
-      <input id="phone" placeholder="Phone (9 digits)" maxlength="9" required>
+    <input type="text" id="phone" placeholder="Phone (9 digits)">
 
-      <select id="gender">
-        <option>Male</option>
-        <option>Female</option>
-      </select>
+    <input type="text" id="nid" placeholder="NID (16 digits)">
 
-      <textarea id="address" placeholder="Address"></textarea>
+    <select id="status">
+        <option value="Active">Active</option>
+        <option value="Inactive">Inactive</option>
+    </select>
 
-      <button type="submit">Save</button>
+    <div class="modal-actions">
+        <button onclick="saveMember()" class="btn-primary">
+            Save
+        </button>
 
-    </form>
-
-  </div>
-
-</div>
-
-<!-- ================= PROFILE MODAL ================= -->
-<div class="modal" id="profileModal">
-  <div class="modal-box profile-clean">
-
-    <!-- HEADER -->
-    <div class="profile-header">
-      <h2 id="profileName">Member Name</h2>
-      <button id="closeProfileBtn" class="close-btn">✖</button>
+        <button onclick="closeModal()" class="btn-secondary">
+            Cancel
+        </button>
     </div>
 
-    <!-- BASIC INFO CARD -->
-    <div class="profile-info-grid">
-
-      <div class="info-card">
-        <label>NID</label>
-        <span id="profileNid"></span>
-      </div>
-
-      <div class="info-card">
-        <label>Phone</label>
-        <span id="profilePhone"></span>
-      </div>
-
-      <div class="info-card">
-        <label>Gender</label>
-        <span id="profileGender"></span>
-      </div>
-
-      <div class="info-card">
-        <label>Address</label>
-        <span id="profileAddress"></span>
-      </div>
-
-      <div class="info-card status">
-        <label>Status</label>
-        <span id="profileStatus"></span>
-      </div>
-
-    </div>
-
-    <!-- SUMMARY CARDS -->
-    <div class="profile-summary">
-
-      <div class="summary-card green">
-        <h4>Savings</h4>
-        <p id="profileSavings">0</p>
-      </div>
-
-      <div class="summary-card blue">
-        <h4>Loans</h4>
-        <p id="profileLoans">0</p>
-      </div>
-
-      <div class="summary-card red">
-        <h4>Remaining</h4>
-        <p id="profileRemaining">0</p>
-      </div>
-
-    </div>
-
-    <!-- TRANSACTIONS TABLE -->
-    <div class="transaction-section">
-
-      <h3>Transactions</h3>
-
-      <div class="table-wrapper modal-table">
-
-        <table>
-          <thead>
-            <tr>
-              <th>Type</th>
-              <th>Amount</th>
-              <th>Prev</th>
-              <th>Total</th>
-              <th>Status</th>
-              <th>Date</th>
-              <th>By</th>
-            </tr>
-          </thead>
-
-          <tbody id="profileTransactions"></tbody>
-        </table>
-
-      </div>
-
-    </div>
-
-  </div>
 </div>
 
 </div>
 
-<script type="module" src="js/members.js"></script>
-<script src="js/layout.js"></script>
+<!-- SCRIPTS -->
 <script src="js/i18n.js"></script>
+<script src="js/layout.js"></script>
+<script src="js/members.js"></script>
 
 </body>
 </html>

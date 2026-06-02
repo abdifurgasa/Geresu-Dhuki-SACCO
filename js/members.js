@@ -254,8 +254,7 @@ return "-";
 /* ==========================
 MODAL FUNCTIONS
 ========================== */
-
-function openAddModal() {
+window.openAddModal = function () {
 
     document.getElementById("memberId").value = "";
     document.getElementById("fullName").value = "";
@@ -266,8 +265,7 @@ function openAddModal() {
     document.getElementById("modalTitle").textContent = "Add Member";
 
     document.getElementById("memberModal").style.display = "flex";
-}
-
+};
 window.closeModal = function(){
 
 document.getElementById("memberModal")

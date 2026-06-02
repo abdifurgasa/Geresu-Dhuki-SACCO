@@ -65,11 +65,15 @@ body{
 
 .sidebar{
     width:290px;
-    background:linear-gradient(
-        180deg,
-        var(--sidebar-dark),
-        var(--sidebar)
+    .sidebar {
+   background: linear-gradient(
+    135deg,
+    #00AEEF,
+    #008FD5
     );
+    color: white;
+    }
+   
     color:#fff;
     padding:20px;
     position:fixed;

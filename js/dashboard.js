@@ -1,211 +1,370 @@
-// ===============================
-// SIDEBAR TOGGLE
-// ===============================
+// dashboard.js
 
-document.addEventListener("DOMContentLoaded", () => {
+import { db } from "./firebase-config.js";
+
+import {
+    collection,
+    getDocs
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+document.addEventListener("DOMContentLoaded", async () => {
+
+    initializeSidebar();
+
+    await loadDashboardData();
+
+    createPerformanceChart();
+
+    createLoanChart();
+
+});
+
+
+// =========================
+// SIDEBAR
+// =========================
+
+function initializeSidebar() {
 
     const sidebar = document.getElementById("sidebar");
     const mainContent = document.getElementById("mainContent");
     const toggleBtn = document.getElementById("toggleBtn");
 
-    if (toggleBtn) {
-        toggleBtn.addEventListener("click", () => {
+    if (!toggleBtn) return;
 
-            sidebar.classList.toggle("collapsed");
-            mainContent.classList.toggle("expanded");
+    toggleBtn.addEventListener("click", () => {
+
+        sidebar.classList.toggle("collapsed");
+
+        mainContent.classList.toggle("expanded");
+
+    });
+
+}
+
+
+// =========================
+// LOAD DASHBOARD DATA
+// =========================
+
+async function loadDashboardData() {
+
+    try {
+
+        const membersSnapshot =
+            await getDocs(collection(db, "members"));
+
+        const savingsSnapshot =
+            await getDocs(collection(db, "savings"));
+
+        const loansSnapshot =
+            await getDocs(collection(db, "loans"));
+
+        const repaymentsSnapshot =
+            await getDocs(collection(db, "repayments"));
+
+        const withdrawalsSnapshot =
+            await getDocs(collection(db, "withdrawals"));
+
+        const totalMembers =
+            membersSnapshot.size;
+
+        let totalSavings = 0;
+        let totalLoans = 0;
+        let totalRepayments = 0;
+        let totalWithdrawals = 0;
+
+        savingsSnapshot.forEach(doc => {
+
+            totalSavings +=
+                Number(doc.data().amount || 0);
 
         });
-    }
 
-    initializeCharts();
+        loansSnapshot.forEach(doc => {
 
-});
+            totalLoans +=
+                Number(doc.data().amount || 0);
 
-// ===============================
-// CHARTS
-// ===============================
+        });
 
-function initializeCharts() {
+        repaymentsSnapshot.forEach(doc => {
 
-    // Performance Chart
-    const performanceCanvas =
-        document.getElementById("performanceChart");
+            totalRepayments +=
+                Number(doc.data().amount || 0);
 
-    if (performanceCanvas) {
+        });
 
-        new Chart(performanceCanvas, {
+        withdrawalsSnapshot.forEach(doc => {
 
-            type: "line",
+            totalWithdrawals +=
+                Number(doc.data().amount || 0);
 
-            data: {
+        });
 
-                labels: [
-                    "Jan", "Feb", "Mar", "Apr",
-                    "May", "Jun", "Jul", "Aug",
-                    "Sep", "Oct", "Nov", "Dec"
-                ],
+        const netProfit =
+            totalRepayments - totalWithdrawals;
 
-                datasets: [
+        updateDashboardCards({
 
-                    {
-                        label: "Savings (ETB)",
-                        data: [
-                            95000, 115000, 130000,
-                            140000, 150000, 165000,
-                            165000, 180000, 190000,
-                            202000, 210000, 225000
-                        ],
-                        tension: 0.4,
-                        fill: true
-                    },
-
-                    {
-                        label: "Loans (ETB)",
-                        data: [
-                            55000, 70000, 78000,
-                            83000, 88000, 96000,
-                            95000, 104000, 107000,
-                            112000, 115000, 122000
-                        ],
-                        tension: 0.4,
-                        fill: true
-                    },
-
-                    {
-                        label: "Withdrawals (ETB)",
-                        data: [
-                            25000, 34000, 39000,
-                            37000, 40000, 47000,
-                            47000, 50000, 54000,
-                            55000, 57000, 62000
-                        ],
-                        tension: 0.4,
-                        fill: true
-                    },
-
-                    {
-                        label: "Profit (ETB)",
-                        data: [
-                            10000, 15000, 17000,
-                            16000, 18000, 23000,
-                            22000, 24000, 28000,
-                            26000, 27000, 30000
-                        ],
-                        tension: 0.4,
-                        fill: false
-                    }
-
-                ]
-            },
-
-            options: {
-
-                responsive: true,
-                maintainAspectRatio: false,
-
-                plugins: {
-                    legend: {
-                        position: "top"
-                    }
-                }
-
-            }
+            totalMembers,
+            totalSavings,
+            totalLoans,
+            totalWithdrawals,
+            netProfit
 
         });
 
     }
 
-    // Loans vs Repayments Chart
-    const loanCanvas =
-        document.getElementById("loanChart");
+    catch (error) {
 
-    if (loanCanvas) {
-
-        new Chart(loanCanvas, {
-
-            type: "bar",
-
-            data: {
-
-                labels: [
-                    "Jan", "Feb", "Mar", "Apr",
-                    "May", "Jun", "Jul", "Aug",
-                    "Sep", "Oct", "Nov", "Dec"
-                ],
-
-                datasets: [
-
-                    {
-                        label: "Loans Issued (ETB)",
-                        data: [
-                            100000, 120000, 145000,
-                            160000, 180000, 205000,
-                            225000, 198000, 165000,
-                            172000, 168000, 145000
-                        ]
-                    },
-
-                    {
-                        label: "Repayments (ETB)",
-                        data: [
-                            60000, 62000, 85000,
-                            90000, 102000, 130000,
-                            145000, 110000, 120000,
-                            76000, 97000, 85000
-                        ]
-                    }
-
-                ]
-
-            },
-
-            options: {
-
-                responsive: true,
-                maintainAspectRatio: false,
-
-                plugins: {
-                    legend: {
-                        position: "top"
-                    }
-                }
-
-            }
-
-        });
+        console.error(
+            "Dashboard Error:",
+            error
+        );
 
     }
 
 }
 
-// ===============================
-// DASHBOARD DATA UPDATE
-// ===============================
 
-function updateDashboardStats(data) {
+// =========================
+// UPDATE CARDS
+// =========================
 
-    document.getElementById("totalMembers").textContent =
-        data.members || 0;
+function updateDashboardCards(data) {
 
-    document.getElementById("totalSavings").textContent =
-        data.savings || 0;
+    const memberCard =
+        document.getElementById("totalMembers");
 
-    document.getElementById("totalLoans").textContent =
-        data.loans || 0;
+    const savingsCard =
+        document.getElementById("totalSavings");
 
-    document.getElementById("totalWithdrawals").textContent =
-        data.withdrawals || 0;
+    const loansCard =
+        document.getElementById("totalLoans");
 
-    document.getElementById("netProfit").textContent =
-        data.profit || 0;
+    const withdrawalsCard =
+        document.getElementById("totalWithdrawals");
+
+    const profitCard =
+        document.getElementById("netProfit");
+
+    if (memberCard)
+        memberCard.textContent =
+            data.totalMembers;
+
+    if (savingsCard)
+        savingsCard.textContent =
+            formatCurrency(data.totalSavings);
+
+    if (loansCard)
+        loansCard.textContent =
+            formatCurrency(data.totalLoans);
+
+    if (withdrawalsCard)
+        withdrawalsCard.textContent =
+            formatCurrency(data.totalWithdrawals);
+
+    if (profitCard)
+        profitCard.textContent =
+            formatCurrency(data.netProfit);
+
 }
 
-// Example usage:
-//
-// updateDashboardStats({
-//     members: 250,
-//     savings: "1,500,000 ETB",
-//     loans: "850,000 ETB",
-//     withdrawals: "200,000 ETB",
-//     profit: "450,000 ETB"
-// });
+
+// =========================
+// FORMAT MONEY
+// =========================
+
+function formatCurrency(amount) {
+
+    return Number(amount).toLocaleString() + " ETB";
+
+}
+
+
+// =========================
+// PERFORMANCE CHART
+// =========================
+
+function createPerformanceChart() {
+
+    const chart =
+        document.getElementById(
+            "performanceChart"
+        );
+
+    if (!chart) return;
+
+    new Chart(chart, {
+
+        type: "line",
+
+        data: {
+
+            labels: [
+                "Jan",
+                "Feb",
+                "Mar",
+                "Apr",
+                "May",
+                "Jun",
+                "Jul",
+                "Aug",
+                "Sep",
+                "Oct",
+                "Nov",
+                "Dec"
+            ],
+
+            datasets: [
+
+                {
+                    label: "Savings",
+
+                    data: [
+                        100,
+                        120,
+                        140,
+                        150,
+                        170,
+                        190,
+                        200,
+                        220,
+                        240,
+                        260,
+                        280,
+                        300
+                    ],
+
+                    tension: 0.4
+                },
+
+                {
+                    label: "Loans",
+
+                    data: [
+                        50,
+                        70,
+                        80,
+                        90,
+                        100,
+                        110,
+                        130,
+                        140,
+                        150,
+                        160,
+                        170,
+                        180
+                    ],
+
+                    tension: 0.4
+                }
+
+            ]
+
+        },
+
+        options: {
+
+            responsive: true,
+
+            maintainAspectRatio: false
+
+        }
+
+    });
+
+}
+
+
+// =========================
+// LOAN CHART
+// =========================
+
+function createLoanChart() {
+
+    const chart =
+        document.getElementById(
+            "loanChart"
+        );
+
+    if (!chart) return;
+
+    new Chart(chart, {
+
+        type: "bar",
+
+        data: {
+
+            labels: [
+                "Jan",
+                "Feb",
+                "Mar",
+                "Apr",
+                "May",
+                "Jun",
+                "Jul",
+                "Aug",
+                "Sep",
+                "Oct",
+                "Nov",
+                "Dec"
+            ],
+
+            datasets: [
+
+                {
+                    label: "Loans",
+
+                    data: [
+                        100,
+                        120,
+                        150,
+                        160,
+                        180,
+                        210,
+                        230,
+                        200,
+                        170,
+                        180,
+                        170,
+                        150
+                    ]
+                },
+
+                {
+                    label: "Repayments",
+
+                    data: [
+                        60,
+                        60,
+                        85,
+                        90,
+                        100,
+                        130,
+                        145,
+                        110,
+                        120,
+                        75,
+                        95,
+                        80
+                    ]
+                }
+
+            ]
+
+        },
+
+        options: {
+
+            responsive: true,
+
+            maintainAspectRatio: false
+
+        }
+
+    });
+
+}

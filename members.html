@@ -17,7 +17,9 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
 
 <div class="dashboard-container">
 
-<!-- SIDEBAR -->
+<!-- =========================
+SIDEBAR
+========================= -->
 <aside class="sidebar" id="sidebar">
 
     <button class="menu-toggle" id="toggleBtn">
@@ -25,6 +27,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
     </button>
 
     <div class="sidebar-header">
+
         <div class="logo-icon">
             <i class="fas fa-university"></i>
         </div>
@@ -33,6 +36,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
             <h2>SACCO</h2>
             <span>Banking System</span>
         </div>
+
     </div>
 
     <ul class="sidebar-menu">
@@ -103,124 +107,392 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
     </ul>
 
     <div class="sidebar-footer">
-        <a href="#">
+
+        <a href="#" class="logout-btn">
+
             <i class="fas fa-right-from-bracket"></i>
-            <span data-i18n="logout">Logout</span>
+
+            <span data-i18n="logout">
+                Logout
+            </span>
+
         </a>
+
     </div>
 
 </aside>
 
-<!-- MAIN CONTENT -->
+<!-- =========================
+MAIN CONTENT
+========================= -->
+
 <main class="main-content" id="mainContent">
 
-<!-- TOP BAR -->
+<!-- =========================
+TOPBAR
+========================= -->
+
 <div class="topbar">
 
-    <div>
-        <h1 data-i18n="members">Members</h1>
-        <p data-i18n="overview">Manage SACCO Members</p>
+    <div class="page-title">
+
+        <h1 data-i18n="members">
+            Members
+        </h1>
+
+        <p data-i18n="overview">
+            Manage SACCO Members
+        </p>
+
     </div>
 
     <div class="topbar-actions">
 
+        <!-- Language -->
+
         <div class="language-selector">
-            <select id="languageSelect" onchange="changeLanguage(this.value)">
+
+            <select
+                id="languageSelect"
+                onchange="changeLanguage(this.value)"
+            >
                 <option value="en">English</option>
                 <option value="om">Afaan Oromo</option>
                 <option value="am">አማርኛ</option>
             </select>
+
         </div>
 
-        <button class="btn-primary" onclick="openAddModal()">
+        <!-- Add Member -->
+
+        <button
+            class="btn-primary"
+            onclick="openAddModal()"
+        >
+
             <i class="fas fa-plus"></i>
-            Add Member
+
+            <span data-i18n="addMember">
+                Add Member
+            </span>
+
         </button>
 
     </div>
 
 </div>
 
-<!-- SEARCH -->
-<div class="search-bar">
-    <input type="text" id="searchInput" placeholder="Search members...">
-    <button onclick="searchMembers()">
-        <i class="fas fa-search"></i>
-    </button>
+<!-- =========================
+SUMMARY CARDS
+========================= -->
+
+<div class="stats-grid">
+
+    <div class="stat-card">
+
+        <div class="stat-top">
+
+            <div class="stat-icon blue">
+                <i class="fas fa-users"></i>
+            </div>
+
+            <div>
+
+                <div
+                    class="stat-label"
+                    data-i18n="totalMembers"
+                >
+                    Total Members
+                </div>
+
+                <div
+                    class="stat-value"
+                    id="totalMembers"
+                >
+                    0
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
 </div>
 
-<!-- TABLE -->
+<!-- =========================
+SEARCH BAR
+========================= -->
+
+<div class="search-section">
+
+    <div class="search-bar">
+
+        <input
+            type="text"
+            id="searchInput"
+            data-i18n-placeholder="searchMembers"
+            placeholder="Search Member..."
+        >
+
+        <button
+            onclick="searchMembers()"
+        >
+            <i class="fas fa-search"></i>
+        </button>
+
+    </div>
+
+</div>
+
+<!-- =========================
+MEMBERS TABLE
+========================= -->
+
 <div class="table-container">
 
-<table>
+<table class="members-table">
+
     <thead>
-<tr>
-    <th>Full Name</th>
-    <th>Phone</th>
-    <th>NID</th>
-    <th>Status</th>
-    <th>Created At</th>
-    <th>Created By</th>
-    <th>Actions</th>
-</tr>
-</thead>
+
+        <tr>
+
+            <th data-i18n="fullName">
+                Full Name
+            </th>
+
+            <th data-i18n="phone">
+                Phone
+            </th>
+
+            <th data-i18n="nid">
+                NID
+            </th>
+
+            <th data-i18n="status">
+                Status
+            </th>
+
+            <th data-i18n="createdDate">
+                Created At
+            </th>
+
+            <th data-i18n="createdBy">
+                Created By
+            </th>
+
+            <th data-i18n="actions">
+                Actions
+            </th>
+
+        </tr>
+
+    </thead>
 
     <tbody id="membersTable">
-        <!-- Firebase Data Here -->
+
+        <!-- Firestore Members Here -->
+
     </tbody>
 
 </table>
 
 </div>
+<!-- =========================
+PAGINATION
+========================= -->
 
-<!-- PAGINATION -->
 <div class="pagination">
-    <button onclick="prevPage()">Prev</button>
-    <span id="pageInfo">1</span>
-    <button onclick="nextPage()">Next</button>
+
+    <button
+        class="page-btn"
+        onclick="prevPage()"
+    >
+        <i class="fas fa-angle-left"></i>
+    </button>
+
+    <span id="pageInfo">
+        Page 1
+    </span>
+
+    <button
+        class="page-btn"
+        onclick="nextPage()"
+    >
+        <i class="fas fa-angle-right"></i>
+    </button>
+
 </div>
 
 </main>
+
 </div>
 
-<!-- ADD / EDIT MODAL -->
-<div class="modal" id="memberModal">
+<!-- =========================
+ADD / EDIT MEMBER MODAL
+========================= -->
+
+<div
+class="modal"
+id="memberModal"
+>
 
 <div class="modal-content">
 
-    <h2 id="modalTitle">Add Member</h2>
+    <div class="modal-header">
 
-    <input type="hidden" id="memberId">
+        <h2
+        id="modalTitle"
+        data-i18n="addMember"
+        >
+            Add Member
+        </h2>
 
-    <input type="text" id="fullName" placeholder="Full Name">
+        <button
+        class="close-btn"
+        onclick="closeModal()"
+        >
+            <i class="fas fa-times"></i>
+        </button>
 
-    <input type="text" id="phone" placeholder="Phone (9 digits)">
+    </div>
 
-    <input type="text" id="nid" placeholder="NID (16 digits)">
+    <input
+    type="hidden"
+    id="memberId"
+    >
 
-    <select id="status">
-        <option value="Active">Active</option>
-        <option value="Inactive">Inactive</option>
-    </select>
+    <div class="form-group">
+
+        <label
+        data-i18n="fullName"
+        >
+            Full Name
+        </label>
+
+        <input
+        type="text"
+        id="fullName"
+        >
+
+    </div>
+
+    <div class="form-group">
+
+        <label
+        data-i18n="phone"
+        >
+            Phone Number
+        </label>
+
+        <input
+        type="text"
+        id="phone"
+        maxlength="9"
+        >
+
+    </div>
+
+    <div class="form-group">
+
+        <label
+        data-i18n="nid"
+        >
+            NID Number
+        </label>
+
+        <input
+        type="text"
+        id="nid"
+        maxlength="16"
+        >
+
+    </div>
+
+    <div class="form-group">
+
+        <label
+        data-i18n="status"
+        >
+            Status
+        </label>
+
+        <select id="status">
+
+            <option value="Active">
+                Active
+            </option>
+
+            <option value="Inactive">
+                Inactive
+            </option>
+
+        </select>
+
+    </div>
 
     <div class="modal-actions">
-        <button onclick="saveMember()" class="btn-primary">
+
+        <button
+        class="btn-primary"
+        onclick="saveMember()"
+        >
+            <i class="fas fa-save"></i>
             Save
         </button>
 
-        <button onclick="closeModal()" class="btn-secondary">
+        <button
+        class="btn-secondary"
+        onclick="closeModal()"
+        >
             Cancel
         </button>
+
     </div>
 
 </div>
 
 </div>
 
-<!-- SCRIPTS -->
+<!-- =========================
+PROFILE MODAL
+========================= -->
+
+<div
+class="modal"
+id="profileModal"
+>
+
+<div class="profile-modal">
+
+    <button
+    class="close-btn"
+    onclick="closeProfile()"
+    >
+        <i class="fas fa-times"></i>
+    </button>
+
+    <div id="profileContent">
+
+        <!-- Dynamic Firebase Profile -->
+
+    </div>
+
+</div>
+
+</div>
+
+<!-- ========================= MULTI LANGUAGE ========================= -->
+
 <script src="js/i18n.js"></script>
+
+<!-- ========================= SIDEBAR ========================= -->
+
 <script src="js/layout.js"></script>
-<script src="js/members.js"></script>
+
+<!-- ========================= MEMBERS LOGIC ========================= -->
+
+<script type="module" src="js/members.js"></script>
 
 </body>
 </html>

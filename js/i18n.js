@@ -37,7 +37,14 @@ const translations = {
     netProfit: "Net Profit",
     totalMembers: "Total Members",
     totalSavings: "Total Savings",
-    totalLoans: "Total Loans"
+    totalLoans: "Total Loans",
+    withdrawalsTitle: "Withdrawals",
+    processWithdrawals: "Process withdrawals",
+    registerMember: "Register new member",
+    recordSavings: "Record member savings",
+    loansTitle: "Loans",
+    performanceOverview: "Performance Overview",
+    loansVsRepayments: "Loans vs Repayments"
   },
 
   am: {
@@ -78,7 +85,14 @@ const translations = {
     netProfit: "ንጹህ ትርፍ",
     totalMembers: "ጠቅላላ አባላት",
     totalSavings: "ጠቅላላ ቁጠባ",
-    totalLoans: "ጠቅላላ ብድር"
+    totalLoans: "ጠቅላላ ብድር",
+    withdrawalsTitle: "መውጣት",
+    processWithdrawals: "የመውጣት ሂደት",
+    registerMember: "አዲስ አባል መዝግብ",
+    recordSavings: "የቁጠባ መዝገብ",
+    loansTitle: "ብድር",
+    performanceOverview: "የአፈጻጸም እይታ",
+    loansVsRepayments: "ብድር እና ክፍያ"
   },
 
   om: {
@@ -119,7 +133,14 @@ const translations = {
     netProfit: "Bu'aa Qulqulluu",
     totalMembers: "Miseensota Waliigalaa",
     totalSavings: "Qusannaa Waliigalaa",
-    totalLoans: "Liqii Waliigalaa"
+    totalLoans: "Liqii Waliigalaa",
+    withdrawalsTitle: "Baasii",
+    processWithdrawals: "Baasii Raawwadhu",
+    registerMember: "Miseensa Haaraa Galmeessi",
+    recordSavings: "Qusannaa Galchi",
+    loansTitle: "Liqii",
+    performanceOverview: "Raawwii Hojii",
+    loansVsRepayments: "Liqii fi Deebii Liqii"
   }
 };
 

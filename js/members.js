@@ -256,6 +256,8 @@ MODAL FUNCTIONS
 ========================== */
 window.openAddModal = function () {
 
+    editingId = null;
+
     document.getElementById("memberId").value = "";
     document.getElementById("fullName").value = "";
     document.getElementById("phone").value = "";

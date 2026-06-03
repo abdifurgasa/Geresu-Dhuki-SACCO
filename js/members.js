@@ -14,8 +14,30 @@ import {
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
+import {
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+/* ==========================
+AUTH STATE (FIXED)
+========================== */
+
+let currentUser = null;
+
+onAuthStateChanged(auth, (user) => {
+  currentUser = user || null;
+});
+
+/* ==========================
+COLLECTIONS
+========================== */
+
 const membersCollection = collection(db, "members");
 const transactionsCollection = collection(db, "transactions");
+
+/* ==========================
+STATE
+========================== */
 
 let members = [];
 let filteredMembers = [];
@@ -26,16 +48,15 @@ const rowsPerPage = 10;
 let editingId = null;
 
 /* ==========================
-AUTH SAFE CHECK
+AUTH GUARD (SAFE)
 ========================== */
 
 function requireAuth() {
-  const user = auth.currentUser;
-  if (!user) {
-    alert("You are not logged in or session expired.");
+  if (!currentUser) {
+    alert("User not ready or session expired. Please refresh and try again.");
     return null;
   }
-  return user;
+  return currentUser;
 }
 
 /* ==========================
@@ -61,7 +82,7 @@ onSnapshot(membersCollection, (snapshot) => {
 });
 
 /* ==========================
-TOTAL MEMBERS
+COUNT
 ========================== */
 
 function updateMembersCount() {
@@ -80,10 +101,10 @@ window.searchMembers = function () {
     .toLowerCase()
     .trim();
 
-  filteredMembers = members.filter(member =>
-    (member.fullName || "").toLowerCase().includes(keyword) ||
-    (member.phone || "").includes(keyword) ||
-    (member.nid || "").includes(keyword)
+  filteredMembers = members.filter(m =>
+    (m.fullName || "").toLowerCase().includes(keyword) ||
+    (m.phone || "").includes(keyword) ||
+    (m.nid || "").includes(keyword)
   );
 
   currentPage = 1;
@@ -91,7 +112,7 @@ window.searchMembers = function () {
 };
 
 /* ==========================
-TABLE RENDER
+TABLE
 ========================== */
 
 function renderTable() {
@@ -139,7 +160,7 @@ function renderTable() {
 }
 
 /* ==========================
-PAGE INFO
+PAGINATION
 ========================== */
 
 function updatePageInfo() {
@@ -153,10 +174,6 @@ function updatePageInfo() {
   el.textContent = `Page ${currentPage} of ${totalPages}`;
 }
 
-/* ==========================
-PAGINATION
-========================== */
-
 window.nextPage = function () {
 
   const totalPages =
@@ -169,6 +186,7 @@ window.nextPage = function () {
 };
 
 window.prevPage = function () {
+
   if (currentPage > 1) {
     currentPage--;
     renderTable();
@@ -190,7 +208,7 @@ function formatDate(timestamp) {
 }
 
 /* ==========================
-OPEN ADD MODAL
+MODAL
 ========================== */
 
 window.openAddModal = function () {
@@ -204,7 +222,6 @@ window.openAddModal = function () {
   document.getElementById("status").value = "Active";
 
   document.getElementById("modalTitle").textContent = "Add Member";
-
   document.getElementById("memberModal").style.display = "flex";
 };
 
@@ -213,42 +230,35 @@ window.closeModal = function () {
 };
 
 /* ==========================
-EDIT MEMBER
+EDIT
 ========================== */
 
-window.editMember = async function (memberId) {
+window.editMember = async function (id) {
 
   const user = requireAuth();
   if (!user) return;
 
-  try {
+  const snap = await getDoc(doc(db, "members", id));
 
-    const memberRef = doc(db, "members", memberId);
-    const memberSnap = await getDoc(memberRef);
+  if (!snap.exists()) return;
 
-    if (!memberSnap.exists()) return;
+  const m = snap.data();
 
-    const member = memberSnap.data();
+  editingId = id;
 
-    editingId = memberId;
+  document.getElementById("modalTitle").textContent = "Edit Member";
 
-    document.getElementById("modalTitle").textContent = "Edit Member";
-    document.getElementById("memberId").value = memberId;
-    document.getElementById("fullName").value = member.fullName || "";
-    document.getElementById("phone").value = member.phone || "";
-    document.getElementById("nid").value = member.nid || "";
-    document.getElementById("status").value = member.status || "Active";
+  document.getElementById("memberId").value = id;
+  document.getElementById("fullName").value = m.fullName || "";
+  document.getElementById("phone").value = m.phone || "";
+  document.getElementById("nid").value = m.nid || "";
+  document.getElementById("status").value = m.status || "Active";
 
-    document.getElementById("memberModal").style.display = "flex";
-
-  } catch (error) {
-    console.error(error);
-    alert(error.message);
-  }
+  document.getElementById("memberModal").style.display = "flex";
 };
 
 /* ==========================
-SAVE MEMBER (FIXED)
+SAVE (FIXED AUTH)
 ========================== */
 
 window.saveMember = async function () {
@@ -256,160 +266,89 @@ window.saveMember = async function () {
   const user = requireAuth();
   if (!user) return;
 
-  try {
+  const fullName = document.getElementById("fullName").value.trim();
+  const phone = document.getElementById("phone").value.trim();
+  const nid = document.getElementById("nid").value.trim();
+  const status = document.getElementById("status").value;
 
-    const fullName = document.getElementById("fullName").value.trim();
-    const phone = document.getElementById("phone").value.trim();
-    const nid = document.getElementById("nid").value.trim();
-    const status = document.getElementById("status").value;
+  if (!fullName) return alert("Full Name required");
+  if (!/^\d{9}$/.test(phone)) return alert("Phone must be 9 digits");
+  if (!/^\d{16}$/.test(nid)) return alert("NID must be 16 digits");
 
-    if (!fullName) return alert("Full Name required");
-    if (!/^\d{9}$/.test(phone)) return alert("Phone must be 9 digits");
-    if (!/^\d{16}$/.test(nid)) return alert("NID must be 16 digits");
+  const createdBy = user.displayName || user.email || "Admin";
 
-    /* DUPLICATE CHECK */
-    const phoneSnap = await getDocs(query(membersCollection, where("phone", "==", phone)));
-    let phoneExists = false;
+  if (!editingId) {
 
-    phoneSnap.forEach(d => {
-      if (d.id !== editingId) phoneExists = true;
+    await addDoc(membersCollection, {
+      fullName,
+      phone,
+      nid,
+      status,
+      createdBy,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
     });
 
-    if (phoneExists) return alert("Phone already exists");
+  } else {
 
-    const nidSnap = await getDocs(query(membersCollection, where("nid", "==", nid)));
-    let nidExists = false;
-
-    nidSnap.forEach(d => {
-      if (d.id !== editingId) nidExists = true;
+    await updateDoc(doc(db, "members", editingId), {
+      fullName,
+      phone,
+      nid,
+      status,
+      updatedAt: serverTimestamp()
     });
 
-    if (nidExists) return alert("NID already exists");
-
-    const createdBy = user.displayName || user.email || "Admin";
-
-    if (!editingId) {
-
-      await addDoc(membersCollection, {
-        fullName,
-        phone,
-        nid,
-        status,
-        createdAt: serverTimestamp(),
-        createdBy,
-        updatedAt: serverTimestamp()
-      });
-
-    } else {
-
-      await updateDoc(doc(db, "members", editingId), {
-        fullName,
-        phone,
-        nid,
-        status,
-        updatedAt: serverTimestamp()
-      });
-
-    }
-
-    closeModal();
-
-  } catch (error) {
-    console.error(error);
-    alert(error.message);
   }
+
+  closeModal();
 };
 
 /* ==========================
-DELETE MEMBER
+DELETE
 ========================== */
 
-window.deleteMemberConfirm = async function (memberId) {
+window.deleteMemberConfirm = async function (id) {
 
   const user = requireAuth();
   if (!user) return;
 
-  const confirmed = confirm("Delete this member?");
-  if (!confirmed) return;
+  if (!confirm("Delete this member?")) return;
 
-  try {
+  const txSnap = await getDocs(
+    query(transactionsCollection, where("memberId", "==", id))
+  );
 
-    const txSnap = await getDocs(
-      query(transactionsCollection, where("memberId", "==", memberId))
-    );
-
-    if (!txSnap.empty) {
-      return alert("Cannot delete: transactions exist");
-    }
-
-    await deleteDoc(doc(db, "members", memberId));
-
-  } catch (error) {
-    console.error(error);
-    alert(error.message);
+  if (!txSnap.empty) {
+    return alert("Cannot delete: transactions exist");
   }
+
+  await deleteDoc(doc(db, "members", id));
 };
 
 /* ==========================
-PROFILE MODAL
+PROFILE (MINI FIX SAFE)
 ========================== */
+
+window.openProfile = async function (id) {
+
+  const user = requireAuth();
+  if (!user) return;
+
+  const snap = await getDoc(doc(db, "members", id));
+  if (!snap.exists()) return;
+
+  const m = snap.data();
+
+  document.getElementById("profileContent").innerHTML = `
+    <h2>${m.fullName}</h2>
+    <p>${m.phone}</p>
+    <p>${m.nid}</p>
+  `;
+
+  document.getElementById("profileModal").style.display = "flex";
+};
 
 window.closeProfile = function () {
   document.getElementById("profileModal").style.display = "none";
-};
-
-/* ==========================
-OPEN PROFILE
-========================== */
-
-window.openProfile = async function (memberId) {
-
-  const user = requireAuth();
-  if (!user) return;
-
-  try {
-
-    const memberSnap = await getDoc(doc(db, "members", memberId));
-    if (!memberSnap.exists()) return;
-
-    const member = memberSnap.data();
-
-    const txSnap = await getDocs(
-      query(transactionsCollection, where("memberId", "==", memberId))
-    );
-
-    let totalSavings = 0;
-    let totalWithdrawals = 0;
-    let totalLoans = 0;
-    let totalRepayments = 0;
-
-    let rows = "";
-
-    txSnap.forEach(d => {
-
-      const tx = d.data();
-      const amount = Number(tx.amount || 0);
-
-      if (tx.type === "saving") totalSavings += amount;
-      if (tx.type === "withdrawal") totalWithdrawals += amount;
-      if (tx.type === "loan") totalLoans += amount;
-      if (tx.type === "repayment") totalRepayments += amount;
-
-    });
-
-    const savingBalance = totalSavings - totalWithdrawals;
-    const remainingLoan = totalLoans - totalRepayments;
-    const netPosition = savingBalance - remainingLoan;
-
-    document.getElementById("profileContent").innerHTML = `
-      <h2>${member.fullName}</h2>
-      <p>Net Position: ${netPosition.toLocaleString()}</p>
-    `;
-
-    document.getElementById("profileModal").style.display = "flex";
-
-  } catch (error) {
-    console.error(error);
-    alert(error.message);
-  }
 };

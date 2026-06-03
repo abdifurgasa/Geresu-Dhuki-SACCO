@@ -1,219 +1,120 @@
-<!-- =========================================================
-     SIDEBAR
-========================================================= -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<aside
-  class="sidebar"
-  id="sidebar"
->
+<title data-i18n="settings">Settings</title>
 
-  <!-- TOGGLE -->
-  <button
-    class="toggle-btn"
-    onclick="toggleSidebar()"
-  >
-    ☰
-  </button>
+<link rel="stylesheet" href="css/style.css">
 
-  <!-- LOGO -->
-  <h2 class="logo">
-    🏦 SACCO
-  </h2>
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
 
-  <!-- NAVIGATION -->
-  <nav class="nav">
+<body>
 
-    <!-- DASHBOARD -->
-    <a
-      href="dashboard.html"
-      class="nav-item active"
-    >
+<div class="dashboard-container">
 
-      <span class="icon">
-        📊
-      </span>
+<!-- ================= SIDEBAR ================= -->
+<aside class="sidebar" id="sidebar">
 
-      <span
-        class="text"
-        data-i18n="dashboard"
-      >
-        Dashboard
-      </span>
+<button class="menu-toggle" id="toggleBtn">
+<i class="fas fa-bars"></i>
+</button>
 
-    </a>
+<div class="sidebar-header">
+<div class="logo-icon">
+<i class="fas fa-university"></i>
+</div>
+<div class="logo-text">
+<h2>SACCO</h2>
+<span>Banking System</span>
+</div>
+</div>
 
-    <!-- MEMBERS -->
-    <a
-      href="members.html"
-      class="nav-item admin-only"
-    >
+<ul class="sidebar-menu">
 
-      <span class="icon">
-        👥
-      </span>
+<li><a href="dashboard.html"><i class="fas fa-chart-pie"></i><span data-i18n="dashboard">Dashboard</span></a></li>
+<li><a href="members.html"><i class="fas fa-users"></i><span data-i18n="members">Members</span></a></li>
+<li><a href="savings.html"><i class="fas fa-wallet"></i><span data-i18n="savings">Savings</span></a></li>
+<li><a href="loans.html"><i class="fas fa-landmark"></i><span data-i18n="loans">Loans</span></a></li>
+<li><a href="repayments.html"><i class="fas fa-money-check"></i><span data-i18n="repayments">Repayments</span></a></li>
+<li><a href="withdrawals.html"><i class="fas fa-money-bill"></i><span data-i18n="withdrawals">Withdrawals</span></a></li>
+<li><a href="reports.html"><i class="fas fa-file"></i><span data-i18n="reports">Reports</span></a></li>
+<li class="active"><a href="settings.html"><i class="fas fa-gear"></i><span data-i18n="settings">Settings</span></a></li>
 
-      <span
-        class="text"
-        data-i18n="members"
-      >
-        Members
-      </span>
+</ul>
 
-    </a>
-
-    <!-- SAVINGS -->
-    <a
-      href="savings.html"
-      class="nav-item"
-    >
-
-      <span class="icon">
-        💰
-      </span>
-
-      <span
-        class="text"
-        data-i18n="savings"
-      >
-        Savings
-      </span>
-
-    </a>
-
-    <!-- LOANS -->
-    <a
-      href="loans.html"
-      class="nav-item"
-    >
-
-      <span class="icon">
-        🏦
-      </span>
-
-      <span
-        class="text"
-        data-i18n="loans"
-      >
-        Loans
-      </span>
-
-    </a>
-
-    <!-- REPAYMENTS -->
-    <a
-      href="repayments.html"
-      class="nav-item"
-    >
-
-      <span class="icon">
-        💵
-      </span>
-
-      <span
-        class="text"
-        data-i18n="repayments"
-      >
-        Repayments
-      </span>
-
-    </a>
-
-    <!-- WITHDRAWALS -->
-    <a
-      href="withdrawals.html"
-      class="nav-item admin-only"
-    >
-
-      <span class="icon">
-        💸
-      </span>
-
-      <span
-        class="text"
-        data-i18n="withdrawals"
-      >
-        Withdrawals
-      </span>
-
-    </a>
-
-    <!-- REPORTS -->
-    <a
-      href="reports.html"
-      class="nav-item admin-only"
-    >
-
-      <span class="icon">
-        📄
-      </span>
-
-      <span
-        class="text"
-        data-i18n="reports"
-      >
-        Reports
-      </span>
-
-    </a>
-
-    <!-- USERS -->
-    <a
-      href="users.html"
-      class="nav-item admin-only"
-    >
-
-      <span class="icon">
-        👤
-      </span>
-
-      <span
-        class="text"
-        data-i18n="users"
-      >
-        Users
-      </span>
-
-    </a>
-
-    <!-- SETTINGS -->
-    <a
-      href="settings.html"
-      class="nav-item"
-    >
-
-      <span class="icon">
-        ⚙️
-      </span>
-
-      <span
-        class="text"
-        data-i18n="settings"
-      >
-        Settings
-      </span>
-
-    </a>
-
-    <!-- LOGOUT -->
-    <a
-      href="#"
-      class="nav-item logout"
-      id="logoutBtn"
-    >
-
-      <span class="icon">
-        🚪
-      </span>
-
-      <span
-        class="text"
-        data-i18n="logout"
-      >
-        Logout
-      </span>
-
-    </a>
-
-  </nav>
+<div class="sidebar-footer">
+<a href="#" onclick="logout()" class="logout-btn">
+<i class="fas fa-right-from-bracket"></i>
+<span data-i18n="logout">Logout</span>
+</a>
+</div>
 
 </aside>
+
+<!-- ================= MAIN ================= -->
+<main class="main-content">
+
+<div class="topbar">
+<h1 data-i18n="settings">System Settings</h1>
+</div>
+
+<!-- ================= SETTINGS FORM ================= -->
+<div class="table-container">
+
+<form id="settingsForm">
+
+<div class="form-group">
+<label data-i18n="saccoName">SACCO Name</label>
+<input type="text" id="saccoName">
+</div>
+
+<div class="form-group">
+<label data-i18n="currency">Currency</label>
+<input type="text" id="currency">
+</div>
+
+<div class="form-group">
+<label data-i18n="interestRate">Default Interest Rate (%)</label>
+<input type="number" id="interestRate">
+</div>
+
+<div class="form-group">
+<label data-i18n="maxLoan">Maximum Loan Amount</label>
+<input type="number" id="maxLoan">
+</div>
+
+<div class="form-group">
+<label data-i18n="minSaving">Minimum Saving</label>
+<input type="number" id="minSaving">
+</div>
+
+<div class="form-group">
+<label data-i18n="sessionTimeout">Session Timeout (min)</label>
+<input type="number" id="sessionTimeout">
+</div>
+
+<div class="modal-actions">
+
+<button type="button" class="btn-primary" onclick="saveSettings()">
+<i class="fas fa-save"></i> Save
+</button>
+
+</div>
+
+</form>
+
+</div>
+
+</main>
+</div>
+
+<script type="module" src="js/i18n.js"></script>
+<script type="module" src="js/layout.js"></script>
+<script type="module" src="js/settings.js"></script>
+
+</body>
+</html>

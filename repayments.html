@@ -1,219 +1,229 @@
-<!-- =========================================================
-     SIDEBAR
-========================================================= -->
+<!DOCTYPE html>
+<html lang="en">
 
-<aside
-  class="sidebar"
-  id="sidebar"
->
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- TOGGLE -->
-  <button
-    class="toggle-btn"
-    onclick="toggleSidebar()"
-  >
-    ☰
-  </button>
+<title data-i18n="repayments">Repayments</title>
 
-  <!-- LOGO -->
-  <h2 class="logo">
-    🏦 SACCO
-  </h2>
+<link rel="stylesheet" href="css/style.css">
 
-  <!-- NAVIGATION -->
-  <nav class="nav">
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-    <!-- DASHBOARD -->
-    <a
-      href="dashboard.html"
-      class="nav-item active"
-    >
+</head>
 
-      <span class="icon">
-        📊
-      </span>
+<body>
 
-      <span
-        class="text"
-        data-i18n="dashboard"
-      >
-        Dashboard
-      </span>
+<div class="dashboard-container">
 
-    </a>
+<!-- ========================= SIDEBAR ========================= -->
+<aside class="sidebar" id="sidebar">
 
-    <!-- MEMBERS -->
-    <a
-      href="members.html"
-      class="nav-item admin-only"
-    >
+    <button class="menu-toggle" id="toggleBtn">
+        <i class="fas fa-bars"></i>
+    </button>
 
-      <span class="icon">
-        👥
-      </span>
+    <div class="sidebar-header">
 
-      <span
-        class="text"
-        data-i18n="members"
-      >
-        Members
-      </span>
+        <div class="logo-icon">
+            <i class="fas fa-university"></i>
+        </div>
 
-    </a>
+        <div class="logo-text">
+            <h2>SACCO</h2>
+            <span>Banking System</span>
+        </div>
 
-    <!-- SAVINGS -->
-    <a
-      href="savings.html"
-      class="nav-item"
-    >
+    </div>
 
-      <span class="icon">
-        💰
-      </span>
+    <ul class="sidebar-menu">
 
-      <span
-        class="text"
-        data-i18n="savings"
-      >
-        Savings
-      </span>
+        <li><a href="dashboard.html"><i class="fas fa-chart-pie"></i> <span data-i18n="dashboard">Dashboard</span></a></li>
+        <li><a href="members.html"><i class="fas fa-users"></i> <span data-i18n="members">Members</span></a></li>
+        <li><a href="savings.html"><i class="fas fa-wallet"></i> <span data-i18n="savings">Savings</span></a></li>
+        <li><a href="loans.html"><i class="fas fa-landmark"></i> <span data-i18n="loans">Loans</span></a></li>
+        <li class="active"><a href="repayments.html"><i class="fas fa-money-check-dollar"></i> <span data-i18n="repayments">Repayments</span></a></li>
+        <li><a href="withdrawals.html"><i class="fas fa-money-bill-transfer"></i> <span data-i18n="withdrawals">Withdrawals</span></a></li>
+        <li><a href="reports.html"><i class="fas fa-file-alt"></i> <span data-i18n="reports">Reports</span></a></li>
+        <li><a href="users.html"><i class="fas fa-user"></i> <span data-i18n="users">Users</span></a></li>
+        <li><a href="settings.html"><i class="fas fa-gear"></i> <span data-i18n="settings">Settings</span></a></li>
 
-    </a>
+    </ul>
 
-    <!-- LOANS -->
-    <a
-      href="loans.html"
-      class="nav-item"
-    >
-
-      <span class="icon">
-        🏦
-      </span>
-
-      <span
-        class="text"
-        data-i18n="loans"
-      >
-        Loans
-      </span>
-
-    </a>
-
-    <!-- REPAYMENTS -->
-    <a
-      href="repayments.html"
-      class="nav-item"
-    >
-
-      <span class="icon">
-        💵
-      </span>
-
-      <span
-        class="text"
-        data-i18n="repayments"
-      >
-        Repayments
-      </span>
-
-    </a>
-
-    <!-- WITHDRAWALS -->
-    <a
-      href="withdrawals.html"
-      class="nav-item admin-only"
-    >
-
-      <span class="icon">
-        💸
-      </span>
-
-      <span
-        class="text"
-        data-i18n="withdrawals"
-      >
-        Withdrawals
-      </span>
-
-    </a>
-
-    <!-- REPORTS -->
-    <a
-      href="reports.html"
-      class="nav-item admin-only"
-    >
-
-      <span class="icon">
-        📄
-      </span>
-
-      <span
-        class="text"
-        data-i18n="reports"
-      >
-        Reports
-      </span>
-
-    </a>
-
-    <!-- USERS -->
-    <a
-      href="users.html"
-      class="nav-item admin-only"
-    >
-
-      <span class="icon">
-        👤
-      </span>
-
-      <span
-        class="text"
-        data-i18n="users"
-      >
-        Users
-      </span>
-
-    </a>
-
-    <!-- SETTINGS -->
-    <a
-      href="settings.html"
-      class="nav-item"
-    >
-
-      <span class="icon">
-        ⚙️
-      </span>
-
-      <span
-        class="text"
-        data-i18n="settings"
-      >
-        Settings
-      </span>
-
-    </a>
-
-    <!-- LOGOUT -->
-    <a
-      href="#"
-      class="nav-item logout"
-      id="logoutBtn"
-    >
-
-      <span class="icon">
-        🚪
-      </span>
-
-      <span
-        class="text"
-        data-i18n="logout"
-      >
-        Logout
-      </span>
-
-    </a>
-
-  </nav>
+    <div class="sidebar-footer">
+        <a href="#" class="logout-btn">
+            <i class="fas fa-right-from-bracket"></i>
+            <span data-i18n="logout">Logout</span>
+        </a>
+    </div>
 
 </aside>
+
+<!-- ========================= MAIN ========================= -->
+<main class="main-content" id="mainContent">
+
+<!-- TOPBAR -->
+<div class="topbar">
+
+    <div class="page-title">
+        <h1 data-i18n="repayments">Repayments</h1>
+        <p data-i18n="overview">Manage Loan Repayments</p>
+    </div>
+
+    <div class="topbar-actions">
+
+        <div class="language-selector">
+            <select id="languageSelect" onchange="changeLanguage(this.value)">
+                <option value="en">English</option>
+                <option value="om">Afaan Oromo</option>
+                <option value="am">አማርኛ</option>
+            </select>
+        </div>
+
+        <button class="btn-primary" onclick="openAddModal()">
+            <i class="fas fa-plus"></i>
+            <span data-i18n="addRepayment">Add Repayment</span>
+        </button>
+
+    </div>
+
+</div>
+
+<!-- SUMMARY -->
+<div class="stats-grid">
+
+    <div class="stat-card">
+        <div class="stat-top">
+            <div class="stat-icon blue">
+                <i class="fas fa-money-check-dollar"></i>
+            </div>
+
+            <div>
+                <div class="stat-label" data-i18n="totalRepayments">Total Repayments</div>
+                <div class="stat-value" id="totalRepayments">0</div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- SEARCH -->
+<div class="search-section">
+
+    <div class="search-bar">
+
+        <input
+            type="text"
+            id="searchInput"
+            placeholder="Search repayment..."
+            oninput="searchRepayments()"
+        >
+
+        <button onclick="searchRepayments()">
+            <i class="fas fa-search"></i>
+        </button>
+
+    </div>
+
+</div>
+
+<!-- TABLE -->
+<div class="table-container">
+
+<table class="members-table">
+
+<thead>
+
+<tr>
+    <th data-i18n="fullName">Member</th>
+    <th>Loan ID</th>
+    <th>Amount</th>
+    <th>Remaining Loan</th>
+    <th data-i18n="createdDate">Date</th>
+    <th data-i18n="createdBy">Created By</th>
+    <th data-i18n="actions">Actions</th>
+</tr>
+
+</thead>
+
+<tbody id="repaymentsTable"></tbody>
+
+</table>
+
+</div>
+
+<!-- PAGINATION -->
+<div class="pagination">
+
+    <button class="page-btn" onclick="prevPage()">
+        <i class="fas fa-angle-left"></i>
+    </button>
+
+    <span id="pageInfo">Page 1</span>
+
+    <button class="page-btn" onclick="nextPage()">
+        <i class="fas fa-angle-right"></i>
+    </button>
+
+</div>
+
+</main>
+
+</div>
+
+<!-- ========================= MODAL ========================= -->
+<div class="modal" id="repaymentModal">
+
+<div class="modal-content">
+
+    <div class="modal-header">
+        <h2 data-i18n="addRepayment">Add Repayment</h2>
+
+        <button class="close-btn" onclick="closeModal()">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+
+    <input type="text" id="loanId" placeholder="Loan ID">
+
+    <input type="number" id="amount" placeholder="Amount">
+
+    <div class="modal-actions">
+
+        <button class="btn-primary" onclick="saveRepayment()">
+            <i class="fas fa-save"></i> Save
+        </button>
+
+        <button class="btn-secondary" onclick="closeModal()">
+            Cancel
+        </button>
+
+    </div>
+
+</div>
+
+</div>
+
+<!-- PROFILE MODAL -->
+<div class="modal" id="profileModal">
+
+<div class="profile-modal">
+
+    <button class="close-btn" onclick="closeProfile()">
+        <i class="fas fa-times"></i>
+    </button>
+
+    <div id="profileContent"></div>
+
+</div>
+
+</div>
+
+<script src="js/i18n.js"></script>
+<script type="module" src="js/layout.js"></script>
+<script type="module" src="js/repayments.js"></script>
+
+</body>
+</html>

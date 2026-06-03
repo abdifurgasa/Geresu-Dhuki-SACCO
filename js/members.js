@@ -275,8 +275,15 @@ SAVE (FIXED AUTH)
 
 window.saveMember = async function () {
 
-  const user = requireAuth();
-  if (!user) return;
+  // WAIT FOR AUTH FIRST (CRITICAL FIX)
+  if (!authReady) {
+    await authReadyPromise;
+  }
+
+  if (!currentUser) {
+    alert("Not logged in. Please login again.");
+    return;
+  }
 
   const fullName = document.getElementById("fullName").value.trim();
   const phone = document.getElementById("phone").value.trim();
@@ -287,7 +294,7 @@ window.saveMember = async function () {
   if (!/^\d{9}$/.test(phone)) return alert("Phone must be 9 digits");
   if (!/^\d{16}$/.test(nid)) return alert("NID must be 16 digits");
 
-  const createdBy = user.displayName || user.email || "Admin";
+  const createdBy = currentUser.displayName || currentUser.email || "Admin";
 
   if (!editingId) {
 

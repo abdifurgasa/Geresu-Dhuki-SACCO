@@ -3,7 +3,7 @@
 ===================================================== */
 
 :root{
-    --sidebar-bg:#12e293;
+    --sidebar-bg:#001a4d;
     --sidebar-bg2:#001133;
 
     --primary:#2563eb;
@@ -61,8 +61,9 @@ body{
     background:
     linear-gradient(
     180deg,
-    #009966 0%,
-    #006b47 100%
+    var(--sidebar-bg) 0%,
+    var(--sidebar-bg2) 100%
+    );
 
     color:#fff;
 

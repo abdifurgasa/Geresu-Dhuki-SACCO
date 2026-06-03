@@ -1,3 +1,15 @@
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+let currentUser = null;
+let authReady = false;
+
+export const authReadyPromise = new Promise((resolve) => {
+  onAuthStateChanged(auth, (user) => {
+    currentUser = user;
+    authReady = true;
+    resolve(user);
+  });
+});
 import { db, auth } from "./firebase.js";
 
 import {

@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>SACCO Members</title>
+<title>SACCO Savings</title>
 
 <link rel="stylesheet" href="css/style.css">
 
@@ -17,9 +17,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
 
 <div class="dashboard-container">
 
-<!-- =========================
-SIDEBAR
-========================= -->
+<!-- SIDEBAR -->
 <aside class="sidebar" id="sidebar">
 
     <button class="menu-toggle" id="toggleBtn">
@@ -48,14 +46,14 @@ SIDEBAR
             </a>
         </li>
 
-        <li class="active">
+        <li>
             <a href="members.html">
                 <i class="fas fa-users"></i>
                 <span data-i18n="members">Members</span>
             </a>
         </li>
 
-        <li>
+        <li class="active">
             <a href="savings.html">
                 <i class="fas fa-wallet"></i>
                 <span data-i18n="savings">Savings</span>
@@ -122,38 +120,26 @@ SIDEBAR
 
 </aside>
 
-<!-- =========================
-MAIN CONTENT
-========================= -->
-
+<!-- MAIN CONTENT -->
 <main class="main-content" id="mainContent">
 
-<!-- =========================
-TOPBAR
-========================= -->
+<!-- TOPBAR -->
 
 <div class="topbar">
-<h2>💰 Savings Management</h2>
-</div>
 
-<!-- MEMBER SELECT -->
-<div class="form-card">
+    <div class="page-title">
 
-<h3>Select Member</h3>
+        <h1 data-i18n="savings">
+            Savings
+        </h1>
 
-<div class="search-container">
-<input id="searchInput" class="search-input"
-placeholder="Search member...">
+        <p data-i18n="manageSavings">
+            Manage SACCO Savings
+        </p>
 
-<div id="searchResults"></div>
-</div>
+    </div>
 
-<div id="selectedMember" style="margin-top:10px;">
-👤 No member selected
-</div>
-
-</div>
-        <!-- Language -->
+    <div class="topbar-actions">
 
         <div class="language-selector">
 
@@ -168,97 +154,262 @@ placeholder="Search member...">
 
         </div>
 
-        <!-- Add Member -->
-          <button class="btn-primary" id="addMemberBtn">
+        <button
+            class="btn-primary"
+            id="addSavingBtn"
+        >
+
             <i class="fas fa-plus"></i>
-            <span data-i18n="addMember">Add Member</span>
+
+            <span data-i18n="addSaving">
+                Add Saving
+            </span>
+
         </button>
 
     </div>
 
 </div>
-<!-- =========================================================
-     MAIN CONTENT
-========================================================= -->
 
-<!-- ADD SAVING -->
-<div class="form-card">
+<!-- SUMMARY CARD -->
 
-<h3>Add Saving</h3>
+<div class="stats-grid">
 
-<form id="savingForm">
+    <div class="stat-card">
 
-<input type="number" id="amount" placeholder="Amount" required>
+        <div class="stat-top">
 
-<button type="submit" class="primary-btn">
-<i class="fa fa-plus"></i> Save
-</button>
+            <div class="stat-icon green">
+                <i class="fas fa-wallet"></i>
+            </div>
 
-</form>
+            <div>
+
+                <div
+                    class="stat-label"
+                    data-i18n="totalSavings"
+                >
+                    Total Savings
+                </div>
+
+                <div
+                    class="stat-value"
+                    id="totalSavings"
+                >
+                    0
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- SEARCH -->
+
+<div class="search-section">
+
+    <div class="search-bar">
+
+        <input
+            type="text"
+            id="searchInput"
+            placeholder="Search Member..."
+            data-i18n-placeholder="searchMembers"
+        >
+
+        <button id="searchBtn">
+            <i class="fas fa-search"></i>
+        </button>
+
+    </div>
+
+    <div id="searchResults"></div>
+
+</div>
+
+<!-- SELECTED MEMBER -->
+
+<div class="selected-member-card">
+
+    <div id="selectedMember">
+
+        <i class="fas fa-user"></i>
+
+        No member selected
+
+    </div>
 
 </div>
 
 <!-- TABLE -->
-<div class="table-card">
 
-<table class="data-table">
+<div class="table-container">
 
-<thead>
-<tr>
-<th>Name</th>
-<th>Phone</th>
-<th>Deposit</th>
-<th>Previous</th>
-<th>Total</th>
-<th>Date</th>
-<th>Action</th>
-</tr>
-</thead>
+<table class="members-table">
 
-<tbody id="savingsTable"></tbody>
+    <thead>
+
+        <tr>
+
+            <th>Name</th>
+            <th>Phone</th>
+            <th>Deposit</th>
+            <th>Previous</th>
+            <th>Total</th>
+            <th>Created Date</th>
+            <th>Created By</th>
+            <th>Actions</th>
+
+        </tr>
+
+    </thead>
+
+    <tbody id="savingsTable">
+
+    </tbody>
 
 </table>
+
+</div>
+
+<!-- PAGINATION -->
+
+<div class="pagination">
+
+    <button
+        class="page-btn"
+        onclick="prevPage()"
+    >
+        <i class="fas fa-angle-left"></i>
+    </button>
+
+    <span id="pageInfo">
+        Page 1
+    </span>
+
+    <button
+        class="page-btn"
+        onclick="nextPage()"
+    >
+        <i class="fas fa-angle-right"></i>
+    </button>
 
 </div>
 
 </main>
 
+</div>
+
+<!-- ADD SAVING MODAL -->
+
+<div
+class="modal"
+id="savingModal"
+>
+
+<div class="modal-content">
+
+    <div class="modal-header">
+
+        <h2 id="modalTitle">
+            Add Saving
+        </h2>
+
+        <button
+            class="close-btn"
+            onclick="closeModal()"
+        >
+            <i class="fas fa-times"></i>
+        </button>
+
+    </div>
+
+    <input
+        type="hidden"
+        id="savingId"
+    >
+
+    <div class="form-group">
+
+        <label>
+            Member
+        </label>
+
+        <input
+            type="text"
+            id="memberSearch"
+            placeholder="Search member..."
+        >
+
+    </div>
+
+    <div class="form-group">
+
+        <label>
+            Amount
+        </label>
+
+        <input
+            type="number"
+            id="amount"
+            min="1"
+        >
+
+    </div>
+
+    <div class="modal-actions">
+
+        <button
+            class="btn-primary"
+            onclick="saveSaving()"
+        >
+            <i class="fas fa-save"></i>
+            Save
+        </button>
+
+        <button
+            class="btn-secondary"
+            onclick="closeModal()"
+        >
+            Cancel
+        </button>
+
+    </div>
+
+</div>
+
+</div>
+
 <!-- PROFILE MODAL -->
-<div class="modal" id="profileModal">
 
-<div class="modal-box">
+<div
+class="modal"
+id="profileModal"
+>
 
-<div class="modal-header">
-<h2 id="profileName">Profile</h2>
-<button id="closeProfileBtn">✖</button>
-</div>
+<div class="profile-modal">
 
-<div>
-<h3>Total:
-<span id="profileTotalSaving">0</span>
-</h3>
+    <button
+        class="close-btn"
+        onclick="closeProfile()"
+    >
+        <i class="fas fa-times"></i>
+    </button>
 
-<table class="data-table">
+    <div id="profileContent">
 
-<thead>
-<tr>
-<th>Date</th>
-<th>Amount</th>
-<th>By</th>
-</tr>
-</thead>
-
-<tbody id="savingHistory"></tbody>
-
-</table>
+    </div>
 
 </div>
 
 </div>
 
-</div>
-  
+<script src="js/i18n.js"></script>
+<script type="module" src="js/layout.js"></script>
 <script type="module" src="js/savings.js"></script>
-<script type="module" src="js/i18n.js"></script>
+
 </body>
 </html>

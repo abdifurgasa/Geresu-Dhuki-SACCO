@@ -1,15 +1,3 @@
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-
-let currentUser = null;
-let authReady = false;
-
-export const authReadyPromise = new Promise((resolve) => {
-  onAuthStateChanged(auth, (user) => {
-    currentUser = user;
-    authReady = true;
-    resolve(user);
-  });
-});
 import { db, auth } from "./firebase.js";
 
 import {
@@ -22,58 +10,45 @@ import {
   getDocs,
   query,
   where,
-  onSnapshot,
-  serverTimestamp
+  serverTimestamp,
+  onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-import {
-  onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-
-/* ==========================
-AUTH STATE (FIXED)
-========================== */
-
-let currentUser = null;
-
-onAuthStateChanged(auth, (user) => {
-  currentUser = user || null;
-});
-
-/* ==========================
+/* =========================
 COLLECTIONS
-========================== */
+========================= */
 
 const membersCollection = collection(db, "members");
 const transactionsCollection = collection(db, "transactions");
 
-/* ==========================
+/* =========================
 STATE
-========================== */
+========================= */
 
 let members = [];
 let filteredMembers = [];
-
 let currentPage = 1;
 const rowsPerPage = 10;
-
 let editingId = null;
 
-/* ==========================
-AUTH GUARD (SAFE)
-========================== */
+/* =========================
+MAKE FUNCTIONS GLOBAL EARLY
+(IMPORTANT FIX)
+========================= */
 
-function requireAuth() {
-  if (!currentUser) {
-    alert("User not ready or session expired. Please refresh and try again.");
-    return null;
-  }
-  return currentUser;
-}
+window.openAddModal = openAddModal;
+window.closeModal = closeModal;
+window.saveMember = saveMember;
+window.editMember = editMember;
+window.deleteMemberConfirm = deleteMemberConfirm;
+window.openProfile = openProfile;
+window.searchMembers = searchMembers;
+window.nextPage = nextPage;
+window.prevPage = prevPage;
 
-/* ==========================
-LOAD MEMBERS
-========================== */
+/* =========================
+LOAD MEMBERS REALTIME
+========================= */
 
 onSnapshot(membersCollection, (snapshot) => {
 
@@ -93,137 +68,21 @@ onSnapshot(membersCollection, (snapshot) => {
 
 });
 
-/* ==========================
-COUNT
-========================== */
+/* =========================
+UTILS
+========================= */
 
-function updateMembersCount() {
-  const el = document.getElementById("totalMembers");
-  if (el) el.textContent = members.length;
+function getCurrentUserSafe() {
+  const user = auth.currentUser;
+  if (!user) return null;
+  return user;
 }
 
-/* ==========================
-SEARCH
-========================== */
+/* =========================
+ADD MODAL
+========================= */
 
-window.searchMembers = function () {
-
-  const keyword = document.getElementById("searchInput")
-    .value
-    .toLowerCase()
-    .trim();
-
-  filteredMembers = members.filter(m =>
-    (m.fullName || "").toLowerCase().includes(keyword) ||
-    (m.phone || "").includes(keyword) ||
-    (m.nid || "").includes(keyword)
-  );
-
-  currentPage = 1;
-  renderTable();
-};
-
-/* ==========================
-TABLE
-========================== */
-
-function renderTable() {
-
-  const tbody = document.getElementById("membersTable");
-  if (!tbody) return;
-
-  tbody.innerHTML = "";
-
-  const start = (currentPage - 1) * rowsPerPage;
-  const end = start + rowsPerPage;
-
-  const pageData = filteredMembers.slice(start, end);
-
-  pageData.forEach(member => {
-
-    const tr = document.createElement("tr");
-
-    tr.innerHTML = `
-      <td>${member.fullName || ""}</td>
-      <td>${member.phone || ""}</td>
-      <td>${member.nid || ""}</td>
-      <td><span class="status-badge">${member.status || ""}</span></td>
-      <td>${formatDate(member.createdAt)}</td>
-      <td>${member.createdBy || "-"}</td>
-      <td>
-        <button class="table-btn view-btn" onclick="openProfile('${member.id}')">
-          <i class="fas fa-eye"></i>
-        </button>
-
-        <button class="table-btn edit-btn" onclick="editMember('${member.id}')">
-          <i class="fas fa-pen"></i>
-        </button>
-
-        <button class="table-btn delete-btn" onclick="deleteMemberConfirm('${member.id}')">
-          <i class="fas fa-trash"></i>
-        </button>
-      </td>
-    `;
-
-    tbody.appendChild(tr);
-  });
-
-  updatePageInfo();
-}
-
-/* ==========================
-PAGINATION
-========================== */
-
-function updatePageInfo() {
-
-  const el = document.getElementById("pageInfo");
-  if (!el) return;
-
-  const totalPages =
-    Math.ceil(filteredMembers.length / rowsPerPage) || 1;
-
-  el.textContent = `Page ${currentPage} of ${totalPages}`;
-}
-
-window.nextPage = function () {
-
-  const totalPages =
-    Math.ceil(filteredMembers.length / rowsPerPage);
-
-  if (currentPage < totalPages) {
-    currentPage++;
-    renderTable();
-  }
-};
-
-window.prevPage = function () {
-
-  if (currentPage > 1) {
-    currentPage--;
-    renderTable();
-  }
-};
-
-/* ==========================
-DATE FORMAT
-========================== */
-
-function formatDate(timestamp) {
-  if (!timestamp) return "-";
-
-  if (timestamp.seconds) {
-    return new Date(timestamp.seconds * 1000).toLocaleString();
-  }
-
-  return "-";
-}
-
-/* ==========================
-MODAL
-========================== */
-
-window.openAddModal = function () {
+function openAddModal() {
 
   editingId = null;
 
@@ -234,21 +93,77 @@ window.openAddModal = function () {
   document.getElementById("status").value = "Active";
 
   document.getElementById("modalTitle").textContent = "Add Member";
+
   document.getElementById("memberModal").style.display = "flex";
-};
+}
 
-window.closeModal = function () {
+function closeModal() {
   document.getElementById("memberModal").style.display = "none";
-};
+}
 
-/* ==========================
+/* =========================
+SAVE MEMBER (FIXED AUTH CHECK)
+========================= */
+
+async function saveMember() {
+
+  try {
+
+    const user = getCurrentUserSafe();
+
+    if (!user) {
+      alert("Please login again (session expired)");
+      return;
+    }
+
+    const fullName = document.getElementById("fullName").value.trim();
+    const phone = document.getElementById("phone").value.trim();
+    const nid = document.getElementById("nid").value.trim();
+    const status = document.getElementById("status").value;
+
+    if (!fullName) return alert("Full Name required");
+    if (!/^\d{9}$/.test(phone)) return alert("Phone must be 9 digits");
+    if (!/^\d{16}$/.test(nid)) return alert("NID must be 16 digits");
+
+    const createdBy = user.email || "System";
+
+    if (!editingId) {
+
+      await addDoc(membersCollection, {
+        fullName,
+        phone,
+        nid,
+        status,
+        createdBy,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      });
+
+    } else {
+
+      await updateDoc(doc(db, "members", editingId), {
+        fullName,
+        phone,
+        nid,
+        status,
+        updatedAt: serverTimestamp()
+      });
+
+    }
+
+    closeModal();
+
+  } catch (err) {
+    console.error(err);
+    alert(err.message);
+  }
+}
+
+/* =========================
 EDIT
-========================== */
+========================= */
 
-window.editMember = async function (id) {
-
-  const user = requireAuth();
-  if (!user) return;
+async function editMember(id) {
 
   const snap = await getDoc(doc(db, "members", id));
 
@@ -258,101 +173,33 @@ window.editMember = async function (id) {
 
   editingId = id;
 
-  document.getElementById("modalTitle").textContent = "Edit Member";
-
   document.getElementById("memberId").value = id;
   document.getElementById("fullName").value = m.fullName || "";
   document.getElementById("phone").value = m.phone || "";
   document.getElementById("nid").value = m.nid || "";
   document.getElementById("status").value = m.status || "Active";
 
+  document.getElementById("modalTitle").textContent = "Edit Member";
+
   document.getElementById("memberModal").style.display = "flex";
-};
+}
 
-/* ==========================
-SAVE (FIXED AUTH)
-========================== */
-
-window.saveMember = async function () {
-
-  // WAIT FOR AUTH FIRST (CRITICAL FIX)
-  if (!authReady) {
-    await authReadyPromise;
-  }
-
-  if (!currentUser) {
-    alert("Not logged in. Please login again.");
-    return;
-  }
-
-  const fullName = document.getElementById("fullName").value.trim();
-  const phone = document.getElementById("phone").value.trim();
-  const nid = document.getElementById("nid").value.trim();
-  const status = document.getElementById("status").value;
-
-  if (!fullName) return alert("Full Name required");
-  if (!/^\d{9}$/.test(phone)) return alert("Phone must be 9 digits");
-  if (!/^\d{16}$/.test(nid)) return alert("NID must be 16 digits");
-
-  const createdBy = currentUser.displayName || currentUser.email || "Admin";
-
-  if (!editingId) {
-
-    await addDoc(membersCollection, {
-      fullName,
-      phone,
-      nid,
-      status,
-      createdBy,
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp()
-    });
-
-  } else {
-
-    await updateDoc(doc(db, "members", editingId), {
-      fullName,
-      phone,
-      nid,
-      status,
-      updatedAt: serverTimestamp()
-    });
-
-  }
-
-  closeModal();
-};
-
-/* ==========================
+/* =========================
 DELETE
-========================== */
+========================= */
 
-window.deleteMemberConfirm = async function (id) {
-
-  const user = requireAuth();
-  if (!user) return;
+async function deleteMemberConfirm(id) {
 
   if (!confirm("Delete this member?")) return;
 
-  const txSnap = await getDocs(
-    query(transactionsCollection, where("memberId", "==", id))
-  );
-
-  if (!txSnap.empty) {
-    return alert("Cannot delete: transactions exist");
-  }
-
   await deleteDoc(doc(db, "members", id));
-};
+}
 
-/* ==========================
-PROFILE (MINI FIX SAFE)
-========================== */
+/* =========================
+PROFILE
+========================= */
 
-window.openProfile = async function (id) {
-
-  const user = requireAuth();
-  if (!user) return;
+async function openProfile(id) {
 
   const snap = await getDoc(doc(db, "members", id));
   if (!snap.exists()) return;
@@ -366,8 +213,80 @@ window.openProfile = async function (id) {
   `;
 
   document.getElementById("profileModal").style.display = "flex";
-};
+}
 
-window.closeProfile = function () {
-  document.getElementById("profileModal").style.display = "none";
-};
+/* =========================
+SEARCH
+========================= */
+
+function searchMembers() {
+
+  const keyword = document.getElementById("searchInput").value.toLowerCase();
+
+  filteredMembers = members.filter(m =>
+    (m.fullName || "").toLowerCase().includes(keyword) ||
+    (m.phone || "").includes(keyword) ||
+    (m.nid || "").includes(keyword)
+  );
+
+  renderTable();
+}
+
+/* =========================
+TABLE
+========================= */
+
+function renderTable() {
+
+  const tbody = document.getElementById("membersTable");
+
+  if (!tbody) return;
+
+  tbody.innerHTML = "";
+
+  const start = (currentPage - 1) * rowsPerPage;
+  const pageData = filteredMembers.slice(start, start + rowsPerPage);
+
+  pageData.forEach(m => {
+
+    const tr = document.createElement("tr");
+
+    tr.innerHTML = `
+      <td>${m.fullName || ""}</td>
+      <td>${m.phone || ""}</td>
+      <td>${m.nid || ""}</td>
+      <td>${m.status || ""}</td>
+      <td>
+        <button onclick="openProfile('${m.id}')">View</button>
+        <button onclick="editMember('${m.id}')">Edit</button>
+        <button onclick="deleteMemberConfirm('${m.id}')">Delete</button>
+      </td>
+    `;
+
+    tbody.appendChild(tr);
+
+  });
+}
+
+/* =========================
+PAGINATION
+========================= */
+
+function nextPage() {
+  currentPage++;
+  renderTable();
+}
+
+function prevPage() {
+  if (currentPage > 1) currentPage--;
+  renderTable();
+}
+
+/* =========================
+COUNT
+========================= */
+
+function updateMembersCount() {
+  const el = document.getElementById("totalMembers");
+  if (el) el.textContent = members.length;
+}

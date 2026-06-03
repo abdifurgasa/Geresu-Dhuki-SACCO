@@ -9,245 +9,540 @@ import {
   getDocs,
   query,
   where,
-  serverTimestamp,
-  onSnapshot
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  orderBy,
+  onSnapshot,
+  serverTimestamp
+}
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 /* =========================
 COLLECTIONS
 ========================= */
 
-const savingsCollection = collection(db, "savings");
-const membersCollection = collection(db, "members");
+const membersCollection = collection(db,"members");
+const savingsCollection = collection(db,"savings");
+const transactionsCollection = collection(db,"transactions");
 
 /* =========================
 STATE
 ========================= */
 
 let savings = [];
-let members = [];
+let filteredSavings = [];
+
+let currentPage = 1;
+const rowsPerPage = 10;
+
 let selectedMember = null;
 
 /* =========================
-GLOBAL FUNCTIONS (IMPORTANT FIX)
+GLOBAL FUNCTIONS
 ========================= */
 
-window.selectMember = selectMember;
+window.openAddSavingModal = openAddSavingModal;
+window.closeModal = closeModal;
+window.saveSaving = saveSaving;
 window.deleteSaving = deleteSaving;
+window.searchSavings = searchSavings;
+window.nextPage = nextPage;
+window.prevPage = prevPage;
+window.openProfile = openProfile;
+window.closeProfile = closeProfile;
 
 /* =========================
-LOAD MEMBERS FOR SEARCH
+ADD BUTTON
 ========================= */
 
-onSnapshot(membersCollection, (snapshot) => {
+document.addEventListener("DOMContentLoaded",()=>{
 
-  members = [];
+  const btn =
+  document.getElementById("addSavingBtn");
 
-  snapshot.forEach((docSnap) => {
-    members.push({
-      id: docSnap.id,
-      ...docSnap.data()
-    });
-  });
+  if(btn){
+
+    btn.addEventListener(
+      "click",
+      openAddSavingModal
+    );
+
+  }
 
 });
 
 /* =========================
-MEMBER SEARCH UI
+LOAD SAVINGS
 ========================= */
 
-const searchInput = document.getElementById("searchInput");
-const searchResults = document.getElementById("searchResults");
+onSnapshot(
+  savingsCollection,
+  snapshot=>{
 
-if (searchInput) {
+    savings = [];
 
-  searchInput.addEventListener("input", () => {
+    snapshot.forEach(docSnap=>{
 
-    const keyword = searchInput.value.toLowerCase();
-
-    const filtered = members.filter(m =>
-      (m.fullName || "").toLowerCase().includes(keyword) ||
-      (m.phone || "").includes(keyword)
-    );
-
-    searchResults.innerHTML = "";
-
-    filtered.forEach(m => {
-
-      const div = document.createElement("div");
-      div.className = "search-item";
-      div.innerHTML = `
-        👤 ${m.fullName} - ${m.phone}
-      `;
-
-      div.onclick = () => selectMember(m);
-
-      searchResults.appendChild(div);
+      savings.push({
+        id:docSnap.id,
+        ...docSnap.data()
+      });
 
     });
 
-  });
+    filteredSavings = [...savings];
+
+    updateTotals();
+
+    renderTable();
+
+  }
+);
+
+/* =========================
+TOTALS
+========================= */
+
+function updateTotals(){
+
+  const total =
+  savings.reduce(
+    (sum,item)=>
+    sum + Number(item.amount || 0),
+    0
+  );
+
+  const el =
+  document.getElementById(
+    "totalSavings"
+  );
+
+  if(el){
+
+    el.textContent =
+    total.toLocaleString();
+
+  }
 
 }
 
 /* =========================
-SELECT MEMBER
+MODAL
 ========================= */
 
-function selectMember(member) {
+function openAddSavingModal(){
 
-  selectedMember = member;
+  document.getElementById(
+    "savingModal"
+  ).style.display = "flex";
 
-  document.getElementById("selectedMember").innerHTML = `
-    👤 ${member.fullName} (${member.phone})
-  `;
+}
 
-  document.getElementById("searchResults").innerHTML = "";
+function closeModal(){
 
-  loadSavings(member.id);
+  document.getElementById(
+    "savingModal"
+  ).style.display = "none";
+
 }
 
 /* =========================
 SAVE SAVING
 ========================= */
 
-const form = document.getElementById("savingForm");
+async function saveSaving(){
 
-if (form) {
+try{
 
-  form.addEventListener("submit", async (e) => {
+  if(!auth.currentUser){
 
-    e.preventDefault();
+    alert("Please login again");
 
-    try {
+    return;
 
-      const user = auth.currentUser;
-
-      if (!user) {
-        alert("User not logged in or session expired.");
-        return;
-      }
-
-      if (!selectedMember) {
-        alert("Please select a member first");
-        return;
-      }
-
-      const amount = Number(document.getElementById("amount").value);
-
-      if (!amount || amount <= 0) {
-        alert("Invalid amount");
-        return;
-      }
-
-      await addDoc(savingsCollection, {
-
-        memberId: selectedMember.id,
-        memberName: selectedMember.fullName,
-        phone: selectedMember.phone,
-
-        amount,
-
-        createdBy: user.email || "System",
-        createdAt: serverTimestamp()
-
-      });
-
-      form.reset();
-
-      loadSavings(selectedMember.id);
-
-    } catch (err) {
-      console.error(err);
-      alert(err.message);
-    }
-
-  });
-
-}
-
-/* =========================
-LOAD SAVINGS
-========================= */
-
-function loadSavings(memberId) {
-
-  onSnapshot(savingsCollection, (snapshot) => {
-
-    savings = [];
-
-    snapshot.forEach((docSnap) => {
-
-      const data = docSnap.data();
-
-      if (data.memberId === memberId) {
-
-        savings.push({
-          id: docSnap.id,
-          ...data
-        });
-
-      }
-
-    });
-
-    renderTable();
-
-  });
-
-}
-
-/* =========================
-RENDER TABLE
-========================= */
-
-function renderTable() {
-
-  const tbody = document.getElementById("savingsTable");
-
-  if (!tbody) return;
-
-  tbody.innerHTML = "";
-
-  let total = 0;
-
-  savings.forEach(s => {
-
-    total += Number(s.amount);
-
-    const tr = document.createElement("tr");
-
-    tr.innerHTML = `
-      <td>${s.memberName || ""}</td>
-      <td>${s.phone || ""}</td>
-      <td>${s.amount}</td>
-      <td>-</td>
-      <td>${total}</td>
-      <td>${formatDate(s.createdAt)}</td>
-      <td>
-        <button onclick="deleteSaving('${s.id}')">Delete</button>
-      </td>
-    `;
-
-    tbody.appendChild(tr);
-
-  });
-
-}
-
-/* =========================
-DELETE SAVING
-========================= */
-
-async function deleteSaving(id) {
-
-  if (!confirm("Delete this saving?")) return;
-
-  await deleteDoc(doc(db, "savings", id));
-
-  if (selectedMember) {
-    loadSavings(selectedMember.id);
   }
+
+  const amount =
+  Number(
+    document
+    .getElementById("amount")
+    .value
+  );
+
+  if(!selectedMember){
+
+    alert("Select member first");
+
+    return;
+
+  }
+
+  if(amount <= 0){
+
+    alert("Enter valid amount");
+
+    return;
+
+  }
+
+  const previousBalance =
+  calculateMemberBalance(
+    selectedMember.id
+  );
+
+  const newBalance =
+  previousBalance + amount;
+
+  const createdBy =
+  auth.currentUser.email;
+
+  await addDoc(
+    savingsCollection,
+    {
+
+      memberId:
+      selectedMember.id,
+
+      memberName:
+      selectedMember.fullName,
+
+      phone:
+      selectedMember.phone,
+
+      amount,
+
+      previousBalance,
+
+      newBalance,
+
+      createdBy,
+
+      createdAt:
+      serverTimestamp()
+
+    }
+  );
+
+  await addDoc(
+    transactionsCollection,
+    {
+
+      memberId:
+      selectedMember.id,
+
+      type:"saving",
+
+      amount,
+
+      previousBalance,
+
+      newBalance,
+
+      createdBy,
+
+      date:
+      serverTimestamp()
+
+    }
+  );
+
+  closeModal();
+
+}
+catch(error){
+
+  console.error(error);
+
+  alert(error.message);
+
+}
+
+}
+
+/* =========================
+MEMBER BALANCE
+========================= */
+
+function calculateMemberBalance(
+memberId
+){
+
+let balance = 0;
+
+savings.forEach(item=>{
+
+  if(item.memberId === memberId){
+
+    balance =
+    Number(
+      item.newBalance || 0
+    );
+
+  }
+
+});
+
+return balance;
+
+}
+
+/* =========================
+SEARCH
+========================= */
+
+function searchSavings(){
+
+const keyword =
+document
+.getElementById(
+"searchInput"
+)
+.value
+.toLowerCase();
+
+filteredSavings =
+savings.filter(item=>
+
+(item.memberName || "")
+.toLowerCase()
+.includes(keyword)
+
+||
+
+(item.phone || "")
+.includes(keyword)
+
+);
+
+currentPage = 1;
+
+renderTable();
+
+}
+
+/* =========================
+TABLE
+========================= */
+
+function renderTable(){
+
+const tbody =
+document.getElementById(
+"savingsTable"
+);
+
+if(!tbody) return;
+
+tbody.innerHTML = "";
+
+const start =
+(currentPage - 1)
+* rowsPerPage;
+
+const pageData =
+filteredSavings.slice(
+start,
+start + rowsPerPage
+);
+
+pageData.forEach(item=>{
+
+const tr =
+document.createElement("tr");
+
+tr.innerHTML = `
+
+<td>${item.memberName || ""}</td>
+
+<td>${item.phone || ""}</td>
+
+<td>${Number(item.amount || 0).toLocaleString()}</td>
+
+<td>${Number(item.previousBalance || 0).toLocaleString()}</td>
+
+<td>${Number(item.newBalance || 0).toLocaleString()}</td>
+
+<td>${formatDate(item.createdAt)}</td>
+
+<td>${item.createdBy || "-"}</td>
+
+<td>
+
+<button
+class="table-btn view-btn"
+onclick="openProfile('${item.memberId}')">
+<i class="fas fa-eye"></i>
+</button>
+
+<button
+class="table-btn delete-btn"
+onclick="deleteSaving('${item.id}')">
+<i class="fas fa-trash"></i>
+</button>
+
+</td>
+
+`;
+
+tbody.appendChild(tr);
+
+});
+
+updatePageInfo();
+
+}
+
+/* =========================
+DELETE
+========================= */
+
+async function deleteSaving(id){
+
+try{
+
+const confirmed =
+confirm(
+"Delete saving?"
+);
+
+if(!confirmed) return;
+
+await deleteDoc(
+doc(
+db,
+"savings",
+id
+)
+);
+
+}
+catch(error){
+
+alert(error.message);
+
+}
+
+}
+
+/* =========================
+PROFILE
+========================= */
+
+async function openProfile(
+memberId
+){
+
+const memberSnap =
+await getDoc(
+doc(
+db,
+"members",
+memberId
+)
+);
+
+if(!memberSnap.exists())
+return;
+
+const member =
+memberSnap.data();
+
+document
+.getElementById(
+"profileContent"
+)
+.innerHTML = `
+
+<h2>
+${member.fullName}
+</h2>
+
+<p>
+Phone:
+${member.phone}
+</p>
+
+<p>
+NID:
+${member.nid}
+</p>
+
+`;
+
+document
+.getElementById(
+"profileModal"
+)
+.style.display =
+"flex";
+
+}
+
+function closeProfile(){
+
+document
+.getElementById(
+"profileModal"
+)
+.style.display =
+"none";
+
+}
+
+/* =========================
+PAGINATION
+========================= */
+
+function updatePageInfo(){
+
+const totalPages =
+Math.ceil(
+filteredSavings.length
+/
+rowsPerPage
+) || 1;
+
+document
+.getElementById(
+"pageInfo"
+)
+.textContent =
+`Page ${currentPage} of ${totalPages}`;
+
+}
+
+function nextPage(){
+
+const totalPages =
+Math.ceil(
+filteredSavings.length
+/
+rowsPerPage
+);
+
+if(
+currentPage
+<
+totalPages
+){
+
+currentPage++;
+
+renderTable();
+
+}
+
+}
+
+function prevPage(){
+
+if(
+currentPage > 1
+){
+
+currentPage--;
+
+renderTable();
+
+}
 
 }
 
@@ -255,13 +550,24 @@ async function deleteSaving(id) {
 DATE FORMAT
 ========================= */
 
-function formatDate(timestamp) {
+function formatDate(
+timestamp
+){
 
-  if (!timestamp) return "-";
+if(!timestamp)
+return "-";
 
-  if (timestamp.seconds) {
-    return new Date(timestamp.seconds * 1000).toLocaleString();
-  }
+if(timestamp.seconds){
 
-  return "-";
+return new Date(
+timestamp.seconds
+*
+1000
+)
+.toLocaleString();
+
+}
+
+return "-";
+
 }

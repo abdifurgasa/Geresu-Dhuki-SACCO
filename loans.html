@@ -1,551 +1,523 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <meta charset="UTF-8" />
+<title>SACCO Loans</title>
 
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  />
+<link rel="stylesheet" href="css/style.css">
 
-  <title data-i18n="loans">
-    Loans
-  </title>
-
-  <link
-    rel="stylesheet"
-    href="css/style.css"
-  />
-
-  <link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
-  />
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
 </head>
 
 <body>
 
-<!-- =========================================================
-     SIDEBAR
-========================================================= -->
+<div class="dashboard-container">
 
-<aside
-  class="sidebar"
-  id="sidebar"
->
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
 
-  <!-- TOGGLE -->
-  <button
-    class="toggle-btn"
-    onclick="toggleSidebar()"
-  >
-    ☰
-  </button>
+<button class="menu-toggle" id="toggleBtn">
+<i class="fas fa-bars"></i>
+</button>
 
-  <!-- LOGO -->
-  <h2 class="logo">
-    🏦 SACCO
-  </h2>
+<div class="sidebar-header">
 
-  <!-- NAVIGATION -->
-  <nav class="nav">
+<div class="logo-icon">
+<i class="fas fa-university"></i>
+</div>
 
-    <a
-      href="dashboard.html"
-      class="nav-item"
-    >
+<div class="logo-text">
+<h2>SACCO</h2>
+<span>Banking System</span>
+</div>
 
-      <span class="icon">
-        📊
-      </span>
+</div>
 
-      <span
-        class="text"
-        data-i18n="dashboard"
-      >
-        Dashboard
-      </span>
+<ul class="sidebar-menu">
 
-    </a>
+<li>
+<a href="dashboard.html">
+<i class="fas fa-chart-pie"></i>
+<span data-i18n="dashboard">Dashboard</span>
+</a>
+</li>
 
-    <a
-      href="members.html"
-      class="nav-item active admin-only"
-    >
+<li>
+<a href="members.html">
+<i class="fas fa-users"></i>
+<span data-i18n="members">Members</span>
+</a>
+</li>
 
-      <span class="icon">
-        👥
-      </span>
+<li>
+<a href="savings.html">
+<i class="fas fa-wallet"></i>
+<span data-i18n="savings">Savings</span>
+</a>
+</li>
 
-      <span
-        class="text"
-        data-i18n="members"
-      >
-        Members
-      </span>
+<li class="active">
+<a href="loans.html">
+<i class="fas fa-landmark"></i>
+<span data-i18n="loans">Loans</span>
+</a>
+</li>
 
-    </a>
+<li>
+<a href="repayments.html">
+<i class="fas fa-money-check-dollar"></i>
+<span data-i18n="repayments">Repayments</span>
+</a>
+</li>
 
-    <a
-      href="savings.html"
-      class="nav-item"
-    >
+<li>
+<a href="withdrawals.html">
+<i class="fas fa-money-bill-transfer"></i>
+<span data-i18n="withdrawals">Withdrawals</span>
+</a>
+</li>
 
-      <span class="icon">
-        💰
-      </span>
+<li>
+<a href="reports.html">
+<i class="fas fa-file-alt"></i>
+<span data-i18n="reports">Reports</span>
+</a>
+</li>
 
-      <span
-        class="text"
-        data-i18n="savings"
-      >
-        Savings
-      </span>
+<li>
+<a href="users.html">
+<i class="fas fa-user"></i>
+<span data-i18n="users">Users</span>
+</a>
+</li>
 
-    </a>
+<li>
+<a href="settings.html">
+<i class="fas fa-gear"></i>
+<span data-i18n="settings">Settings</span>
+</a>
+</li>
 
-    <a
-      href="loans.html"
-      class="nav-item"
-    >
+</ul>
 
-      <span class="icon">
-        🏦
-      </span>
+<div class="sidebar-footer">
 
-      <span
-        class="text"
-        data-i18n="loans"
-      >
-        Loans
-      </span>
+<a href="#" class="logout-btn">
 
-    </a>
+<i class="fas fa-right-from-bracket"></i>
 
-    <a
-      href="repayments.html"
-      class="nav-item"
-    >
+<span data-i18n="logout">
+Logout
+</span>
 
-      <span class="icon">
-        💵
-      </span>
+</a>
 
-      <span
-        class="text"
-        data-i18n="repayments"
-      >
-        Repayments
-      </span>
-
-    </a>
-
-    <a
-      href="withdrawals.html"
-      class="nav-item admin-only"
-    >
-
-      <span class="icon">
-        💸
-      </span>
-
-      <span
-        class="text"
-        data-i18n="withdrawals"
-      >
-        Withdrawals
-      </span>
-
-    </a>
-
-    <a
-      href="reports.html"
-      class="nav-item admin-only"
-    >
-
-      <span class="icon">
-        📄
-      </span>
-
-      <span
-        class="text"
-        data-i18n="reports"
-      >
-        Reports
-      </span>
-
-    </a>
-
-    <a
-      href="users.html"
-      class="nav-item admin-only"
-    >
-
-      <span class="icon">
-        👤
-      </span>
-
-      <span
-        class="text"
-        data-i18n="users"
-      >
-        Users
-      </span>
-
-    </a>
-
-    <a
-      href="settings.html"
-      class="nav-item"
-    >
-
-      <span class="icon">
-        ⚙️
-      </span>
-
-      <span
-        class="text"
-        data-i18n="settings"
-      >
-        Settings
-      </span>
-
-    </a>
-
-    <a
-      href="#"
-      class="nav-item logout"
-      id="logoutBtn"
-    >
-
-      <span class="icon">
-        🚪
-      </span>
-
-      <span
-        class="text"
-        data-i18n="logout"
-      >
-        Logout
-      </span>
-
-    </a>
-
-  </nav>
+</div>
 
 </aside>
 
-<!-- =========================================================
-     MAIN
-========================================================= -->
+<!-- MAIN -->
+<main class="main-content" id="mainContent">
 
-<main class="main">
+<div class="topbar">
 
-  <!-- TOPBAR -->
+<div class="page-title">
 
-  <div class="topbar">
+<h1 data-i18n="loans">
+Loans
+</h1>
 
-    <h2 data-i18n="loans_management">
-      🏦 Loans Management
-    </h2>
+<p>
+Manage SACCO Loans
+</p>
 
-    <div
-      style="
-        display:flex;
-        gap:10px;
-        align-items:center;
-      "
-    >
+</div>
 
-      <select
-        id="languageSelect"
-        onchange="changeLanguage(this.value)"
-      >
+<div class="topbar-actions">
 
-        <option value="en">
-          English
-        </option>
+<div class="language-selector">
 
-        <option value="am">
-          አማርኛ
-        </option>
+<select
+id="languageSelect"
+onchange="changeLanguage(this.value)"
+>
 
-        <option value="om">
-          Afaan Oromoo
-        </option>
+<option value="en">English</option>
+<option value="om">Afaan Oromo</option>
+<option value="am">አማርኛ</option>
 
-      </select>
+</select>
+
+</div>
+
+<button
+class="btn-primary"
+id="addLoanBtn"
+>
+
+<i class="fas fa-plus"></i>
+
+<span>
+Add Loan
+</span>
+
+</button>
+
+</div>
+
+</div>
+<!-- =========================
+SUMMARY CARD
+========================= -->
+
+<div class="stats-grid">
+
+    <div class="stat-card">
+
+        <div class="stat-top">
+
+            <div class="stat-icon orange">
+                <i class="fas fa-landmark"></i>
+            </div>
+
+            <div>
+
+                <div
+                    class="stat-label"
+                    data-i18n="totalLoans"
+                >
+                    Total Loans
+                </div>
+
+                <div
+                    class="stat-value"
+                    id="totalLoans"
+                >
+                    0
+                </div>
+
+            </div>
+
+        </div>
 
     </div>
 
-  </div>
+</div>
 
-  <!-- SEARCH -->
+<!-- =========================
+SEARCH BAR
+========================= -->
 
-  <div class="search-container">
+<div class="search-section">
 
-    <input
-      type="text"
-      id="searchMember"
-      class="search-input"
-      data-i18n-placeholder="search_member"
-      placeholder="Search member"
-    />
+    <div class="search-bar">
 
-    <div
-      id="searchResults"
-      class="search-dropdown"
-    ></div>
+        <input
+            type="text"
+            id="searchInput"
+            placeholder="Search Loan..."
+        >
 
-  </div>
+        <button onclick="searchLoans()">
 
-  
-  <!-- SELECTED -->
-  
+            <i class="fas fa-search"></i>
 
-  <div
-    id="selectedMember"
-    class="selected-box"
-    data-i18n="select_member"
-  >
-    👤 Select a member
-  </div>
+        </button>
+
+    </div>
+
+</div>
+
+<!-- =========================
+LOANS TABLE
+========================= -->
+
+<div class="table-container">
+
+<table class="members-table">
+
+<thead>
+
+<tr>
+
+<th>Name</th>
+
+<th>Phone No</th>
+
+<th>Principal</th>
+
+<th>Interest</th>
+
+<th>Total</th>
+
+<th>Remaining</th>
+
+<th>Type</th>
+
+<th>Duration</th>
+
+<th>Status</th>
+
+<th>Created Date</th>
+
+<th>Created By</th>
+
+<th>Actions</th>
+
+</tr>
+
+</thead>
+
+<tbody id="loansTable">
+
+<!-- Firebase Data -->
+
+</tbody>
+
+</table>
+
+</div>
+<!-- =========================
+PAGINATION
+========================= -->
+
+<div class="pagination">
 
 <button
-        class="add-btn"
-        id="openModalBtn"
-      >
+class="page-btn"
+onclick="prevPage()"
+>
+<i class="fas fa-angle-left"></i>
+</button>
 
-        <i class="fa fa-plus"></i>
+<span id="pageInfo">
+Page 1
+</span>
 
-        <span data-i18n="add_loan">
-          Add Loan
-        </span>
+<button
+class="page-btn"
+onclick="nextPage()"
+>
+<i class="fas fa-angle-right"></i>
+</button>
 
-      </button>
-  
-  <!-- TABLE -->
-
-  <div class="table-card">
-
-    <table class="table-modern">
-
-      <thead>
-
-        <tr>
-
-          <th data-i18n="name">
-            Name
-          </th>
-
-          <th data-i18n="phone">
-            Phone
-          </th>
-
-          <th data-i18n="principal">
-            Principal
-          </th>
-
-          <th data-i18n="interest">
-            Interest
-          </th>
-
-          <th data-i18n="total">
-            Total
-          </th>
-
-          <th data-i18n="remaining">
-            Remaining
-          </th>
-
-          <th data-i18n="type">
-            Type
-          </th>
-
-          <th data-i18n="duration">
-            Duration
-          </th>
-
-          <th data-i18n="status">
-            Status
-          </th>
-
-          <th data-i18n="createdDate">
-            Created Date
-          </th>
-
-          <th data-i18n="createdBy">
-            Created By
-          </th>
-
-          <th data-i18n="actions">
-            Actions
-          </th>
-
-        </tr>
-
-      </thead>
-
-      <tbody id="loansTable"></tbody>
-
-    </table>
-
-  </div>
+</div>
 
 </main>
 
-<!-- =========================================================
-     MODAL
-========================================================= -->
+</div>
+
+<!-- =========================
+ADD / EDIT LOAN MODAL
+========================= -->
 
 <div
-  class="modal"
-  id="loanModal"
+class="modal"
+id="loanModal"
 >
 
-  <div class="modal-box">
+<div class="modal-content">
 
-    <div class="modal-header">
+<div class="modal-header">
 
-      <h3 data-i18n="add_loan">
-        Add Loan
-      </h3>
+<h2 id="modalTitle">
+Add Loan
+</h2>
 
-      <button
-        class="modal-close-icon"
-        id="closeModalBtn"
-      >
-        ✖
-      </button>
-
-    </div>
-
-    <form id="loanForm">
-
-      <input
-        type="number"
-        id="principal"
-        data-i18n-placeholder="loan_amount"
-        placeholder="Loan Amount"
-        required
-      />
-
-      <input
-        type="number"
-        id="rate"
-        data-i18n-placeholder="interest_rate"
-        placeholder="Interest Rate"
-        required
-      />
-
-      <input
-        type="number"
-        id="time"
-        data-i18n-placeholder="duration"
-        placeholder="Duration"
-        required
-      />
-
-      <select id="interestType">
-
-        <option value="Simple">
-          Simple
-        </option>
-
-        <option value="Compound">
-          Compound
-        </option>
-
-        <option value="Flat">
-          Flat
-        </option>
-
-      </select>
-
-      <button
-        type="submit"
-        class="save-btn"
-      >
-
-        <span data-i18n="save">
-          Save
-        </span>
-
-      </button>
-
-    </form>
-
-  </div>
+<button
+class="close-btn"
+onclick="closeModal()"
+>
+<i class="fas fa-times"></i>
+</button>
 
 </div>
 
-<!-- =========================================================
-     DELETE MODAL
-========================================================= -->
-
-<div
-  class="modal"
-  id="deleteModal"
+<input
+type="hidden"
+id="loanId"
 >
 
-  <div class="modal-box">
+<div class="form-group">
 
-    <h3 data-i18n="delete_loan">
-      Delete Loan
-    </h3>
+<label>
+Member Name
+</label>
 
-    <p
-      style="margin-top:10px;"
-      data-i18n="delete_confirm"
-    >
-      Are you sure?
-    </p>
+<input
+type="text"
+id="memberName"
+>
 
-    <div
-      style="
-        display:flex;
-        gap:10px;
-        margin-top:20px;
-      "
-    >
+</div>
 
-      <button
-        id="confirmDeleteBtn"
-        class="delete-btn"
-      >
+<div class="form-group">
 
-        <span data-i18n="yes_delete">
-          Yes Delete
-        </span>
+<label>
+Phone No
+</label>
 
-      </button>
+<input
+type="text"
+id="phone"
+>
 
-      <button
-        id="cancelDeleteBtn"
-        class="cancel-btn"
-      >
+</div>
 
-        <span data-i18n="cancel">
-          Cancel
-        </span>
+<div class="form-group">
 
-      </button>
+<label>
+Principal Amount
+</label>
+
+<input
+type="number"
+id="principal"
+>
+
+</div>
+
+<div class="form-group">
+
+<label>
+Interest (%)
+</label>
+
+<input
+type="number"
+id="interestRate"
+>
+
+</div>
+
+<div class="form-group">
+
+<label>
+Loan Type
+</label>
+
+<select id="loanType">
+
+<option value="Business">
+Business
+</option>
+
+<option value="Agriculture">
+Agriculture
+</option>
+
+<option value="Education">
+Education
+</option>
+
+<option value="Emergency">
+Emergency
+</option>
+
+<option value="Personal">
+Personal
+</option>
+
+</select>
+
+</div>
+
+<div class="form-group">
+
+<label>
+Duration (Months)
+</label>
+
+<input
+type="number"
+id="duration"
+>
+
+</div>
+
+<div class="form-group">
+
+<label>
+Status
+</label>
+
+<select id="status">
+
+<option value="Active">
+Active
+</option>
+
+<option value="Completed">
+Completed
+</option>
+
+</select>
+
+</div>
+
+<div class="modal-actions">
+
+<button
+class="btn-primary"
+onclick="saveLoan()"
+>
+
+<i class="fas fa-save"></i>
+
+Save
+
+</button>
+
+<button
+class="btn-secondary"
+onclick="closeModal()"
+>
+
+Cancel
+
+</button>
+
+</div>
+
+</div>
+
+</div>
+<!-- =========================
+PROFILE MODAL
+========================= -->
+
+<div class="modal" id="profileModal">
+
+    <div class="profile-modal">
+
+        <button
+            class="close-btn"
+            onclick="closeProfile()"
+        >
+            <i class="fas fa-times"></i>
+        </button>
+
+        <div id="profileContent">
+            <!-- Loan Profile Here -->
+        </div>
 
     </div>
 
-  </div>
-
 </div>
-<script src="js/layout.js"></script>
+
+<!-- =========================
+SCRIPTS
+========================= -->
+
 <script src="js/i18n.js"></script>
 
-<script
-  type="module"
-  src="js/loans.js"
-></script>
+<script type="module" src="js/layout.js"></script>
+
+<script type="module" src="js/loans.js"></script>
 
 </body>
 </html>

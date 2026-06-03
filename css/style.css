@@ -479,120 +479,131 @@ tbody tr:hover{
 }
 
 /* =========================
-QUICK ACTIONS
+   QUICK ACTIONS
 ========================= */
 
-.quick-actions {
-    display: flex;
-    gap: 20px;
-    margin-top: 25px;
-    margin-bottom: 25px;
-    flex-wrap: nowrap;
-    overflow-x: auto;
+.section-title{
+    font-size:30px;
+    font-weight:700;
+    margin-bottom:20px;
 }
 
-.quick-card {
-    flex: 1;
-    min-width: 240px;
-    background: #fff;
-    border-radius: 18px;
-    padding: 20px;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    text-decoration: none;
-    transition: 0.3s;
-    border: 1px solid #e5e7eb;
-    box-shadow: 0 2px 10px rgba(0,0,0,.05);
+.quick-actions{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:20px;
+    margin-bottom:30px;
 }
 
-.quick-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 20px rgba(0,0,0,.1);
+.action-card{
+    border-radius:20px;
+    padding:22px;
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    text-decoration:none;
+
+    transition:.3s;
 }
 
-.quick-icon {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #fff;
-    font-size: 24px;
-    flex-shrink: 0;
+.action-card:hover{
+    transform:translateY(-4px);
 }
 
-.quick-content {
-    flex: 1;
+.action-blue{
+    background:#f1f6ff;
+    border:1px solid #dce8ff;
 }
 
-.quick-content h4 {
-    margin: 0;
-    font-size: 18px;
-    font-weight: 600;
+.action-green{
+    background:#f4fbf5;
+    border:1px solid #d8f1dd;
 }
 
-.quick-content p {
-    margin-top: 5px;
-    color: #666;
-    font-size: 14px;
+.action-orange{
+    background:#fff8ef;
+    border:1px solid #ffe4be;
 }
 
-.quick-arrow {
-    font-size: 24px;
-    color: #444;
+.action-red{
+    background:#fff3f3;
+    border:1px solid #ffd5d5;
 }
 
-/* Card Colors */
-
-.quick-members {
-    background: #eef4ff;
-    border-color: #dbe7ff;
+.action-left{
+    display:flex;
+    align-items:center;
+    gap:15px;
 }
 
-.quick-members .quick-icon {
-    background: linear-gradient(135deg,#3b82f6,#2563eb);
+.action-icon{
+    width:64px;
+    height:64px;
+    border-radius:50%;
+    color:white;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
 }
 
-.quick-savings {
-    background: #eefcf2;
-    border-color: #d5f5de;
+.action-text h4{
+    font-size:20px;
+    margin-bottom:5px;
 }
 
-.quick-savings .quick-icon {
-    background: linear-gradient(135deg,#4ade80,#22c55e);
+.action-text p{
+    color:var(--text-light);
+    font-size:14px;
 }
 
-.quick-loans {
-    background: #fff8ef;
-    border-color: #fde5c0;
+.action-arrow{
+    font-size:26px;
 }
 
-.quick-loans .quick-icon {
-    background: linear-gradient(135deg,#fb923c,#f97316);
+/* =========================
+   CHARTS
+========================= */
+
+.chart-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:20px;
 }
 
-.quick-withdrawals {
-    background: #fff1f2;
-    border-color: #ffd7dc;
+.chart-card{
+    background:white;
+    border-radius:22px;
+    padding:20px;
+    border:1px solid var(--border);
+    box-shadow:var(--shadow);
 }
 
-.quick-withdrawals .quick-icon {
-    background: linear-gradient(135deg,#fb7185,#ef4444);
+.chart-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:20px;
 }
 
-/* Responsive */
-
-@media(max-width:1200px){
-    .quick-actions{
-        overflow-x:auto;
-    }
-
-    .quick-card{
-        min-width:260px;
-    }
+.chart-header h3{
+    font-size:20px;
 }
+
+.chart-filter{
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:10px 14px;
+    background:white;
+}
+
+.chart-container{
+    height:320px;
+    position:relative;
+}
+
 /* =====================================================
    PAGINATION
 ===================================================== */

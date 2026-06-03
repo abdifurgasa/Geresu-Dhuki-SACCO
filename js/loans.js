@@ -1,527 +1,399 @@
-import { db, auth }
-from "./firebase.js";
+import { db, auth } from "./firebase.js";
 
 import {
-  initLanguage,
-  translations
+collection,
+addDoc,
+updateDoc,
+deleteDoc,
+doc,
+getDoc,
+onSnapshot,
+serverTimestamp
 }
-from "./i18n.js";
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-import {
+/* =========================
+COLLECTION
+========================= */
 
-  collection,
-  addDoc,
-  getDocs,
-  query,
-  orderBy,
-  serverTimestamp,
-  deleteDoc,
-  doc,
-  updateDoc
+const loansCollection = collection(db, "loans");
 
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+/* =========================
+STATE
+========================= */
 
-/* =========================================================
-   INIT LANGUAGE
-========================================================= */
+let loans = [];
+let filteredLoans = [];
 
-initLanguage();
-
-/* =========================================================
-   ELEMENTS
-========================================================= */
-
-const loansTable =
-  document.getElementById("loansTable");
-
-const modal =
-  document.getElementById("loanModal");
-
-const openModalBtn =
-  document.getElementById("openModalBtn");
-
-const closeModalBtn =
-  document.getElementById("closeModalBtn");
-
-const loanForm =
-  document.getElementById("loanForm");
-
-const searchInput =
-  document.getElementById("searchMember");
-
-const searchResults =
-  document.getElementById("searchResults");
-
-const selectedBox =
-  document.getElementById("selectedMember");
-
-/* DELETE */
-
-const deleteModal =
-  document.getElementById("deleteModal");
-
-const confirmDeleteBtn =
-  document.getElementById("confirmDeleteBtn");
-
-const cancelDeleteBtn =
-  document.getElementById("cancelDeleteBtn");
-
-/* =========================================================
-   STATE
-========================================================= */
-
-let members = [];
-
-let selectedMember = null;
+let currentPage = 1;
+const rowsPerPage = 10;
 
 let editingId = null;
 
-let deleteId = null;
+/* =========================
+GLOBAL FUNCTIONS (IMPORTANT)
+========================= */
 
-/* =========================================================
-   MODAL
-========================================================= */
+window.openAddModal = openAddModal;
+window.closeModal = closeModal;
+window.saveLoan = saveLoan;
+window.editLoan = editLoan;
+window.deleteLoanConfirm = deleteLoanConfirm;
+window.searchLoans = searchLoans;
+window.nextPage = nextPage;
+window.prevPage = prevPage;
+window.openProfile = openProfile;
 
-openModalBtn.onclick = () => {
+/* =========================
+REALTIME LOADING
+========================= */
 
-  modal.classList.add("active");
+onSnapshot(loansCollection, (snapshot) => {
 
-};
+    loans = [];
 
-closeModalBtn.onclick = () => {
+    snapshot.forEach((docSnap) => {
 
-  modal.classList.remove("active");
+        loans.push({
+            id: docSnap.id,
+            ...docSnap.data()
+        });
 
-};
+    });
 
-window.onclick = (e) => {
+    filteredLoans = [...loans];
 
-  if (e.target === modal) {
-
-    modal.classList.remove("active");
-
-  }
-
-  if (e.target === deleteModal) {
-
-    deleteModal.classList.remove("active");
-
-  }
-
-};
-
-/* =========================================================
-   LOAD MEMBERS
-========================================================= */
-
-async function loadMembers() {
-
-  const snap =
-    await getDocs(collection(db, "members"));
-
-  members =
-    snap.docs.map(doc => ({
-
-      id: doc.id,
-
-      ...doc.data()
-
-    }));
-
-}
-
-loadMembers();
-
-/* =========================================================
-   SEARCH
-========================================================= */
-
-searchInput.addEventListener("input", () => {
-
-  const value =
-    searchInput.value.toLowerCase();
-
-  searchResults.innerHTML = "";
-
-  if (!value) return;
-
-  const filtered =
-    members.filter(m =>
-
-      m.name.toLowerCase().includes(value) ||
-
-      m.phone.includes(value)
-
-    );
-
-  filtered.forEach(member => {
-
-    const div =
-      document.createElement("div");
-
-    div.className = "search-item";
-
-    div.innerHTML = `
-      ${member.name}
-      <br>
-      <small>${member.phone}</small>
-    `;
-
-    div.onclick = () => {
-
-      selectedMember = member;
-
-      selectedBox.innerHTML =
-        `👤 ${member.name}`;
-
-      searchResults.innerHTML = "";
-
-      searchInput.value = "";
-
-    };
-
-    searchResults.appendChild(div);
-
-  });
+    updateLoansCount();
+    renderTable();
 
 });
 
-/* =========================================================
-   STATUS COLORS
-========================================================= */
+/* =========================
+TOTAL COUNT
+========================= */
 
-const statusColors = {
+function updateLoansCount() {
 
-  Pending: "#f39c12",
+    const el = document.getElementById("totalLoans");
 
-  Approved: "#27ae60",
-
-  Rejected: "#e74c3c"
-
-};
-
-/* =========================================================
-   LOAD LOANS
-========================================================= */
-
-async function loadLoans() {
-
-  const snap = await getDocs(
-    query(
-      collection(db, "loans"),
-      orderBy("createdAt", "desc")
-    )
-  );
-
-  loansTable.innerHTML = "";
-
-  snap.forEach((d) => {
-
-    const l = d.data();
-
-    loansTable.innerHTML += `
-
-      <tr>
-
-        <td>${l.name}</td>
-
-        <td>${l.phone}</td>
-
-        <td>${l.principal}</td>
-
-        <td>${l.interest}</td>
-
-        <td>${l.total}</td>
-
-        <td>${l.remaining}</td>
-
-        <td>${l.type}</td>
-
-        <td>${l.time}</td>
-
-        <td>
-
-          <span
-            style="
-              background:${statusColors[l.status]};
-              color:white;
-              padding:6px 12px;
-              border-radius:20px;
-              font-size:12px;
-            "
-          >
-            ${l.status}
-          </span>
-
-        </td>
-
-        <td>
-          ${
-            l.createdAt?.toDate?.()
-            ?.toLocaleString() || "-"
-          }
-        </td>
-
-        <td>${l.createdBy}</td>
-
-        <td>
-
-          <button
-            class="approve-btn"
-            onclick="approveLoan('${d.id}')"
-          >
-            ✅
-          </button>
-
-          <button
-            class="reject-btn"
-            onclick="rejectLoan('${d.id}')"
-          >
-            ❌
-          </button>
-
-          <button
-            class="edit-btn"
-            onclick="editLoan('${d.id}')"
-          >
-            ✏️
-          </button>
-
-          <button
-            class="delete-btn"
-            onclick="openDelete('${d.id}')"
-          >
-            🗑️
-          </button>
-
-        </td>
-
-      </tr>
-
-    `;
-
-  });
-
+    if (el) {
+        el.textContent = loans.length;
+    }
 }
 
-loadLoans();
+/* =========================
+OPEN ADD MODAL
+========================= */
 
-/* =========================================================
-   SAVE LOAN
-========================================================= */
-
-loanForm.onsubmit = async (e) => {
-
-  e.preventDefault();
-
-  const lang =
-    localStorage.getItem("language") || "en";
-
-  if (!selectedMember) {
-
-    alert(
-      translations[lang].select_member
-    );
-
-    return;
-
-  }
-
-  const principal =
-    Number(document.getElementById("principal").value);
-
-  const rate =
-    Number(document.getElementById("rate").value);
-
-  const time =
-    Number(document.getElementById("time").value);
-
-  const type =
-    document.getElementById("interestType").value;
-
-  const interest =
-    (principal * rate * time) / 100;
-
-  const total =
-    principal + interest;
-
-  const data = {
-
-    memberId:
-      selectedMember.id,
-
-    name:
-      selectedMember.name,
-
-    phone:
-      selectedMember.phone,
-
-    principal,
-
-    rate,
-
-    time,
-
-    type,
-
-    interest,
-
-    total,
-
-    remaining:
-      total,
-
-    status:
-      "Pending",
-
-    createdAt:
-      serverTimestamp(),
-
-    createdBy:
-      localStorage.getItem("name") ||
-      auth.currentUser?.displayName ||
-      "Admin"
-
-  };
-
-  if (editingId) {
-
-    await updateDoc(
-      doc(db, "loans", editingId),
-      data
-    );
+function openAddModal() {
 
     editingId = null;
 
-  } else {
+    document.getElementById("loanId").value = "";
+    document.getElementById("memberName").value = "";
+    document.getElementById("phone").value = "";
+    document.getElementById("principal").value = "";
+    document.getElementById("interestRate").value = "";
+    document.getElementById("duration").value = "";
+    document.getElementById("loanType").value = "Business";
+    document.getElementById("status").value = "Active";
 
-    await addDoc(
-      collection(db, "loans"),
-      data
+    document.getElementById("modalTitle").textContent = "Add Loan";
+
+    document.getElementById("loanModal").style.display = "flex";
+}
+
+/* =========================
+CLOSE MODAL
+========================= */
+
+function closeModal() {
+
+    document.getElementById("loanModal").style.display = "none";
+}
+
+/* =========================
+SAVE LOAN (CREATE / UPDATE)
+========================= */
+
+async function saveLoan() {
+
+    try {
+
+        const user = auth.currentUser;
+
+        if (!user) {
+            alert("Session expired. Please login again.");
+            return;
+        }
+
+        const memberName = document.getElementById("memberName").value.trim();
+        const phone = document.getElementById("phone").value.trim();
+        const principal = Number(document.getElementById("principal").value);
+        const interestRate = Number(document.getElementById("interestRate").value);
+        const duration = Number(document.getElementById("duration").value);
+        const loanType = document.getElementById("loanType").value;
+        const status = document.getElementById("status").value;
+
+        /* =========================
+        VALIDATION
+        ========================= */
+
+        if (!memberName) return alert("Member name required");
+        if (!phone) return alert("Phone required");
+        if (principal <= 0) return alert("Invalid principal");
+        if (interestRate < 0) return alert("Invalid interest rate");
+
+        /* =========================
+        CALCULATIONS
+        ========================= */
+
+        const interestAmount = principal * (interestRate / 100);
+        const totalAmount = principal + interestAmount;
+
+        const loanData = {
+
+            memberName,
+            phone,
+
+            principal,
+            interestRate,
+            interestAmount,
+
+            totalAmount,
+            remainingBalance: totalAmount,
+
+            loanType,
+            duration,
+            status,
+
+            createdBy: user.email || "System",
+            updatedAt: serverTimestamp()
+
+        };
+
+        /* =========================
+        CREATE OR UPDATE
+        ========================= */
+
+        if (!editingId) {
+
+            loanData.createdAt = serverTimestamp();
+
+            await addDoc(loansCollection, loanData);
+
+        } else {
+
+            await updateDoc(doc(db, "loans", editingId), loanData);
+        }
+
+        closeModal();
+
+    } catch (error) {
+
+        console.error(error);
+        alert(error.message);
+    }
+}
+
+/* =========================
+EDIT LOAN
+========================= */
+
+async function editLoan(id) {
+
+    try {
+
+        const snap = await getDoc(doc(db, "loans", id));
+
+        if (!snap.exists()) return;
+
+        const l = snap.data();
+
+        editingId = id;
+
+        document.getElementById("loanId").value = id;
+        document.getElementById("memberName").value = l.memberName || "";
+        document.getElementById("phone").value = l.phone || "";
+        document.getElementById("principal").value = l.principal || 0;
+        document.getElementById("interestRate").value = l.interestRate || 0;
+        document.getElementById("duration").value = l.duration || 0;
+        document.getElementById("loanType").value = l.loanType || "Business";
+        document.getElementById("status").value = l.status || "Active";
+
+        document.getElementById("modalTitle").textContent = "Edit Loan";
+
+        document.getElementById("loanModal").style.display = "flex";
+
+    } catch (error) {
+
+        console.error(error);
+        alert(error.message);
+    }
+}
+
+/* =========================
+DELETE LOAN
+========================= */
+
+async function deleteLoanConfirm(id) {
+
+    if (!confirm("Delete this loan?")) return;
+
+    try {
+
+        await deleteDoc(doc(db, "loans", id));
+
+    } catch (error) {
+
+        console.error(error);
+        alert(error.message);
+    }
+}
+
+/* =========================
+SEARCH LOANS
+========================= */
+
+function searchLoans() {
+
+    const keyword = document.getElementById("searchInput").value.toLowerCase();
+
+    filteredLoans = loans.filter(l =>
+        (l.memberName || "").toLowerCase().includes(keyword) ||
+        (l.phone || "").includes(keyword) ||
+        (l.loanType || "").toLowerCase().includes(keyword)
     );
 
-  }
+    currentPage = 1;
 
-  loanForm.reset();
+    renderTable();
+}
 
-  modal.classList.remove("active");
+/* =========================
+RENDER TABLE
+========================= */
 
-  selectedMember = null;
+function renderTable() {
 
-  selectedBox.innerHTML =
-    translations[lang].select_member;
+    const tbody = document.getElementById("loansTable");
+    if (!tbody) return;
 
-  loadLoans();
+    tbody.innerHTML = "";
 
-};
+    const start = (currentPage - 1) * rowsPerPage;
+    const pageData = filteredLoans.slice(start, start + rowsPerPage);
 
-/* =========================================================
-   EDIT
-========================================================= */
+    pageData.forEach(l => {
 
-window.editLoan = async (id) => {
+        const tr = document.createElement("tr");
 
-  const snap =
-    await getDocs(collection(db, "loans"));
+        tr.innerHTML = `
+            <td>${l.memberName || ""}</td>
+            <td>${l.phone || ""}</td>
+            <td>${l.principal || 0}</td>
+            <td>${l.interestAmount || 0}</td>
+            <td>${l.totalAmount || 0}</td>
+            <td>${l.remainingBalance || 0}</td>
+            <td>${l.loanType || ""}</td>
+            <td>${l.duration || ""}</td>
+            <td>${l.status || ""}</td>
+            <td>${formatDate(l.createdAt)}</td>
+            <td>${l.createdBy || "-"}</td>
 
-  const loan =
-    snap.docs.find(d => d.id === id);
+            <td>
+                <button onclick="openProfile('${l.id}')">View</button>
+                <button onclick="editLoan('${l.id}')">Edit</button>
+                <button onclick="deleteLoanConfirm('${l.id}')">Delete</button>
+            </td>
+        `;
 
-  if (!loan) return;
+        tbody.appendChild(tr);
+    });
 
-  const l = loan.data();
+    updatePageInfo();
+}
 
-  editingId = id;
+/* =========================
+PAGE INFO
+========================= */
 
-  document.getElementById("principal").value =
-    l.principal;
+function updatePageInfo() {
 
-  document.getElementById("rate").value =
-    l.rate;
+    const el = document.getElementById("pageInfo");
 
-  document.getElementById("time").value =
-    l.time;
+    if (!el) return;
 
-  document.getElementById("interestType").value =
-    l.type;
+    const totalPages = Math.ceil(filteredLoans.length / rowsPerPage) || 1;
 
-  selectedMember = {
+    el.textContent = `Page ${currentPage} of ${totalPages}`;
+}
 
-    id: l.memberId,
+/* =========================
+PAGINATION
+========================= */
 
-    name: l.name,
+function nextPage() {
 
-    phone: l.phone
+    const totalPages = Math.ceil(filteredLoans.length / rowsPerPage);
 
-  };
-
-  selectedBox.innerHTML =
-    `👤 ${l.name}`;
-
-  modal.classList.add("active");
-
-};
-
-/* =========================================================
-   DELETE
-========================================================= */
-
-window.openDelete = (id) => {
-
-  deleteId = id;
-
-  deleteModal.classList.add("active");
-
-};
-
-confirmDeleteBtn.onclick = async () => {
-
-  await deleteDoc(
-    doc(db, "loans", deleteId)
-  );
-
-  deleteModal.classList.remove("active");
-
-  loadLoans();
-
-};
-
-cancelDeleteBtn.onclick = () => {
-
-  deleteModal.classList.remove("active");
-
-};
-
-/* =========================================================
-   APPROVE
-========================================================= */
-
-window.approveLoan = async (id) => {
-
-  await updateDoc(
-    doc(db, "loans", id),
-    {
-      status: "Approved"
+    if (currentPage < totalPages) {
+        currentPage++;
+        renderTable();
     }
-  );
+}
 
-  loadLoans();
+function prevPage() {
 
-};
-
-/* =========================================================
-   REJECT
-========================================================= */
-
-window.rejectLoan = async (id) => {
-
-  await updateDoc(
-    doc(db, "loans", id),
-    {
-      status: "Rejected"
+    if (currentPage > 1) {
+        currentPage--;
+        renderTable();
     }
-  );
+}
 
-  loadLoans();
+/* =========================
+PROFILE VIEW
+========================= */
 
-};
+async function openProfile(id) {
+
+    const snap = await getDoc(doc(db, "loans", id));
+
+    if (!snap.exists()) return;
+
+    const l = snap.data();
+
+    document.getElementById("profileContent").innerHTML = `
+        <div style="padding:10px">
+
+            <h2>${l.memberName}</h2>
+
+            <p><b>Phone:</b> ${l.phone}</p>
+            <p><b>Principal:</b> ${l.principal}</p>
+            <p><b>Interest:</b> ${l.interestAmount}</p>
+            <p><b>Total:</b> ${l.totalAmount}</p>
+            <p><b>Remaining:</b> ${l.remainingBalance}</p>
+            <p><b>Status:</b> ${l.status}</p>
+            <p><b>Type:</b> ${l.loanType}</p>
+            <p><b>Duration:</b> ${l.duration}</p>
+            <p><b>Created By:</b> ${l.createdBy}</p>
+        </div>
+    `;
+
+    document.getElementById("profileModal").style.display = "flex";
+}
+
+/* =========================
+DATE FORMAT
+========================= */
+
+function formatDate(timestamp) {
+
+    if (!timestamp) return "-";
+
+    if (timestamp.seconds) {
+        return new Date(timestamp.seconds * 1000).toLocaleString();
+    }
+
+    return "-";
+}

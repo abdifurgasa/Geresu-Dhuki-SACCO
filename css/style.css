@@ -456,6 +456,44 @@ ACTION BUTTONS
     color:white;
 }
 
+.chart-card{
+    background:white;
+
+    border-radius:22px;
+
+    padding:25px;
+
+    box-shadow:var(--shadow);
+}
+
+.table-container{
+    background:white;
+
+    border-radius:22px;
+
+    overflow:hidden;
+
+    box-shadow:var(--shadow);
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+thead{
+    background:#f8fafc;
+}
+
+th{
+    padding:16px;
+    text-align:left;
+}
+
+td{
+    padding:16px;
+    border-top:1px solid #eef2f7;
+}
 /* =========================
 PAGINATION
 ========================= */

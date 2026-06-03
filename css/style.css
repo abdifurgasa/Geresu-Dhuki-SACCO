@@ -195,6 +195,33 @@ body{
     text-decoration:none;
 }
 
+/* =========================
+SIDEBAR COLLAPSE
+========================= */
+
+.sidebar{
+    width:260px;
+    transition:.3s;
+}
+
+.sidebar.collapsed{
+    width:80px;
+}
+
+.sidebar.collapsed .logo-text,
+.sidebar.collapsed .sidebar-menu span,
+.sidebar.collapsed .sidebar-footer span{
+    display:none;
+}
+
+.main-content{
+    margin-left:260px;
+    transition:.3s;
+}
+
+.main-content.expanded{
+    margin-left:80px;
+}
 /* =====================================================
    MAIN CONTENT
 ===================================================== */

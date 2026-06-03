@@ -1,322 +1,136 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <meta charset="UTF-8" />
+<title>SACCO Members</title>
 
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  />
+<link rel="stylesheet" href="css/style.css">
 
-  <title data-i18n="savings_title">
-    Savings
-  </title>
-
-  <!-- CSS -->
-  <link
-    rel="stylesheet"
-    href="css/style.css"
-  />
-
-  <!-- FONT AWESOME -->
-  <link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
-  />
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
 </head>
 
 <body>
-<main
-  class="main"
-  id="main"
->
 
-  <!-- =========================================================
-       TOPBAR
-  ========================================================= -->
+<div class="dashboard-container">
 
-  <div class="topbar">
+<!-- =========================
+SIDEBAR
+========================= -->
+<aside class="sidebar" id="sidebar">
 
-    <h2 data-i18n="membersManagement">
-      SAVINGS MANAGEMENT
-    </h2>
+    <button class="menu-toggle" id="toggleBtn">
+        <i class="fas fa-bars"></i>
+    </button>
 
-    <div class="topbar-actions">
+    <div class="sidebar-header">
 
-      <!-- LANGUAGE -->
-      <select
-        id="languageSelect"
-        onchange="changeLanguage(this.value)"
-      >
+        <div class="logo-icon">
+            <i class="fas fa-university"></i>
+        </div>
 
-        <option value="en">
-          English
-        </option>
-
-        <option value="am">
-          አማርኛ
-        </option>
-
-        <option value="om">
-          Afaan Oromoo
-        </option>
-
-      </select>
-
-      <!-- USER -->
-      <div
-        class="selected-box"
-        id="roleBox"
-      >
-        👤 Admin
-      </div>
+        <div class="logo-text">
+            <h2>SACCO</h2>
+            <span>Banking System</span>
+        </div>
 
     </div>
 
-  </div>
+    <ul class="sidebar-menu">
 
-  <!-- =========================================================
-       PAGE HEADER
-  ========================================================= -->
+        <li>
+            <a href="dashboard.html">
+                <i class="fas fa-chart-pie"></i>
+                <span data-i18n="dashboard">Dashboard</span>
+            </a>
+        </li>
 
-  <div class="page-header">
+        <li class="active">
+            <a href="members.html">
+                <i class="fas fa-users"></i>
+                <span data-i18n="members">Members</span>
+            </a>
+        </li>
 
-    <h1 data-i18n="membersManagement">
-      Saving Management
-    </h1>
+        <li>
+            <a href="savings.html">
+                <i class="fas fa-wallet"></i>
+                <span data-i18n="savings">Savings</span>
+            </a>
+        </li>
 
-    <p data-i18n="manageMembers">
-      Manage SACCO Savings
-    </p>
+        <li>
+            <a href="loans.html">
+                <i class="fas fa-landmark"></i>
+                <span data-i18n="loans">Loans</span>
+            </a>
+        </li>
 
-  </div>
-<!-- =========================================================
-     SIDEBAR
-========================================================= -->
+        <li>
+            <a href="repayments.html">
+                <i class="fas fa-money-check-dollar"></i>
+                <span data-i18n="repayments">Repayments</span>
+            </a>
+        </li>
 
-<aside
-  class="sidebar"
-  id="sidebar"
->
+        <li>
+            <a href="withdrawals.html">
+                <i class="fas fa-money-bill-transfer"></i>
+                <span data-i18n="withdrawals">Withdrawals</span>
+            </a>
+        </li>
 
-  <!-- TOGGLE -->
-  <button
-    class="toggle-btn"
-    onclick="toggleSidebar()"
-  >
-    ☰
-  </button>
+        <li>
+            <a href="reports.html">
+                <i class="fas fa-file-alt"></i>
+                <span data-i18n="reports">Reports</span>
+            </a>
+        </li>
 
-  <!-- LOGO -->
-  <h2 class="logo">
-    🏦 SACCO
-  </h2>
+        <li>
+            <a href="users.html">
+                <i class="fas fa-user"></i>
+                <span data-i18n="users">Users</span>
+            </a>
+        </li>
 
-  <!-- NAVIGATION -->
-  <nav class="nav">
+        <li>
+            <a href="settings.html">
+                <i class="fas fa-gear"></i>
+                <span data-i18n="settings">Settings</span>
+            </a>
+        </li>
 
-    <!-- DASHBOARD -->
-    <a
-      href="dashboard.html"
-      class="nav-item"
-    >
+    </ul>
 
-      <span class="icon">
-        📊
-      </span>
+    <div class="sidebar-footer">
 
-      <span
-        class="text"
-        data-i18n="dashboard"
-      >
-        Dashboard
-      </span>
+        <a href="#" class="logout-btn">
 
-    </a>
+            <i class="fas fa-right-from-bracket"></i>
 
-    <!-- MEMBERS -->
-    <a
-      href="members.html"
-      class="nav-item admin-only"
-    >
+            <span data-i18n="logout">
+                Logout
+            </span>
 
-      <span class="icon">
-        👥
-      </span>
+        </a>
 
-      <span
-        class="text"
-        data-i18n="members"
-      >
-        Members
-      </span>
-
-    </a>
-
-    <!-- SAVINGS -->
-    <a
-      href="savings.html"
-      class="nav-item active"
-    >
-
-      <span class="icon">
-        💰
-      </span>
-
-      <span
-        class="text"
-        data-i18n="savings"
-      >
-        Savings
-      </span>
-
-    </a>
-
-    <!-- LOANS -->
-    <a
-      href="loans.html"
-      class="nav-item"
-    >
-
-      <span class="icon">
-        🏦
-      </span>
-
-      <span
-        class="text"
-        data-i18n="loans"
-      >
-        Loans
-      </span>
-
-    </a>
-
-    <!-- REPAYMENTS -->
-    <a
-      href="repayments.html"
-      class="nav-item"
-    >
-
-      <span class="icon">
-        💵
-      </span>
-
-      <span
-        class="text"
-        data-i18n="repayments"
-      >
-        Repayments
-      </span>
-
-    </a>
-
-    <!-- WITHDRAWALS -->
-    <a
-      href="withdrawals.html"
-      class="nav-item admin-only"
-    >
-
-      <span class="icon">
-        💸
-      </span>
-
-      <span
-        class="text"
-        data-i18n="withdrawals"
-      >
-        Withdrawals
-      </span>
-
-    </a>
-
-    <!-- REPORTS -->
-    <a
-      href="reports.html"
-      class="nav-item admin-only"
-    >
-
-      <span class="icon">
-        📄
-      </span>
-
-      <span
-        class="text"
-        data-i18n="reports"
-      >
-        Reports
-      </span>
-
-    </a>
-
-    <!-- USERS -->
-    <a
-      href="users.html"
-      class="nav-item admin-only"
-    >
-
-      <span class="icon">
-        👤
-      </span>
-
-      <span
-        class="text"
-        data-i18n="users"
-      >
-        Users
-      </span>
-
-    </a>
-
-    <!-- SETTINGS -->
-    <a
-      href="settings.html"
-      class="nav-item"
-    >
-
-      <span class="icon">
-        ⚙️
-      </span>
-
-      <span
-        class="text"
-        data-i18n="settings"
-      >
-        Settings
-      </span>
-
-    </a>
-
-    <!-- LOGOUT -->
-    <a
-      href="#"
-      class="nav-item logout"
-      id="logoutBtn"
-    >
-
-      <span class="icon">
-        🚪
-      </span>
-
-      <span
-        class="text"
-        data-i18n="logout"
-      >
-        Logout
-      </span>
-
-    </a>
-
-  </nav>
+    </div>
 
 </aside>
 
-<!-- =========================================================
-     MAIN CONTENT
-========================================================= -->
-<main class="main">
+<!-- =========================
+MAIN CONTENT
+========================= -->
+
+<main class="main-content" id="mainContent">
+
+<!-- =========================
+TOPBAR
+========================= -->
 
 <div class="topbar">
 <h2>💰 Savings Management</h2>
@@ -339,6 +153,33 @@ placeholder="Search member...">
 </div>
 
 </div>
+        <!-- Language -->
+
+        <div class="language-selector">
+
+            <select
+                id="languageSelect"
+                onchange="changeLanguage(this.value)"
+            >
+                <option value="en">English</option>
+                <option value="om">Afaan Oromo</option>
+                <option value="am">አማርኛ</option>
+            </select>
+
+        </div>
+
+        <!-- Add Member -->
+          <button class="btn-primary" id="addMemberBtn">
+            <i class="fas fa-plus"></i>
+            <span data-i18n="addMember">Add Member</span>
+        </button>
+
+    </div>
+
+</div>
+<!-- =========================================================
+     MAIN CONTENT
+========================================================= -->
 
 <!-- ADD SAVING -->
 <div class="form-card">

@@ -1,219 +1,161 @@
-<!-- =========================================================
-     SIDEBAR
-========================================================= -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<aside
-  class="sidebar"
-  id="sidebar"
->
+<title data-i18n="withdrawals">Withdrawals</title>
 
-  <!-- TOGGLE -->
-  <button
-    class="toggle-btn"
-    onclick="toggleSidebar()"
-  >
-    ☰
-  </button>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
 
-  <!-- LOGO -->
-  <h2 class="logo">
-    🏦 SACCO
-  </h2>
+<body>
 
-  <!-- NAVIGATION -->
-  <nav class="nav">
+<div class="dashboard-container">
 
-    <!-- DASHBOARD -->
-    <a
-      href="dashboard.html"
-      class="nav-item active"
-    >
+<!-- SIDEBAR (KEEP CONSISTENT WITH YOUR SYSTEM) -->
+<aside class="sidebar" id="sidebar">
 
-      <span class="icon">
-        📊
-      </span>
+    <button class="menu-toggle" id="toggleBtn">
+        <i class="fas fa-bars"></i>
+    </button>
 
-      <span
-        class="text"
-        data-i18n="dashboard"
-      >
-        Dashboard
-      </span>
+    <div class="sidebar-header">
+        <div class="logo-icon">
+            <i class="fas fa-university"></i>
+        </div>
+        <div class="logo-text">
+            <h2>SACCO</h2>
+            <span data-i18n="bankingSystem">Banking System</span>
+        </div>
+    </div>
 
-    </a>
+    <ul class="sidebar-menu">
 
-    <!-- MEMBERS -->
-    <a
-      href="members.html"
-      class="nav-item admin-only"
-    >
+        <li><a href="dashboard.html"><i class="fas fa-chart-pie"></i> <span data-i18n="dashboard">Dashboard</span></a></li>
+        <li><a href="members.html"><i class="fas fa-users"></i> <span data-i18n="members">Members</span></a></li>
+        <li><a href="savings.html"><i class="fas fa-wallet"></i> <span data-i18n="savings">Savings</span></a></li>
+        <li><a href="loans.html"><i class="fas fa-landmark"></i> <span data-i18n="loans">Loans</span></a></li>
+        <li><a href="repayments.html"><i class="fas fa-money-check"></i> <span data-i18n="repayments">Repayments</span></a></li>
 
-      <span class="icon">
-        👥
-      </span>
+        <li class="active">
+            <a href="withdrawals.html">
+                <i class="fas fa-money-bill-transfer"></i>
+                <span data-i18n="withdrawals">Withdrawals</span>
+            </a>
+        </li>
 
-      <span
-        class="text"
-        data-i18n="members"
-      >
-        Members
-      </span>
+        <li><a href="reports.html"><i class="fas fa-file"></i> <span data-i18n="reports">Reports</span></a></li>
+        <li><a href="users.html"><i class="fas fa-user"></i> <span data-i18n="users">Users</span></a></li>
+        <li><a href="settings.html"><i class="fas fa-gear"></i> <span data-i18n="settings">Settings</span></a></li>
 
-    </a>
+        <!-- LOGOUT (IMPORTANT) -->
+        <li>
+            <a href="#" id="logoutBtn">
+                <i class="fas fa-right-from-bracket"></i>
+                <span data-i18n="logout">Logout</span>
+            </a>
+        </li>
 
-    <!-- SAVINGS -->
-    <a
-      href="savings.html"
-      class="nav-item"
-    >
-
-      <span class="icon">
-        💰
-      </span>
-
-      <span
-        class="text"
-        data-i18n="savings"
-      >
-        Savings
-      </span>
-
-    </a>
-
-    <!-- LOANS -->
-    <a
-      href="loans.html"
-      class="nav-item"
-    >
-
-      <span class="icon">
-        🏦
-      </span>
-
-      <span
-        class="text"
-        data-i18n="loans"
-      >
-        Loans
-      </span>
-
-    </a>
-
-    <!-- REPAYMENTS -->
-    <a
-      href="repayments.html"
-      class="nav-item"
-    >
-
-      <span class="icon">
-        💵
-      </span>
-
-      <span
-        class="text"
-        data-i18n="repayments"
-      >
-        Repayments
-      </span>
-
-    </a>
-
-    <!-- WITHDRAWALS -->
-    <a
-      href="withdrawals.html"
-      class="nav-item admin-only"
-    >
-
-      <span class="icon">
-        💸
-      </span>
-
-      <span
-        class="text"
-        data-i18n="withdrawals"
-      >
-        Withdrawals
-      </span>
-
-    </a>
-
-    <!-- REPORTS -->
-    <a
-      href="reports.html"
-      class="nav-item admin-only"
-    >
-
-      <span class="icon">
-        📄
-      </span>
-
-      <span
-        class="text"
-        data-i18n="reports"
-      >
-        Reports
-      </span>
-
-    </a>
-
-    <!-- USERS -->
-    <a
-      href="users.html"
-      class="nav-item admin-only"
-    >
-
-      <span class="icon">
-        👤
-      </span>
-
-      <span
-        class="text"
-        data-i18n="users"
-      >
-        Users
-      </span>
-
-    </a>
-
-    <!-- SETTINGS -->
-    <a
-      href="settings.html"
-      class="nav-item"
-    >
-
-      <span class="icon">
-        ⚙️
-      </span>
-
-      <span
-        class="text"
-        data-i18n="settings"
-      >
-        Settings
-      </span>
-
-    </a>
-
-    <!-- LOGOUT -->
-    <a
-      href="#"
-      class="nav-item logout"
-      id="logoutBtn"
-    >
-
-      <span class="icon">
-        🚪
-      </span>
-
-      <span
-        class="text"
-        data-i18n="logout"
-      >
-        Logout
-      </span>
-
-    </a>
-
-  </nav>
+    </ul>
 
 </aside>
+
+<!-- MAIN -->
+<main class="main-content">
+
+<!-- TOPBAR -->
+<div class="topbar">
+
+    <h2 data-i18n="withdrawals">Withdrawals</h2>
+
+    <button class="btn-primary" onclick="openAddModal()">
+        <i class="fas fa-plus"></i>
+        <span data-i18n="newWithdrawal">New Withdrawal</span>
+    </button>
+
+</div>
+
+<!-- STATS -->
+<div class="stats-grid">
+
+    <div class="stat-card">
+        <div class="stat-label" data-i18n="totalWithdrawals">Total Withdrawals</div>
+        <div class="stat-value" id="totalWithdrawals">0</div>
+    </div>
+
+</div>
+
+<!-- SEARCH -->
+<div class="search-bar">
+    <input id="searchInput"
+           data-i18n-placeholder="searchWithdrawals"
+           placeholder="Search withdrawals..."
+           oninput="searchWithdrawals()">
+</div>
+
+<!-- TABLE -->
+<div class="table-container">
+
+<table class="members-table">
+
+<thead>
+<tr>
+    <th data-i18n="name">Name</th>
+    <th data-i18n="phone">Phone</th>
+    <th data-i18n="amount">Amount</th>
+    <th data-i18n="reason">Reason</th>
+    <th data-i18n="before">Before</th>
+    <th data-i18n="after">After</th>
+    <th data-i18n="date">Date</th>
+    <th data-i18n="createdBy">Created By</th>
+</tr>
+</thead>
+
+<tbody id="withdrawalsTable"></tbody>
+
+</table>
+
+</div>
+
+</main>
+</div>
+
+<!-- MODAL -->
+<div class="modal" id="withdrawalModal">
+
+<div class="modal-content">
+
+    <div class="modal-header">
+        <h2 data-i18n="newWithdrawal">New Withdrawal</h2>
+        <button onclick="closeModal()">✖</button>
+    </div>
+
+    <select id="memberSelect"></select>
+
+    <input id="phone" disabled>
+    <input id="amount" type="number" data-i18n-placeholder="amount" placeholder="Amount">
+    <input id="reason" data-i18n-placeholder="reason" placeholder="Reason">
+
+    <div class="modal-actions">
+        <button class="btn-primary" onclick="saveWithdrawal()">
+            <span data-i18n="save">Save</span>
+        </button>
+        <button class="btn-secondary" onclick="closeModal()">
+            <span data-i18n="cancel">Cancel</span>
+        </button>
+    </div>
+
+</div>
+
+</div>
+
+<!-- CORE SCRIPTS -->
+<script src="js/i18n.js"></script>
+<script type="module" src="js/layout.js"></script>
+<script type="module" src="js/withdrawals.js"></script>
+
+</body>
+</html>

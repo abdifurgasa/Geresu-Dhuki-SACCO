@@ -1,318 +1,267 @@
 import { db, auth } from "./firebase.js";
+
 import {
   collection,
   addDoc,
-  getDocs,
   deleteDoc,
-  updateDoc,
   doc,
+  getDoc,
+  getDocs,
   query,
-  orderBy,
-  serverTimestamp
+  where,
+  serverTimestamp,
+  onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+/* =========================
+COLLECTIONS
+========================= */
+
+const savingsCollection = collection(db, "savings");
+const membersCollection = collection(db, "members");
 
 /* =========================
 STATE
 ========================= */
 
-let members = [];
 let savings = [];
+let members = [];
 let selectedMember = null;
-let editingId = null;
 
 /* =========================
-ELEMENTS
+GLOBAL FUNCTIONS (IMPORTANT FIX)
 ========================= */
 
-const savingForm = document.getElementById("savingForm");
-const savingsTable = document.getElementById("savingsTable");
-const searchInput = document.getElementById("searchInput");
+window.selectMember = selectMember;
+window.deleteSaving = deleteSaving;
 
 /* =========================
-LOAD MEMBERS
+LOAD MEMBERS FOR SEARCH
 ========================= */
 
-async function loadMembers() {
-
-  const q = query(collection(db, "members"), orderBy("fullName"));
-  const snap = await getDocs(q);
+onSnapshot(membersCollection, (snapshot) => {
 
   members = [];
 
-  snap.forEach(d => {
-    members.push({ id: d.id, ...d.data() });
-  });
-}
-
-/* =========================
-SEARCH MEMBER
-========================= */
-
-searchInput.addEventListener("input", () => {
-
-  const value = searchInput.value.toLowerCase();
-  const box = document.getElementById("searchResults");
-
-  box.innerHTML = "";
-
-  if (!value) return;
-
-  const filtered = members.filter(m =>
-    m.fullName?.toLowerCase().includes(value) ||
-    m.phone?.includes(value) ||
-    m.memberId?.includes(value)
-  );
-
-  filtered.forEach(m => {
-
-    const div = document.createElement("div");
-
-    div.className = "search-item";
-
-    div.innerHTML = `
-      <strong>${m.fullName}</strong><br>
-      ${m.phone}
-    `;
-
-    div.onclick = () => {
-
-      selectedMember = m;
-
-      document.getElementById("selectedMember").innerHTML =
-        `👤 ${m.fullName}`;
-
-      box.innerHTML = "";
-      searchInput.value = "";
-
-    };
-
-    box.appendChild(div);
-
+  snapshot.forEach((docSnap) => {
+    members.push({
+      id: docSnap.id,
+      ...docSnap.data()
+    });
   });
 
 });
+
+/* =========================
+MEMBER SEARCH UI
+========================= */
+
+const searchInput = document.getElementById("searchInput");
+const searchResults = document.getElementById("searchResults");
+
+if (searchInput) {
+
+  searchInput.addEventListener("input", () => {
+
+    const keyword = searchInput.value.toLowerCase();
+
+    const filtered = members.filter(m =>
+      (m.fullName || "").toLowerCase().includes(keyword) ||
+      (m.phone || "").includes(keyword)
+    );
+
+    searchResults.innerHTML = "";
+
+    filtered.forEach(m => {
+
+      const div = document.createElement("div");
+      div.className = "search-item";
+      div.innerHTML = `
+        👤 ${m.fullName} - ${m.phone}
+      `;
+
+      div.onclick = () => selectMember(m);
+
+      searchResults.appendChild(div);
+
+    });
+
+  });
+
+}
+
+/* =========================
+SELECT MEMBER
+========================= */
+
+function selectMember(member) {
+
+  selectedMember = member;
+
+  document.getElementById("selectedMember").innerHTML = `
+    👤 ${member.fullName} (${member.phone})
+  `;
+
+  document.getElementById("searchResults").innerHTML = "";
+
+  loadSavings(member.id);
+}
+
+/* =========================
+SAVE SAVING
+========================= */
+
+const form = document.getElementById("savingForm");
+
+if (form) {
+
+  form.addEventListener("submit", async (e) => {
+
+    e.preventDefault();
+
+    try {
+
+      const user = auth.currentUser;
+
+      if (!user) {
+        alert("User not logged in or session expired.");
+        return;
+      }
+
+      if (!selectedMember) {
+        alert("Please select a member first");
+        return;
+      }
+
+      const amount = Number(document.getElementById("amount").value);
+
+      if (!amount || amount <= 0) {
+        alert("Invalid amount");
+        return;
+      }
+
+      await addDoc(savingsCollection, {
+
+        memberId: selectedMember.id,
+        memberName: selectedMember.fullName,
+        phone: selectedMember.phone,
+
+        amount,
+
+        createdBy: user.email || "System",
+        createdAt: serverTimestamp()
+
+      });
+
+      form.reset();
+
+      loadSavings(selectedMember.id);
+
+    } catch (err) {
+      console.error(err);
+      alert(err.message);
+    }
+
+  });
+
+}
 
 /* =========================
 LOAD SAVINGS
 ========================= */
 
-async function loadSavings() {
+function loadSavings(memberId) {
 
-  const q = query(collection(db, "savings"), orderBy("createdAt", "desc"));
-  const snap = await getDocs(q);
+  onSnapshot(savingsCollection, (snapshot) => {
 
-  savings = [];
+    savings = [];
 
-  snap.forEach(d => {
-    savings.push({ id: d.id, ...d.data() });
+    snapshot.forEach((docSnap) => {
+
+      const data = docSnap.data();
+
+      if (data.memberId === memberId) {
+
+        savings.push({
+          id: docSnap.id,
+          ...data
+        });
+
+      }
+
+    });
+
+    renderTable();
+
   });
 
-  render();
 }
 
 /* =========================
-RENDER TABLE (WITH EDIT/DELETE)
+RENDER TABLE
 ========================= */
 
-function render() {
+function renderTable() {
 
-  savingsTable.innerHTML = "";
+  const tbody = document.getElementById("savingsTable");
 
-  savings.forEach((s) => {
+  if (!tbody) return;
 
-    const history = savings
-      .filter(x => x.memberId === s.memberId)
-      .sort((a, b) => (a.createdAt?.seconds || 0) - (b.createdAt?.seconds || 0));
+  tbody.innerHTML = "";
 
-    let previous = 0;
+  let total = 0;
 
-    for (let item of history) {
-      if (item.id === s.id) break;
-      previous += Number(item.amount || 0);
-    }
+  savings.forEach(s => {
 
-    const total = previous + Number(s.amount || 0);
+    total += Number(s.amount);
 
     const tr = document.createElement("tr");
 
     tr.innerHTML = `
-      <td>${s.memberName}</td>
-      <td>${s.phone}</td>
+      <td>${s.memberName || ""}</td>
+      <td>${s.phone || ""}</td>
       <td>${s.amount}</td>
-      <td>${previous}</td>
+      <td>-</td>
       <td>${total}</td>
-      <td>${s.createdAt?.toDate().toLocaleDateString() || "-"}</td>
-
+      <td>${formatDate(s.createdAt)}</td>
       <td>
-
-        <button class="edit-btn" onclick="editSaving('${s.id}')">
-          ✏️
-        </button>
-
-        <button class="delete-btn" onclick="deleteSaving('${s.id}')">
-          🗑️
-        </button>
-
+        <button onclick="deleteSaving('${s.id}')">Delete</button>
       </td>
     `;
 
-    tr.onclick = (e) => {
-      if (e.target.closest("button")) return;
-      openProfile(s.memberId);
-    };
-
-    savingsTable.appendChild(tr);
+    tbody.appendChild(tr);
 
   });
+
 }
-
-/* =========================
-ADD + UPDATE SAVING
-========================= */
-
-savingForm.addEventListener("submit", async (e) => {
-
-  e.preventDefault();
-
-  if (!selectedMember) {
-    alert("Select member first");
-    return;
-  }
-
-  const amount = Number(document.getElementById("amount").value);
-
-  if (!amount || amount <= 0) {
-    alert("Invalid amount");
-    return;
-  }
-
-  const payload = {
-    memberId: selectedMember.memberId,
-    memberName: selectedMember.fullName,
-    phone: selectedMember.phone,
-    amount,
-    createdBy: auth.currentUser?.displayName || "Admin"
-  };
-
-  try {
-
-    if (editingId) {
-
-      await updateDoc(doc(db, "savings", editingId), payload);
-
-      alert("Updated successfully");
-
-      editingId = null;
-
-      document.querySelector("#savingForm button").innerHTML =
-        "Save";
-
-    } else {
-
-      payload.createdAt = serverTimestamp();
-
-      await addDoc(collection(db, "savings"), payload);
-
-      alert("Added successfully");
-
-    }
-
-    savingForm.reset();
-    selectedMember = null;
-
-    document.getElementById("selectedMember").innerHTML =
-      "👤 Select member";
-
-    loadSavings();
-
-  } catch (err) {
-    alert(err.message);
-  }
-
-});
-
-/* =========================
-EDIT SAVING
-========================= */
-
-window.editSaving = function (id) {
-
-  const saving = savings.find(s => s.id === id);
-
-  if (!saving) return;
-
-  editingId = id;
-
-  document.getElementById("amount").value = saving.amount;
-
-  selectedMember = {
-    memberId: saving.memberId,
-    fullName: saving.memberName,
-    phone: saving.phone
-  };
-
-  document.getElementById("selectedMember").innerHTML =
-    `👤 ${saving.memberName}`;
-
-  document.querySelector("#savingForm button").innerHTML =
-    "Update Saving";
-
-  window.scrollTo({ top: 0, behavior: "smooth" });
-
-};
 
 /* =========================
 DELETE SAVING
 ========================= */
 
-window.deleteSaving = async function (id) {
+async function deleteSaving(id) {
 
   if (!confirm("Delete this saving?")) return;
 
   await deleteDoc(doc(db, "savings", id));
 
-  loadSavings();
+  if (selectedMember) {
+    loadSavings(selectedMember.id);
+  }
 
-};
-
-/* =========================
-PROFILE (FULL HISTORY)
-========================= */
-
-window.openProfile = function (memberId) {
-
-  const list = savings.filter(s => s.memberId === memberId);
-
-  let total = 0;
-
-  document.getElementById("profileModal").classList.add("active");
-
-  document.getElementById("profileName").innerText =
-    list[0]?.memberName || "Profile";
-
-  let html = "";
-
-  list.forEach(s => {
-
-    total += Number(s.amount);
-
-    html += `
-      <tr>
-        <td>${s.createdAt?.toDate().toLocaleDateString()}</td>
-        <td>${s.amount}</td>
-        <td>${s.createdBy}</td>
-      </tr>
-    `;
-  });
-
-  document.getElementById("savingHistory").innerHTML = html;
-  document.getElementById("profileTotalSaving").innerText = total;
-
-};
+}
 
 /* =========================
-INIT
+DATE FORMAT
 ========================= */
 
-loadMembers();
-loadSavings();
+function formatDate(timestamp) {
+
+  if (!timestamp) return "-";
+
+  if (timestamp.seconds) {
+    return new Date(timestamp.seconds * 1000).toLocaleString();
+  }
+
+  return "-";
+}

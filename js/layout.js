@@ -1,101 +1,132 @@
 import { auth } from "./firebase.js";
-import { onAuthStateChanged, signOut } 
-from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {
+    signOut,
+    onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-/* =========================================================
+/* ==========================================
    SIDEBAR TOGGLE
-========================================================= */
-window.toggleSidebar = function () {
-  const sidebar = document.getElementById("sidebar");
-  if (sidebar) sidebar.classList.toggle("collapsed");
-};
+========================================== */
 
-/* =========================================================
-   AUTH CHECK (SAFE - NO FALSE LOGOUT)
-========================================================= */
-onAuthStateChanged(auth, (user) => {
-  if (!user) {
-    // wait a bit to avoid false logout
-    setTimeout(() => {
-      if (!auth.currentUser) {
-        window.location.href = "./index.html";
-      }
-    }, 800);
-  }
-});
-
-/* =========================================================
-   LOGOUT SYSTEM
-========================================================= */
 document.addEventListener("DOMContentLoaded", () => {
-  const logoutBtn = document.getElementById("logoutBtn");
 
-  if (logoutBtn) {
-    logoutBtn.addEventListener("click", async (e) => {
-      e.preventDefault();
+    const toggleBtn = document.getElementById("toggleBtn");
+    const sidebar = document.getElementById("sidebar");
+    const mainContent = document.getElementById("mainContent");
 
-      if (!confirm("Are you sure you want to logout?")) return;
+    if (toggleBtn && sidebar) {
 
-      try {
-        await signOut(auth);
-        localStorage.clear();
-        sessionStorage.clear();
-        window.location.href = "./index.html";
-      } catch (err) {
-        console.error(err);
-        alert("Logout failed");
-      }
-    });
-  }
+        toggleBtn.addEventListener("click", () => {
+
+            sidebar.classList.toggle("collapsed");
+
+            if (mainContent) {
+                mainContent.classList.toggle("expanded");
+            }
+
+        });
+
+    }
+
 });
 
-/* =========================================================
-   ROLE SYSTEM (ADMIN / MANAGER / USER)
-========================================================= */
+/* ==========================================
+   AUTH STATE
+========================================== */
 
-function applyRoleAccess() {
-  const role = localStorage.getItem("role") || "user";
+onAuthStateChanged(auth, (user) => {
 
-  document.querySelectorAll("[data-role]").forEach(el => {
-    const roles = el.getAttribute("data-role").split(" ");
+    if (user) {
 
-    if (roles.includes(role)) {
-      el.style.display = "";
+        console.log("Logged in:", user.email);
+
     } else {
-      el.style.display = "none";
-    }
-  });
-}
 
-applyRoleAccess();
+        console.warn("No authenticated user");
 
-/* =========================================================
-   SESSION TIMEOUT (10 min)
-========================================================= */
+        // DO NOT REDIRECT HERE
+        // window.location.href = "index.html";
 
-let timeout;
-const TIME_LIMIT = 10 * 60 * 1000;
-
-function resetTimer() {
-  clearTimeout(timeout);
-
-  timeout = setTimeout(async () => {
-    alert("Session expired");
-
-    try {
-      await signOut(auth);
-    } catch (e) {
-      console.error(e);
     }
 
-    localStorage.clear();
-    window.location.href = "./index.html";
-  }, TIME_LIMIT);
-}
+});
 
-window.addEventListener("mousemove", resetTimer);
-window.addEventListener("keydown", resetTimer);
-window.addEventListener("click", resetTimer);
-window.addEventListener("scroll", resetTimer);
+/* ==========================================
+   LOGOUT
+========================================== */
 
-resetTimer();
+document.addEventListener("DOMContentLoaded", () => {
+
+    const logoutBtn =
+        document.querySelector(".logout-btn");
+
+    if (!logoutBtn) return;
+
+    logoutBtn.addEventListener("click", async (e) => {
+
+        e.preventDefault();
+
+        const confirmed =
+            confirm("Are you sure you want to logout?");
+
+        if (!confirmed) return;
+
+        try {
+
+            await signOut(auth);
+
+            localStorage.clear();
+            sessionStorage.clear();
+
+            window.location.href =
+                "index.html";
+
+        } catch (error) {
+
+            console.error(error);
+
+            alert("Logout failed");
+
+        }
+
+    });
+
+});
+
+/* ==========================================
+   ROLE ACCESS
+========================================== */
+
+window.applyRoleAccess = function (role) {
+
+    const adminOnly =
+        document.querySelectorAll(".admin-only");
+
+    const managerOnly =
+        document.querySelectorAll(".manager-only");
+
+    const userOnly =
+        document.querySelectorAll(".user-only");
+
+    adminOnly.forEach(el => {
+        el.style.display =
+            role === "admin"
+                ? ""
+                : "none";
+    });
+
+    managerOnly.forEach(el => {
+        el.style.display =
+            role === "admin" || role === "manager"
+                ? ""
+                : "none";
+    });
+
+    userOnly.forEach(el => {
+        el.style.display =
+            role === "user"
+                ? ""
+                : "none";
+    });
+
+};

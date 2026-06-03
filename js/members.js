@@ -1,23 +1,21 @@
 import { db, auth } from "./firebase.js";
 
 import {
-collection,
-addDoc,
-updateDoc,
-deleteDoc,
-doc,
-getDoc,
-getDocs,
-query,
-where,
-orderBy,
-onSnapshot,
-serverTimestamp
-}
-from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  collection,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  where,
+  onSnapshot,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-const membersCollection = collection(db,"members");
-const transactionsCollection = collection(db,"transactions");
+const membersCollection = collection(db, "members");
+const transactionsCollection = collection(db, "transactions");
 
 let members = [];
 let filteredMembers = [];
@@ -28,865 +26,390 @@ const rowsPerPage = 10;
 let editingId = null;
 
 /* ==========================
+AUTH SAFE CHECK
+========================== */
+
+function requireAuth() {
+  const user = auth.currentUser;
+  if (!user) {
+    alert("You are not logged in or session expired.");
+    return null;
+  }
+  return user;
+}
+
+/* ==========================
 LOAD MEMBERS
 ========================== */
 
-onSnapshot(
-membersCollection,
-(snapshot)=>{
+onSnapshot(membersCollection, (snapshot) => {
 
-members = [];
+  members = [];
 
-snapshot.forEach(docSnap=>{
+  snapshot.forEach((docSnap) => {
+    members.push({
+      id: docSnap.id,
+      ...docSnap.data()
+    });
+  });
 
-members.push({
-id:docSnap.id,
-...docSnap.data()
+  filteredMembers = [...members];
+
+  updateMembersCount();
+  renderTable();
+
 });
-
-});
-
-filteredMembers = [...members];
-
-updateMembersCount();
-
-renderTable();
-
-}
-);
 
 /* ==========================
 TOTAL MEMBERS
 ========================== */
 
-function updateMembersCount(){
-
-document.getElementById("totalMembers").textContent =
-members.length;
-
+function updateMembersCount() {
+  const el = document.getElementById("totalMembers");
+  if (el) el.textContent = members.length;
 }
 
 /* ==========================
 SEARCH
 ========================== */
 
-window.searchMembers = function(){
+window.searchMembers = function () {
 
-const keyword =
-document.getElementById("searchInput")
-.value
-.toLowerCase()
-.trim();
+  const keyword = document.getElementById("searchInput")
+    .value
+    .toLowerCase()
+    .trim();
 
-filteredMembers = members.filter(member=>{
+  filteredMembers = members.filter(member =>
+    (member.fullName || "").toLowerCase().includes(keyword) ||
+    (member.phone || "").includes(keyword) ||
+    (member.nid || "").includes(keyword)
+  );
 
-return (
-
-(member.fullName || "")
-.toLowerCase()
-.includes(keyword)
-
-||
-
-(member.phone || "")
-.includes(keyword)
-
-||
-
-(member.nid || "")
-.includes(keyword)
-
-);
-
-});
-
-currentPage = 1;
-
-renderTable();
-
+  currentPage = 1;
+  renderTable();
 };
+
+/* ==========================
+TABLE RENDER
+========================== */
+
+function renderTable() {
+
+  const tbody = document.getElementById("membersTable");
+  if (!tbody) return;
+
+  tbody.innerHTML = "";
+
+  const start = (currentPage - 1) * rowsPerPage;
+  const end = start + rowsPerPage;
+
+  const pageData = filteredMembers.slice(start, end);
+
+  pageData.forEach(member => {
+
+    const tr = document.createElement("tr");
+
+    tr.innerHTML = `
+      <td>${member.fullName || ""}</td>
+      <td>${member.phone || ""}</td>
+      <td>${member.nid || ""}</td>
+      <td><span class="status-badge">${member.status || ""}</span></td>
+      <td>${formatDate(member.createdAt)}</td>
+      <td>${member.createdBy || "-"}</td>
+      <td>
+        <button class="table-btn view-btn" onclick="openProfile('${member.id}')">
+          <i class="fas fa-eye"></i>
+        </button>
+
+        <button class="table-btn edit-btn" onclick="editMember('${member.id}')">
+          <i class="fas fa-pen"></i>
+        </button>
+
+        <button class="table-btn delete-btn" onclick="deleteMemberConfirm('${member.id}')">
+          <i class="fas fa-trash"></i>
+        </button>
+      </td>
+    `;
+
+    tbody.appendChild(tr);
+  });
+
+  updatePageInfo();
+}
+
+/* ==========================
+PAGE INFO
+========================== */
+
+function updatePageInfo() {
+
+  const el = document.getElementById("pageInfo");
+  if (!el) return;
+
+  const totalPages =
+    Math.ceil(filteredMembers.length / rowsPerPage) || 1;
+
+  el.textContent = `Page ${currentPage} of ${totalPages}`;
+}
 
 /* ==========================
 PAGINATION
 ========================== */
 
-function renderTable(){
+window.nextPage = function () {
 
-const tbody =
-document.getElementById("membersTable");
+  const totalPages =
+    Math.ceil(filteredMembers.length / rowsPerPage);
 
-tbody.innerHTML = "";
-
-const start =
-(currentPage-1)*rowsPerPage;
-
-const end =
-start+rowsPerPage;
-
-const pageData =
-filteredMembers.slice(start,end);
-
-pageData.forEach(member=>{
-
-const tr =
-document.createElement("tr");
-
-tr.innerHTML = `
-
-<td>${member.fullName || ""}</td>
-
-<td>${member.phone || ""}</td>
-
-<td>${member.nid || ""}</td>
-
-<td>
-<span class="status-badge">
-${member.status || ""}
-</span>
-</td>
-
-<td>
-${formatDate(member.createdAt)}
-</td>
-
-<td>
-${member.createdBy || "-"}
-</td>
-
-<td>
-
-<button
-class="table-btn view-btn"
-onclick="openProfile('${member.id}')"
->
-<i class="fas fa-eye"></i>
-</button>
-
-<button
-class="table-btn edit-btn"
-onclick="editMember('${member.id}')"
->
-<i class="fas fa-pen"></i>
-</button>
-
-<button
-class="table-btn delete-btn"
-onclick="deleteMemberConfirm('${member.id}')"
->
-<i class="fas fa-trash"></i>
-</button>
-
-</td>
-
-`;
-
-tbody.appendChild(tr);
-
-});
-
-updatePageInfo();
-
-}
-
-function updatePageInfo(){
-
-const totalPages =
-Math.ceil(
-filteredMembers.length /
-rowsPerPage
-) || 1;
-
-document.getElementById("pageInfo")
-.textContent =
-`Page ${currentPage} of ${totalPages}`;
-
-}
-
-window.nextPage = function(){
-
-const totalPages =
-Math.ceil(
-filteredMembers.length /
-rowsPerPage
-);
-
-if(currentPage < totalPages){
-
-currentPage++;
-
-renderTable();
-
-}
-
+  if (currentPage < totalPages) {
+    currentPage++;
+    renderTable();
+  }
 };
 
-window.prevPage = function(){
-
-if(currentPage > 1){
-
-currentPage--;
-
-renderTable();
-
-}
-
+window.prevPage = function () {
+  if (currentPage > 1) {
+    currentPage--;
+    renderTable();
+  }
 };
 
 /* ==========================
 DATE FORMAT
 ========================== */
 
-function formatDate(timestamp){
+function formatDate(timestamp) {
+  if (!timestamp) return "-";
 
-if(!timestamp) return "-";
+  if (timestamp.seconds) {
+    return new Date(timestamp.seconds * 1000).toLocaleString();
+  }
 
-if(timestamp.seconds){
-
-return new Date(
-timestamp.seconds*1000
-).toLocaleString();
-
+  return "-";
 }
 
-return "-";
-
-}
 /* ==========================
-MODAL FUNCTIONS
+OPEN ADD MODAL
 ========================== */
+
 window.openAddModal = function () {
 
-    editingId = null;
+  editingId = null;
 
-    document.getElementById("memberId").value = "";
-    document.getElementById("fullName").value = "";
-    document.getElementById("phone").value = "";
-    document.getElementById("nid").value = "";
-    document.getElementById("status").value = "Active";
+  document.getElementById("memberId").value = "";
+  document.getElementById("fullName").value = "";
+  document.getElementById("phone").value = "";
+  document.getElementById("nid").value = "";
+  document.getElementById("status").value = "Active";
 
-    document.getElementById("modalTitle").textContent = "Add Member";
+  document.getElementById("modalTitle").textContent = "Add Member";
 
-    document.getElementById("memberModal").style.display = "flex";
+  document.getElementById("memberModal").style.display = "flex";
 };
-window.closeModal = function(){
 
-document.getElementById("memberModal")
-.style.display = "none";
-
+window.closeModal = function () {
+  document.getElementById("memberModal").style.display = "none";
 };
 
 /* ==========================
 EDIT MEMBER
 ========================== */
 
-window.editMember = async function(memberId){
+window.editMember = async function (memberId) {
 
-try{
+  const user = requireAuth();
+  if (!user) return;
 
-const memberRef =
-doc(db,"members",memberId);
+  try {
 
-const memberSnap =
-await getDoc(memberRef);
+    const memberRef = doc(db, "members", memberId);
+    const memberSnap = await getDoc(memberRef);
 
-if(!memberSnap.exists()) return;
+    if (!memberSnap.exists()) return;
 
-const member =
-memberSnap.data();
+    const member = memberSnap.data();
 
-editingId = memberId;
+    editingId = memberId;
 
-document.getElementById("modalTitle")
-.textContent =
-"Edit Member";
+    document.getElementById("modalTitle").textContent = "Edit Member";
+    document.getElementById("memberId").value = memberId;
+    document.getElementById("fullName").value = member.fullName || "";
+    document.getElementById("phone").value = member.phone || "";
+    document.getElementById("nid").value = member.nid || "";
+    document.getElementById("status").value = member.status || "Active";
 
-document.getElementById("memberId")
-.value =
-memberId;
+    document.getElementById("memberModal").style.display = "flex";
 
-document.getElementById("fullName")
-.value =
-member.fullName || "";
-
-document.getElementById("phone")
-.value =
-member.phone || "";
-
-document.getElementById("nid")
-.value =
-member.nid || "";
-
-document.getElementById("status")
-.value =
-member.status || "Active";
-
-document.getElementById("memberModal")
-.style.display =
-"flex";
-
-}
-catch(error){
-
-console.error(error);
-
-alert(error.message);
-
-}
-
+  } catch (error) {
+    console.error(error);
+    alert(error.message);
+  }
 };
 
 /* ==========================
-SAVE MEMBER
+SAVE MEMBER (FIXED)
 ========================== */
 
-window.saveMember = async function(){
+window.saveMember = async function () {
 
-try{
+  const user = requireAuth();
+  if (!user) return;
 
-const fullName =
-document.getElementById("fullName")
-.value
-.trim();
+  try {
 
-const phone =
-document.getElementById("phone")
-.value
-.trim();
+    const fullName = document.getElementById("fullName").value.trim();
+    const phone = document.getElementById("phone").value.trim();
+    const nid = document.getElementById("nid").value.trim();
+    const status = document.getElementById("status").value;
 
-const nid =
-document.getElementById("nid")
-.value
-.trim();
+    if (!fullName) return alert("Full Name required");
+    if (!/^\d{9}$/.test(phone)) return alert("Phone must be 9 digits");
+    if (!/^\d{16}$/.test(nid)) return alert("NID must be 16 digits");
 
-const status =
-document.getElementById("status")
-.value;
+    /* DUPLICATE CHECK */
+    const phoneSnap = await getDocs(query(membersCollection, where("phone", "==", phone)));
+    let phoneExists = false;
 
-/* ==========================
-VALIDATION
-========================== */
+    phoneSnap.forEach(d => {
+      if (d.id !== editingId) phoneExists = true;
+    });
 
-if(!fullName){
+    if (phoneExists) return alert("Phone already exists");
 
-alert("Full Name required");
+    const nidSnap = await getDocs(query(membersCollection, where("nid", "==", nid)));
+    let nidExists = false;
 
-return;
+    nidSnap.forEach(d => {
+      if (d.id !== editingId) nidExists = true;
+    });
 
-}
+    if (nidExists) return alert("NID already exists");
 
-if(!/^\d{9}$/.test(phone)){
+    const createdBy = user.displayName || user.email || "Admin";
 
-alert("Phone number must be exactly 9 digits");
+    if (!editingId) {
 
-return;
+      await addDoc(membersCollection, {
+        fullName,
+        phone,
+        nid,
+        status,
+        createdAt: serverTimestamp(),
+        createdBy,
+        updatedAt: serverTimestamp()
+      });
 
-}
+    } else {
 
-if(!/^\d{16}$/.test(nid)){
+      await updateDoc(doc(db, "members", editingId), {
+        fullName,
+        phone,
+        nid,
+        status,
+        updatedAt: serverTimestamp()
+      });
 
-alert("NID must be exactly 16 digits");
+    }
 
-return;
+    closeModal();
 
-}
-
-/* ==========================
-DUPLICATE PHONE
-========================== */
-
-const phoneQuery =
-query(
-membersCollection,
-where("phone","==",phone)
-);
-
-const phoneSnap =
-await getDocs(phoneQuery);
-
-let duplicatePhone = false;
-
-phoneSnap.forEach(docSnap=>{
-
-if(docSnap.id !== editingId){
-
-duplicatePhone = true;
-
-}
-
-});
-
-if(duplicatePhone){
-
-alert("Phone already exists");
-
-return;
-
-}
-
-/* ==========================
-DUPLICATE NID
-========================== */
-
-const nidQuery =
-query(
-membersCollection,
-where("nid","==",nid)
-);
-
-const nidSnap =
-await getDocs(nidQuery);
-
-let duplicateNid = false;
-
-nidSnap.forEach(docSnap=>{
-
-if(docSnap.id !== editingId){
-
-duplicateNid = true;
-
-}
-
-});
-
-if(duplicateNid){
-
-alert("NID already exists");
-
-return;
-
-}
-
-/* ==========================
-CURRENT USER
-========================== */
-
-const currentUser =
-auth.currentUser;
-
-const createdBy =
-currentUser?.displayName ||
-currentUser?.email ||
-"System";
-
-/* ==========================
-ADD MEMBER
-========================== */
-
-if(!editingId){
-
-await addDoc(
-membersCollection,
-{
-fullName,
-phone,
-nid,
-status,
-
-createdAt:
-serverTimestamp(),
-
-createdBy,
-
-updatedAt:
-serverTimestamp()
-}
-);
-
-}
-
-/* ==========================
-UPDATE MEMBER
-========================== */
-
-else{
-
-await updateDoc(
-
-doc(db,"members",editingId),
-
-{
-fullName,
-phone,
-nid,
-status,
-
-updatedAt:
-serverTimestamp()
-}
-
-);
-
-}
-
-closeModal();
-
-}
-catch(error){
-
-console.error(error);
-
-alert(error.message);
-
-}
-
+  } catch (error) {
+    console.error(error);
+    alert(error.message);
+  }
 };
 
 /* ==========================
 DELETE MEMBER
 ========================== */
 
-window.deleteMemberConfirm =
-async function(memberId){
+window.deleteMemberConfirm = async function (memberId) {
 
-try{
+  const user = requireAuth();
+  if (!user) return;
 
-const confirmed =
-confirm(
-"Delete this member?"
-);
+  const confirmed = confirm("Delete this member?");
+  if (!confirmed) return;
 
-if(!confirmed) return;
+  try {
 
-/* ==========================
-CHECK TRANSACTIONS
-========================== */
+    const txSnap = await getDocs(
+      query(transactionsCollection, where("memberId", "==", memberId))
+    );
 
-const txQuery =
-query(
-transactionsCollection,
-where("memberId","==",memberId)
-);
+    if (!txSnap.empty) {
+      return alert("Cannot delete: transactions exist");
+    }
 
-const txSnap =
-await getDocs(txQuery);
+    await deleteDoc(doc(db, "members", memberId));
 
-if(!txSnap.empty){
-
-alert(
-"Cannot delete member because transactions exist."
-);
-
-return;
-
-}
-
-/* ==========================
-DELETE
-========================== */
-
-await deleteDoc(
-doc(db,"members",memberId)
-);
-
-}
-catch(error){
-
-console.error(error);
-
-alert(error.message);
-
-}
-
+  } catch (error) {
+    console.error(error);
+    alert(error.message);
+  }
 };
+
 /* ==========================
 PROFILE MODAL
 ========================== */
 
-window.closeProfile = function(){
-
-document.getElementById("profileModal")
-.style.display = "none";
-
+window.closeProfile = function () {
+  document.getElementById("profileModal").style.display = "none";
 };
 
 /* ==========================
-OPEN MEMBER PROFILE
+OPEN PROFILE
 ========================== */
 
-window.openProfile = async function(memberId){
+window.openProfile = async function (memberId) {
 
-try{
+  const user = requireAuth();
+  if (!user) return;
 
-const memberRef =
-doc(db,"members",memberId);
+  try {
 
-const memberSnap =
-await getDoc(memberRef);
+    const memberSnap = await getDoc(doc(db, "members", memberId));
+    if (!memberSnap.exists()) return;
 
-if(!memberSnap.exists()){
+    const member = memberSnap.data();
 
-alert("Member not found");
+    const txSnap = await getDocs(
+      query(transactionsCollection, where("memberId", "==", memberId))
+    );
 
-return;
+    let totalSavings = 0;
+    let totalWithdrawals = 0;
+    let totalLoans = 0;
+    let totalRepayments = 0;
 
-}
+    let rows = "";
 
-const member =
-memberSnap.data();
+    txSnap.forEach(d => {
 
-/* ==========================
-LOAD TRANSACTIONS
-========================== */
+      const tx = d.data();
+      const amount = Number(tx.amount || 0);
 
-const txQuery =
-query(
-transactionsCollection,
-where("memberId","==",memberId)
-);
+      if (tx.type === "saving") totalSavings += amount;
+      if (tx.type === "withdrawal") totalWithdrawals += amount;
+      if (tx.type === "loan") totalLoans += amount;
+      if (tx.type === "repayment") totalRepayments += amount;
 
-const txSnap =
-await getDocs(txQuery);
+    });
 
-/* ==========================
-CALCULATIONS
-========================== */
+    const savingBalance = totalSavings - totalWithdrawals;
+    const remainingLoan = totalLoans - totalRepayments;
+    const netPosition = savingBalance - remainingLoan;
 
-let totalSavings = 0;
-let totalWithdrawals = 0;
-let totalLoans = 0;
-let totalRepayments = 0;
+    document.getElementById("profileContent").innerHTML = `
+      <h2>${member.fullName}</h2>
+      <p>Net Position: ${netPosition.toLocaleString()}</p>
+    `;
 
-let transactionRows = "";
+    document.getElementById("profileModal").style.display = "flex";
 
-txSnap.forEach(docSnap=>{
-
-const tx = docSnap.data();
-
-const amount =
-Number(tx.amount || 0);
-
-switch(tx.type){
-
-case "saving":
-
-totalSavings += amount;
-
-break;
-
-case "withdrawal":
-
-totalWithdrawals += amount;
-
-break;
-
-case "loan":
-
-totalLoans += amount;
-
-break;
-
-case "repayment":
-
-totalRepayments += amount;
-
-break;
-
-}
-
-/* ==========================
-TRANSACTION ROW
-========================== */
-
-transactionRows += `
-
-<tr>
-
-<td>${tx.type || "-"}</td>
-
-<td>
-${amount.toLocaleString()}
-</td>
-
-<td>
-${tx.previousBalance || 0}
-</td>
-
-<td>
-${tx.newBalance || 0}
-</td>
-
-<td>
-${formatDate(tx.date)}
-</td>
-
-<td>
-${tx.createdBy || "-"}
-</td>
-
-</tr>
-
-`;
-
-});
-
-/* ==========================
-FINAL TOTALS
-========================== */
-
-const savingBalance =
-totalSavings - totalWithdrawals;
-
-const remainingLoan =
-totalLoans - totalRepayments;
-
-const netPosition =
-savingBalance - remainingLoan;
-
-/* ==========================
-PROFILE UI
-========================== */
-
-document.getElementById("profileContent")
-.innerHTML = `
-
-<div class="member-profile">
-
-    <div class="profile-header">
-
-        <div class="profile-avatar">
-
-            <i class="fas fa-user"></i>
-
-        </div>
-
-        <div class="profile-details">
-
-            <h2>
-                ${member.fullName || ""}
-            </h2>
-
-            <p>
-                <strong>Phone:</strong>
-                ${member.phone || "-"}
-            </p>
-
-            <p>
-                <strong>NID:</strong>
-                ${member.nid || "-"}
-            </p>
-
-            <p>
-                <strong>Status:</strong>
-                ${member.status || "-"}
-            </p>
-
-            <p>
-                <strong>Created At:</strong>
-                ${formatDate(member.createdAt)}
-            </p>
-
-            <p>
-                <strong>Created By:</strong>
-                ${member.createdBy || "-"}
-            </p>
-
-        </div>
-
-    </div>
-
-    <div class="profile-stats">
-
-        <div class="profile-card-stat">
-
-            <span>Savings Balance</span>
-
-            <h3>
-                ${savingBalance.toLocaleString()}
-            </h3>
-
-        </div>
-
-        <div class="profile-card-stat">
-
-            <span>Total Loans</span>
-
-            <h3>
-                ${totalLoans.toLocaleString()}
-            </h3>
-
-        </div>
-
-        <div class="profile-card-stat">
-
-            <span>Total Repayments</span>
-
-            <h3>
-                ${totalRepayments.toLocaleString()}
-            </h3>
-
-        </div>
-
-        <div class="profile-card-stat">
-
-            <span>Remaining Loan</span>
-
-            <h3>
-                ${remainingLoan.toLocaleString()}
-            </h3>
-
-        </div>
-
-        <div class="profile-card-stat">
-
-            <span>Net Position</span>
-
-            <h3>
-                ${netPosition.toLocaleString()}
-            </h3>
-
-        </div>
-
-    </div>
-
-    <div class="table-container">
-
-        <table class="members-table">
-
-            <thead>
-
-                <tr>
-
-                    <th>Type</th>
-
-                    <th>Amount</th>
-
-                    <th>Previous</th>
-
-                    <th>Balance</th>
-
-                    <th>Date</th>
-
-                    <th>Created By</th>
-
-                </tr>
-
-            </thead>
-
-            <tbody>
-
-                ${transactionRows}
-
-            </tbody>
-
-        </table>
-
-    </div>
-
-</div>
-
-`;
-
-document.getElementById("profileModal")
-.style.display =
-"flex";
-
-}
-catch(error){
-
-console.error(error);
-
-alert(error.message);
-
-}
-
+  } catch (error) {
+    console.error(error);
+    alert(error.message);
+  }
 };

@@ -20,7 +20,5 @@ const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 
-/* 🔥 IMPORTANT FIX: keep user logged in */
-setPersistence(auth, browserLocalPersistence);m "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
-
-
+/* 🔥 KEEP LOGIN SESSION ACTIVE */
+setPersistence(auth, browserLocalPersistence);

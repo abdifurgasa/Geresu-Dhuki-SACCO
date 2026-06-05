@@ -5,15 +5,7 @@ import {
   browserLocalPersistence
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import { getStorage } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-export let currentUser = null;
-
-onAuthStateChanged(auth, (user) => {
-    currentUser = user;
-    console.log("GLOBAL AUTH:", user);
-});
 const firebaseConfig = {
   apiKey: "AIzaSyC4-9M6xgTHfwDdG6APm1Ha_g7TyQJfD_c",
   authDomain: "geresu-dhuki-sacco-d4de7.firebaseapp.com",
@@ -27,6 +19,6 @@ const app = initializeApp(firebaseConfig);
 
 export const auth = getAuth(app);
 export const db = getFirestore(app);
-export const storage = getStorage(app);
 
+// KEEP SESSION
 setPersistence(auth, browserLocalPersistence);

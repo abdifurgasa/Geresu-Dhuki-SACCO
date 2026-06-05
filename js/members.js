@@ -11,8 +11,12 @@ import {
   onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
+import {
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
 /* =========================
-COLLECTIONS
+COLLECTION
 ========================= */
 
 const membersCollection = collection(db, "members");
@@ -27,66 +31,85 @@ let currentPage = 1;
 const rowsPerPage = 10;
 let editingId = null;
 
+let currentUser = null;
+
 /* =========================
-AUTH READY CHECK (IMPORTANT FIX)
+AUTH GATE (CRITICAL FIX)
 ========================= */
 
-function getUser() {
-  return auth.currentUser;
+onAuthStateChanged(auth, (user) => {
+
+  if (!user) {
+    console.warn("Not logged in - members module blocked");
+    return;
+  }
+
+  currentUser = user;
+
+  console.log("Members module started for:", user.uid);
+
+  // 🔥 START FIRESTORE ONLY AFTER LOGIN
+  loadMembers();
+});
+
+/* =========================
+REALTIME LOAD (SAFE NOW)
+========================= */
+
+function loadMembers() {
+
+  return onSnapshot(membersCollection, (snapshot) => {
+
+    members = [];
+
+    snapshot.forEach((docSnap) => {
+      members.push({
+        id: docSnap.id,
+        ...docSnap.data()
+      });
+    });
+
+    filteredMembers = [...members];
+
+    updateMembersCount();
+    renderTable();
+
+  }, (error) => {
+    console.error("Firestore error:", error);
+  });
 }
 
 /* =========================
-WAIT FOR AUTH BEFORE ACTIONS
+AUTH CHECK
 ========================= */
 
 function requireAuth() {
-  const user = getUser();
-  if (!user) {
-    alert("User not ready or session expired. Please refresh and login again.");
+  if (!currentUser) {
+    alert("Session expired. Please login again.");
     return null;
   }
-  return user;
+  return currentUser;
 }
 
 /* =========================
-GLOBAL EXPORT (SAFE)
+GLOBAL FUNCTIONS
 ========================= */
 
-window.openAddModal = () => openAddModal();
-window.closeModal = () => closeModal();
-window.saveMember = () => saveMember();
-window.editMember = (id) => editMember(id);
-window.deleteMemberConfirm = (id) => deleteMemberConfirm(id);
-window.searchMembers = () => searchMembers();
-window.nextPage = () => nextPage();
-window.prevPage = () => prevPage();
-
-/* =========================
-REALTIME LOAD
-========================= */
-
-onSnapshot(membersCollection, (snapshot) => {
-
-  members = [];
-
-  snapshot.forEach((docSnap) => {
-    members.push({
-      id: docSnap.id,
-      ...docSnap.data()
-    });
-  });
-
-  filteredMembers = [...members];
-
-  updateMembersCount();
-  renderTable();
-});
+window.openAddModal = openAddModal;
+window.closeModal = closeModal;
+window.saveMember = saveMember;
+window.editMember = editMember;
+window.deleteMemberConfirm = deleteMemberConfirm;
+window.searchMembers = searchMembers;
+window.nextPage = nextPage;
+window.prevPage = prevPage;
 
 /* =========================
 MODAL
 ========================= */
 
 function openAddModal() {
+
   editingId = null;
 
   document.getElementById("memberId").value = "";
@@ -104,7 +127,7 @@ function closeModal() {
 }
 
 /* =========================
-SAVE MEMBER (FIXED AUTH)
+SAVE MEMBER
 ========================= */
 
 async function saveMember() {
@@ -123,7 +146,7 @@ async function saveMember() {
 
   try {
 
-    const createdBy = user.email || user.displayName || "Admin";
+    const createdBy = user.email || "System";
 
     if (!editingId) {
 
@@ -151,19 +174,20 @@ async function saveMember() {
 
     closeModal();
 
-  } catch (err) {
-    console.error(err);
-    alert(err.message);
+  } catch (error) {
+    console.error(error);
+    alert(error.message);
   }
 }
 
 /* =========================
-EDIT
+EDIT MEMBER
 ========================= */
 
 async function editMember(id) {
 
   const snap = await getDoc(doc(db, "members", id));
+
   if (!snap.exists()) return;
 
   const m = snap.data();
@@ -181,12 +205,18 @@ async function editMember(id) {
 }
 
 /* =========================
-DELETE
+DELETE MEMBER
 ========================= */
 
 async function deleteMemberConfirm(id) {
+
   if (!confirm("Delete this member?")) return;
-  await deleteDoc(doc(db, "members", id));
+
+  try {
+    await deleteDoc(doc(db, "members", id));
+  } catch (error) {
+    console.error(error);
+  }
 }
 
 /* =========================
@@ -194,6 +224,7 @@ SEARCH
 ========================= */
 
 function searchMembers() {
+
   const keyword = document.getElementById("searchInput").value.toLowerCase();
 
   filteredMembers = members.filter(m =>
@@ -206,7 +237,7 @@ function searchMembers() {
 }
 
 /* =========================
-TABLE
+TABLE RENDER
 ========================= */
 
 function renderTable() {
@@ -229,7 +260,6 @@ function renderTable() {
       <td>${m.nid || ""}</td>
       <td>${m.status || ""}</td>
       <td>
-        <button onclick="openProfile('${m.id}')">View</button>
         <button onclick="editMember('${m.id}')">Edit</button>
         <button onclick="deleteMemberConfirm('${m.id}')">Delete</button>
       </td>

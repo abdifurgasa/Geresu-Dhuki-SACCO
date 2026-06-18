@@ -1,63 +1,67 @@
-import { auth, db } from "./js/firebase.js";
+import { auth, db } from "./firebase.js";
 
-import { signInWithEmailAndPassword }
-from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {
+  signInWithEmailAndPassword
+} from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
 
-import { doc, getDoc }
-from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-/* ================= LOGIN ================= */
+import {
+  doc,
+  getDoc
+} from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
 document.addEventListener("DOMContentLoaded", () => {
 
   const btn = document.getElementById("loginBtn");
 
+  if (!btn) return;
+
   btn.addEventListener("click", async () => {
 
     try {
 
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
+      const email =
+        document.getElementById("email").value.trim();
+
+      const password =
+        document.getElementById("password").value;
 
       if (!email || !password) {
-        alert("Fill all fields");
+        alert("Please fill all fields");
         return;
       }
 
-      // 🔐 LOGIN FIREBASE
       const userCredential =
-        await signInWithEmailAndPassword(auth, email, password);
+        await signInWithEmailAndPassword(
+          auth,
+          email,
+          password
+        );
 
       const user = userCredential.user;
 
-      // 📦 GET ROLE
-      const ref = doc(db, "users", user.uid);
-      const snap = await getDoc(ref);
+      console.log("Login success:", user.email);
 
       let role = "user";
+
+      const snap = await getDoc(
+        doc(db, "users", user.uid)
+      );
 
       if (snap.exists()) {
         role = snap.data().role || "user";
       }
 
-      // 💾 SAVE SESSION
       localStorage.setItem("uid", user.uid);
       localStorage.setItem("role", role);
 
-      // 🚀 REDIRECT FIX
-      console.log("LOGIN SUCCESS → redirecting");
+      window.location.href = "dashboard.html";
 
-      if (role === "admin") {
-        window.location.href = "dashboard.html"; // or admin.html
-      } else {
-        window.location.href = "dashboard.html";
-      }
+    } catch (error) {
 
-    }
+      console.error("LOGIN ERROR:", error);
 
-    catch (error) {
-      console.error(error);
       alert(error.message);
+
     }
 
   });

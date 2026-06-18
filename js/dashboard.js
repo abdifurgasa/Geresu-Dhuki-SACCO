@@ -1,33 +1,51 @@
 import { auth, db } from "./firebase.js";
 
 import {
-    collection,
-    getDocs
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  collection,
+  getDocs
+} from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
 import {
-    onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
+
+console.log("Dashboard JS Loaded");
 
 /* =========================
-AUTH GATE (IMPORTANT FIX)
+AUTH GATE
 ========================= */
 
 onAuthStateChanged(auth, async (user) => {
 
-    if (!user) {
-        console.warn("No authenticated user");
-        return;
-    }
+  console.log("AUTH STATE =", user);
 
-    console.log("Dashboard loaded for:", user.uid);
+  if (!user) {
 
-    initializeSidebar();
+    console.error("Firebase session missing");
+
+    // Optional redirect
+    window.location.href = "index.html";
+
+    return;
+  }
+
+  console.log("Logged in as:", user.email);
+
+  initializeSidebar();
+
+  try {
 
     await loadDashboardData();
 
     createPerformanceChart();
+
     createLoanChart();
+
+  } catch (error) {
+
+    console.error(error);
+
+  }
 
 });
 
@@ -37,20 +55,21 @@ SIDEBAR
 
 function initializeSidebar() {
 
-    const sidebar = document.getElementById("sidebar");
-    const mainContent = document.getElementById("mainContent");
-    const toggleBtn = document.getElementById("toggleBtn");
+  const sidebar = document.getElementById("sidebar");
+  const mainContent = document.getElementById("mainContent");
+  const toggleBtn = document.getElementById("toggleBtn");
 
-    if (!toggleBtn) return;
+  if (!toggleBtn) return;
 
-    toggleBtn.addEventListener("click", () => {
+  toggleBtn.addEventListener("click", () => {
 
-        sidebar.classList.toggle("collapsed");
-        mainContent.classList.toggle("expanded");
+    sidebar.classList.toggle("collapsed");
 
-    });
+    mainContent.classList.toggle("expanded");
+
+  });
+
 }
-
 /* =========================
 LOAD DASHBOARD DATA
 ========================= */

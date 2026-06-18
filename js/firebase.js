@@ -1,11 +1,7 @@
 import { initializeApp }
 from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
 
-import {
-  getAuth,
-  setPersistence,
-  browserLocalPersistence
-}
+import { getAuth }
 from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
 
 import { getFirestore }
@@ -17,18 +13,12 @@ const firebaseConfig = {
   projectId: "geresu-dhuki-sacco-d4de7",
   storageBucket: "geresu-dhuki-sacco-d4de7.firebasestorage.app",
   messagingSenderId: "379938868750",
-  appId: "1:379938868750:web:782f5ff7f65665ae1cf65f",
-  measurementId: "G-J309NM1J9G"
+  appId: "1:379938868750:web:782f5ff7f65665ae1cf65f"
 };
 
 const app = initializeApp(firebaseConfig);
 
 const auth = getAuth(app);
-
-await setPersistence(
-  auth,
-  browserLocalPersistence
-);
 
 const db = getFirestore(app);
 

@@ -107,7 +107,15 @@ window.prevPage = prevPage;
 /* =========================
 MODAL
 ========================= */
+document.addEventListener("DOMContentLoaded", () => {
 
+  const addBtn = document.getElementById("addMemberBtn");
+
+  if (addBtn) {
+    addBtn.addEventListener("click", openAddModal);
+  }
+
+});
 function openAddModal() {
 
   editingId = null;

@@ -36,22 +36,24 @@ let currentUser = null;
 /* =========================
 AUTH GATE (CRITICAL FIX)
 ========================= */
-
 onAuthStateChanged(auth, (user) => {
 
+  console.log("AUTH STATE:", user);
+
   if (!user) {
-    console.warn("Not logged in - members module blocked");
+
+    console.warn("Not logged in");
+
     return;
   }
 
+  console.log("Logged in:", user.email);
+
   currentUser = user;
 
-  console.log("Members module started for:", user.uid);
-
-  // 🔥 START FIRESTORE ONLY AFTER LOGIN
   loadMembers();
-});
 
+});
 /* =========================
 REALTIME LOAD (SAFE NOW)
 ========================= */

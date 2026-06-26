@@ -1,78 +1,26 @@
-import { auth } from "./firebase.js";
-
-import {
-  onAuthStateChanged,
-  signOut
-} from "https://www.gstatic.com/firebasejs/12.15.0/firebase-auth.js";
-
-/* ==========================================
-   AUTH GUARD
-========================================== */
-
 onAuthStateChanged(auth, async (user) => {
 
   if (!user) {
-
-    console.warn("User not authenticated");
-
-    // redirect only if not already on login page
-    if (
-      !window.location.pathname.includes("index.html") &&
-      !window.location.pathname.endsWith("/")
-    ) {
+    // Check if Firebase has a pending token refresh error
+    const currentUser = auth.currentUser;
+    if (currentUser) {
+      // User object exists but is null? Force a refresh.
+      try {
+        await currentUser.getIdToken(true); // Force refresh token
+        console.log("Token refreshed successfully!");
+        return; // Don't redirect
+      } catch (error) {
+        console.error("Token refresh failed:", error);
+        // Redirect only if refresh fails
+        window.location.href = "index.html";
+      }
+    } else {
+      console.warn("User not authenticated, redirecting...");
       window.location.href = "index.html";
     }
-
     return;
   }
 
   console.log("Logged in:", user.email);
-
-  const roleBox = document.getElementById("roleBox");
-
-  if (roleBox) {
-    roleBox.innerHTML = `👤 ${user.email}`;
-  }
-
-  if (window.loadUserRole) {
-    await window.loadUserRole(user.uid);
-  }
-
+  // ... rest of your code
 });
-
-/* ==========================================
-   LOGOUT
-========================================== */
-
-const logoutBtn = document.getElementById("logoutBtn");
-
-if (logoutBtn) {
-
-  logoutBtn.addEventListener("click", async (e) => {
-
-    e.preventDefault();
-
-    await signOut(auth);
-
-    localStorage.clear();
-    sessionStorage.clear();
-
-    window.location.href = "index.html";
-
-  });
-
-}
-
-/* ==========================================
-   SIDEBAR
-========================================== */
-
-window.toggleSidebar = function () {
-
-  const sidebar = document.getElementById("sidebar");
-
-  if (sidebar) {
-    sidebar.classList.toggle("collapsed");
-  }
-
-};

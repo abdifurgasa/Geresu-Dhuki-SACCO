@@ -251,6 +251,10 @@ function login(){
   const btn = document.getElementById("loginBtn");
   btn.innerText = "Loading...";
   btn.disabled = true;
+  
+ setTimeout(() => {
+    window.location.href = "dashboard.html";
+  }, 1000);
 
  
 }
